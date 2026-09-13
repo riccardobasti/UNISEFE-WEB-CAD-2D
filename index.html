@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <!--
-  UNISEFE CAD 2D · RIKI CAD Framework v0.0.5 Alpha
+  UNISEFE CAD 2D · RIKI CAD Framework v0.0.6 Alpha
 
   ARCHITECTURAL CONTRACT
   - Static HTML defines the user interface.
@@ -16,7 +16,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UNISEFE CAD 2D · v0.0.5 Alpha</title>
+<title>UNISEFE CAD 2D · v0.0.6 Alpha</title>
 <style>
 :root{--toolbar-h:66px;--panel-w:286px;--mobile-panel-h:300px;--border:#d7d7d7;--bg:#ececec;--surface:#fff;--text:#151515;--muted:#707070}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);overflow:hidden}button,input,select{font:inherit;color:inherit}.app{width:100vw;height:100dvh;display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr);min-width:0;overflow:hidden}
@@ -122,7 +122,7 @@
 </main>
 </div>
 <!-- ===================== RIKI CANONICAL SPACE ================= -->
-<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.5-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
+<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.6-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
   <riki-byte name="CONSTITUTION"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SPACE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="CAD"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
@@ -892,6 +892,36 @@ function lockedGuideSnap(cursor){
   for(let i=0;i<guideLocks.length;i++)for(let j=i+1;j<guideLocks.length;j++)consider(lineLineInfinite(guideLocks[i],guideLocks[j]),'track-intersection',[guideLocks[i],guideLocks[j]],1);
   return best
 }
+/* --- Active Guide × Canonical Entity Intersections -------- */
+function guideEntityIntersectionCandidates(cursor){
+  if(!snapOn('SNAP_INTERSECTION'))return[];
+  const guides=[...commandGuides(),...guideLocks];
+  if(!guides.length)return[];
+  const out=[],es=entities();
+  const push=(p,g,e,kind)=>{
+    if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;
+    out.push({x:Number(p.x),y:Number(p.y),kind:'guide-entity-intersection',source:kind,guide:g,entity:e});
+  };
+  for(const g of guides){
+    for(const e of es){
+      const L=lineSnapGeom(e);
+      if(L){
+        const p=lineLineInfinite(g,{a:{x:L.x1,y:L.y1},b:{x:L.x2,y:L.y2},ux:L.x2-L.x1,uy:L.y2-L.y1});
+        if(p){
+          const t=C('SEG_T',{PX:p.x,PY:p.y,X1:L.x1,Y1:L.y1,X2:L.x2,Y2:L.y2});
+          if(t>=-1e-10&&t<=1+1e-10)push(p,g,e,'guide-line');
+        }
+        continue;
+      }
+      const c=circleSnapGeom(e);
+      if(!c)continue;
+      const v=CV(['LC_VALID','LC_X1','LC_Y1','LC_X2','LC_Y2'],{X1:g.a.x,Y1:g.a.y,X2:g.b.x,Y2:g.b.y,CX:c.cx,CY:c.cy,RADIUS:c.r});
+      if(v.LC_VALID!==1)continue;
+      for(const p of [{x:v.LC_X1,y:v.LC_Y1},{x:v.LC_X2,y:v.LC_Y2}])if(arcAccept(c.e,p))push(p,g,e,c.arc?'guide-arc':'guide-circle');
+    }
+  }
+  return out;
+}
 /* --- Directional Guide Constraint ------------------------- */
 function softGuideConstraint(cursor){
   const all=[...commandGuides(),...guideLocks];
@@ -955,9 +985,11 @@ function snap(p){
   // The body of a line is a directional reference, never an arbitrary snap point.
   if(Number(get('SNAP'))===0){guideState={x:null,y:null,point:null,tech:null};lastSnapKind='none';drawGuides();return p}
   updateGuideTracking(p);
-  const scale=num('VIEW_SCALE')||1,tol=C('SNAP_TOL',{VIEW_SCALE:scale}),cands=magneticCandidates(),tech=technicalSnapCandidates(p);
+  const scale=num('VIEW_SCALE')||1,tol=C('SNAP_TOL',{VIEW_SCALE:scale}),cands=magneticCandidates(),tech=technicalSnapCandidates(p),guideEntity=guideEntityIntersectionCandidates(p);
   let out={x:Number(p.x),y:Number(p.y)},best=null,bestD=Infinity;guideState={x:null,y:null,point:null,tech:null};lastSnapKind='none';
-  for(const c of [...cands,...tech]){const d=C('SNAP_D',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y});if(d<bestD&&d<=tol){best=c;bestD=d}}
+  // Exact intersections between an already-active guide and canonical drawing geometry
+  // are real snap points. They do not create guides; they only resolve the crossing.
+  for(const c of [...cands,...tech,...guideEntity]){const d=C('SNAP_D',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y});if(d<bestD&&d<=tol){best=c;bestD=d}}
   if(best){
     out={x:best.x,y:best.y};
     mergeLocksToExactAxes(best);
@@ -1036,7 +1068,7 @@ function view(){
 /* ==================== PERSISTENCE AND HISTORY ============== */
 /* --- Canonical State Serialization ------------------------ */
 function globalBytes(){return Object.fromEntries([...space.querySelectorAll(':scope > riki-byte')].map(b=>[b.getAttribute('name'),Object.freeze({value:b.querySelector('riki-value')?.textContent??'',bit:Number(b.querySelector('riki-bit')?.textContent||0)})]))}
-function state(){syncAllEntityBytes();return{format:'UNISEFE-CAD-RIKI',version:'0.0.5-alpha',chains:'RIKI-BYTE-STRICT',bytes:globalBytes(),drawing:entityStates()}}
+function state(){syncAllEntityBytes();return{format:'UNISEFE-CAD-RIKI',version:'0.0.6-alpha',chains:'RIKI-BYTE-STRICT',bytes:globalBytes(),drawing:entityStates()}}
 function restoreGlobalBytes(bs){
   for(const [k,raw] of Object.entries(bs||{})){
     if(!byte(k))continue;
@@ -1061,7 +1093,7 @@ function applyDrawing(ds){
   paintedSelection.clear();clearSelection();draft=null;selectionDrag=null;syncScreenStyles();view();refresh()
 }
 function restore(d){if(!d||!d.drawing)throw Error();restoreGlobalBytes(d.bytes);applyDrawing(d.drawing);updateCadBit()}
-async function save(){syncAllEntityBytes();const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-2D-v0.0.4-Alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();commandState('save','closed',true);command.textContent='SAVE · UNISEFE CAD v0.0.5 Alpha saved'}catch(e){if(e.name!=='AbortError'){commandState('save','error',false);command.textContent='SAVE · failed'}}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-2D-v0.0.4-Alpha.riki';a.click();URL.revokeObjectURL(a.href);commandState('save','closed',true)}}
+async function save(){syncAllEntityBytes();const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-2D-v0.0.6-Alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();commandState('save','closed',true);command.textContent='SAVE · UNISEFE CAD v0.0.6 Alpha saved'}catch(e){if(e.name!=='AbortError'){commandState('save','error',false);command.textContent='SAVE · failed'}}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-2D-v0.0.6-Alpha.riki';a.click();URL.revokeObjectURL(a.href);commandState('save','closed',true)}}
 openProject?.addEventListener('change',()=>{const f=openProject.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=String(rd.result),j=JSON.parse(t);restore(j);commandState('open','closed',true)}catch{commandState('open','error',false);command.textContent='OPEN · invalid RIKI state'}};rd.readAsText(f);openProject.value=''});
 function snapshot(){syncAllEntityBytes();return Object.freeze({drawing:structuredClone(entityStates()),bytes:structuredClone(globalBytes())})}
 function restoreSnapshot(s){if(!s)return;restoreGlobalBytes(s.bytes);applyDrawing(s.drawing||{});updateCadBit()}
