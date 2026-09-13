@@ -1,742 +1,45 @@
 <!doctype html>
 <html lang="it">
+<!--
+  UNISEFE CAD 2D · RIKI CAD Framework v0.0.4 Alpha
+
+  ARCHITECTURAL CONTRACT
+  - Static HTML defines the user interface.
+  - RIKI Space owns canonical BYTE/BIT state and permanent CHAINS.
+  - JavaScript is the thin runtime for interpretation, input, projection and I/O.
+  - SVG is a projection of canonical geometry; it is not the canonical model.
+  - POINT and GUIDE_POINT close through Delta Zero before command geometry is committed.
+  - Temporary guide tracking is interaction state and never becomes drawing geometry.
+
+  This pass documents framework boundaries without rewriting CAD behavior.
+--> 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unisefe CAD</title>
+<title>UNISEFE CAD 2D · v0.0.4 Alpha</title>
 <style>
-:root{
-  --topbar-h:0px;
-  --toolbar-h:44px;
-  --panel-w:320px;
-  --border:#d9d9d9;
-  --bg:#f3f3f3;
-  --surface:#ffffff;
-  --text:#111111;
-  --muted:#666666;
-  --radius:8px;
-  --icon:20px;
-  --control:32px;
-  --gap:8px;
-}
-*{box-sizing:border-box}
-html,body{width:100%;height:100%;margin:0}
-body{
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:var(--text);
-  background:var(--bg);
-  overflow:hidden;
-}
-button,input,select,textarea{font:inherit}
-button{color:inherit}
-
-.app{
-  width:100vw;
-  height:100vh;
-  display:grid;
-  grid-template-rows:var(--toolbar-h) 1fr;
-  background:var(--bg);
-}
-
-.topbar{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:12px;
-  padding:0 12px;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-}
-
-.mode-tabs{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  min-width:0;
-}
-.mode-tab{
-  width:36px;
-  height:32px;
-  padding:0;
-  display:grid;
-  place-items:center;
-  border:1px solid transparent;
-  border-radius:var(--radius);
-  background:transparent;
-  cursor:pointer;
-}
-.mode-tab svg{
-  width:20px;
-  height:20px;
-  stroke:currentColor;
-  fill:none;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.mode-tab:hover{background:#f2f2f2}
-.mode-tab[aria-selected="true"]{
-  background:#111;
-  color:#fff;
-}
-.top-actions{
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-
-.toolbar{
-  display:flex;
-  align-items:center;
-  gap:var(--gap);
-  padding:0 10px;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  overflow:hidden;
-}
-.tool-group{
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-.tool-separator{
-  width:1px;
-  height:24px;
-  background:var(--border);
-  flex:0 0 auto;
-}
-.icon-btn{
-  width:var(--control);
-  height:var(--control);
-  padding:0;
-  display:grid;
-  place-items:center;
-  border:1px solid transparent;
-  border-radius:var(--radius);
-  background:transparent;
-  cursor:pointer;
-  flex:0 0 auto;
-}
-.icon-btn:hover{background:#f1f1f1;border-color:#e5e5e5}
-.icon-btn svg{
-  width:var(--icon);
-  height:var(--icon);
-  stroke:currentColor;
-  fill:none;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-
-.workspace{
-  min-height:0;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) var(--panel-w);
-  background:var(--bg);
-}
-
-
-.stage{
-  min-width:0;
-  min-height:0;
-  padding:16px;
-  overflow:auto;
-  display:grid;
-  place-items:start center;
-  background:#e9e9e9;
-}
-.surface-frame{
-  width:min(1200px,100%);
-  min-height:calc(100vh - var(--topbar-h) - var(--toolbar-h) - 32px);
-  background:#fff;
-  border:1px solid #d6d6d6;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-  position:relative;
-  overflow:hidden;
-}
-
-.rightpanel{
-  min-width:0;
-  background:var(--surface);
-  border-left:1px solid var(--border);
-  display:grid;
-  grid-template-rows:auto 1fr;
-}
-.panel-head{
-  height:44px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  padding:0 10px 0 14px;
-  border-bottom:1px solid var(--border);
-}
-.panel-title{
-  font-size:14px;
-  font-weight:650;
-}
-.panel-body{
-  min-height:0;
-  overflow:auto;
-  padding:12px;
-}
-.panel-section{
-  border-bottom:1px solid #ececec;
-  padding:0 0 12px;
-  margin:0 0 12px;
-}
-.panel-section:last-child{border-bottom:0}
-.panel-section h3{
-  margin:0 0 8px;
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  color:var(--muted);
-}
-.field{
-  display:grid;
-  grid-template-columns:90px 1fr;
-  align-items:center;
-  gap:8px;
-  min-height:34px;
-  font-size:13px;
-}
-.field input,
-.field select{
-  width:100%;
-  min-width:0;
-  height:30px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:0 8px;
-  background:#fff;
-}
-
-
-.document-surface{
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding:32px;
-  background:#dedede;
-}
-.document-page{
-  width:min(794px,100%);
-  min-height:1123px;
-  background:#fff;
-  padding:76px 82px;
-  outline:none;
-  color:#111;
-  font-size:16px;
-  line-height:1.6;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.document-page h1{
-  margin:0 0 24px;
-  font-size:32px;
-  line-height:1.2;
-}
-.document-page p{margin:0 0 1em}
-.document-page:focus{box-shadow:0 0 0 1px #cfcfcf,0 2px 12px rgba(0,0,0,.08)}
-
-
-.sheet-surface{
-  width:100%;
-  height:100%;
-  min-height:100%;
-  background:#fff;
-  overflow:auto;
-  position:relative;
-}
-.sheet-wrap{
-  min-width:100%;
-  min-height:100%;
-  background:#fff;
-  padding:0 0 40px;
-}
-.sheet-grid{
-  display:grid;
-  grid-template-columns:46px repeat(8,minmax(110px,1fr));
-  grid-auto-rows:32px;
-  border-top:1px solid #dfe3e8;
-  border-left:1px solid #dfe3e8;
-  min-width:930px;
-  width:100%;
-}
-.sheet-cell,
-.sheet-head,
-.sheet-rowhead{
-  border-right:1px solid #e2e5e9;
-  border-bottom:1px solid #e2e5e9;
-  min-width:0;
-}
-.sheet-head,
-.sheet-rowhead{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f7f8fa;
-  font-size:12px;
-  font-weight:600;
-  color:#5b6470;
-  user-select:none;
-}
-.sheet-head,
-.sheet-rowhead{cursor:pointer}
-.sheet-head.is-selected,
-.sheet-rowhead.is-selected{
-  background:#e9eaec;
-  color:#111;
-  box-shadow:inset 0 0 0 1px #111;
-}
-
-.sheet-head{
-  position:sticky;
-  top:34px;
-  z-index:3;
-}
-.sheet-rowhead{
-  position:sticky;
-  left:0;
-  z-index:2;
-}
-.sheet-cell{
-  padding:5px 8px;
-  outline:none;
-  background:#fff;
-  font-size:13px;
-  line-height:21px;
-  white-space:nowrap;
-  overflow:hidden;
-}
-.sheet-cell:hover{
-  background:#fafbfc;
-}
-.sheet-cell.is-merged-master{
-  position:relative;
-  z-index:2;
-  overflow:hidden;
-  background:#fff;
-}
-.sheet-cell.is-merged-hidden{
-  visibility:hidden;
-  pointer-events:none;
-}
-
-.sheet-cell:focus,
-.sheet-cell.is-active{
-  position:relative;
-  z-index:1;
-  box-shadow:inset 0 0 0 2px #111;
-  background:#fff;
-}
-.sheet-cell.is-selected{
-  background:#e9edf2;
-  box-shadow:inset 0 0 0 1px #6d7680;
-}
-.sheet-cell.is-selected.is-active{
-  box-shadow:inset 0 0 0 2px #111;
-}
-
-.sheet-corner{cursor:pointer}
-.sheet-corner.is-selected{background:#e9eaec;box-shadow:inset 0 0 0 1px #111}
-.sheet-cell.format-border-all{border-color:#111}
-.sheet-cell.format-border-none{border-color:transparent}
-
-.sheet-formula{
-  height:34px;
-  display:grid;
-  grid-template-columns:64px 1fr;
-  position:sticky;
-  top:0;
-  z-index:5;
-  border-bottom:1px solid #dfe3e8;
-  background:#fff;
-}
-.sheet-namebox,
-.sheet-formulabox{
-  height:33px;
-  border:0;
-  border-right:1px solid #dfe3e8;
-  padding:0 10px;
-  outline:none;
-  background:#fff;
-  font-size:13px;
-}
-.sheet-namebox{
-  text-align:center;
-  font-weight:600;
-  color:#3e4650;
-  background:#fafafa;
-}
-.sheet-formulabox{
-  border-right:0;
-}
-.sheet-formulabox:focus{
-  box-shadow:inset 0 0 0 1px #111;
-}
-
-
-.cad-surface{position:absolute;inset:0;background:#fff;overflow:hidden}
-#cad-native{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;background:#fff;user-select:none}#cad-native .entity{fill:none;stroke:var(--entity-color,#444);stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .entity[data-kind="dashline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:4 3}#cad-native .entity[data-kind="dashdotline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:6 2 .5 2;stroke-linecap:round}#cad-native .entity.selected{stroke:#000;stroke-width:1.15}#cad-native .entity[data-kind="dashline"].selected{stroke-dasharray:4 3}#cad-native .entity[data-kind="dashdotline"].selected{stroke-dasharray:6 2 .5 2;stroke-linecap:round}#cad-native text.entity{fill:var(--entity-color,#222);stroke:none;cursor:default}#cad-native .text-preview{fill:#555;pointer-events:none;user-select:none}#cad-native .dimension line,#cad-native .dimension path{vector-effect:non-scaling-stroke}#cad-native .dimension text{fill:var(--entity-color,#444);stroke:#fff;stroke-width:3px;paint-order:stroke fill;stroke-linejoin:round;vector-effect:non-scaling-stroke}#cad-native text.entity.selected{fill:var(--entity-color,#000);stroke:#fff;stroke-width:3px;paint-order:stroke fill;font-weight:650}#cad-native .dimension.selected line,#cad-native .dimension.selected path{stroke:#000;stroke-width:1.15}#cad-native .dimension.selected text{fill:#000}#cad-native .draft{fill:none;stroke:#777;stroke-width:.45;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}#cad-native .guide{stroke:#9aa3ad;stroke-width:.35;stroke-dasharray:4 5;vector-effect:non-scaling-stroke}#cad-native .dimension-tick{stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .selection-box{fill:rgba(80,120,180,.06);stroke:#5b6f86;stroke-width:.6;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}
-.cad-hud{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;pointer-events:none;flex-wrap:wrap}
-.cad-chip{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:#555}
-#toolbar-cad{overflow-x:auto;min-width:0}
-#toolbar-cad .icon-btn{font-size:11px;font-weight:650}
-.icon-btn.active{background:#111;color:#fff;border-color:#111}
-.cad-panel-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-.cad-panel-actions button{height:32px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer}
-.cad-panel-actions button:hover,.cad-panel-actions button.active{background:#111;color:#fff}
-riki-space{display:none}
-
-.hidden{display:none!important}
-
-@media (max-width:900px){
-  :root{--panel-w:280px}
-}
-@media (max-width:720px){
-  .workspace{grid-template-columns:minmax(0,1fr)}
-  .rightpanel{
-    position:fixed;
-    top:calc(var(--topbar-h) + var(--toolbar-h));
-    right:0;
-    bottom:0;
-    width:min(var(--panel-w),88vw);
-    z-index:20;
-    box-shadow:-8px 0 24px rgba(0,0,0,.12);
-  }
-}
-
-#print-layer{display:none}
-@media print{
-  @page{margin:12mm}
-  body *{visibility:hidden!important}
-  #print-layer,#print-layer *{visibility:visible!important}
-  #print-layer{display:block!important;position:absolute!important;inset:0!important;width:100%!important;min-height:100%!important;background:#fff!important;color:#111!important;overflow:visible!important}
-  #print-layer .print-document{width:100%!important;min-height:auto!important;box-shadow:none!important;border:0!important;margin:0!important}
-  #print-layer .print-sheet-table{border-collapse:collapse;width:auto;max-width:100%;font:12px system-ui,sans-serif}
-  #print-layer .print-sheet-table td{min-width:80px;height:28px;padding:4px 6px;border:1px solid #cfd3d8;vertical-align:middle;white-space:nowrap}
-  #print-layer .print-sheet-window{position:relative;overflow:hidden;background:#fff}
-  #print-layer .print-sheet-window-inner{position:absolute;transform-origin:top left}
-  #print-layer .print-cad-image{display:block;max-width:100%;max-height:calc(100vh - 24mm);margin:0 auto;object-fit:contain}
-}
-
-
-.rightpanel{
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-}
-.rightpanel .panel-head{
-  flex:0 0 auto !important;
-}
-.rightpanel .panel-body{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  -webkit-overflow-scrolling:touch;
-}
-
-
-.topbar{display:none!important}
-.mode-tabs{display:none!important}
-
-
-html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hidden}
-.app{min-width:0}
-.toolbar{
-  min-width:0;
-  overflow-x:auto;
-  overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:thin;
-  overscroll-behavior-x:contain;
-}
-.toolbar>.tool-group{flex:0 0 auto}
-.rightpanel.hidden{display:none!important}
-.stage{overscroll-behavior:contain}
-
-@media (max-width:900px){
-  :root{--panel-w:280px;--gap:6px}
-  .toolbar{padding-inline:8px}
-  .stage{padding:10px}
-  .document-surface{padding:20px}
-  .document-page{padding:52px 48px}
-}
-
-@media (max-width:720px){
-  :root{--toolbar-h:42px;--control:34px;--icon:19px}
-  .toolbar{gap:5px;padding-inline:6px}
-  .tool-group{gap:2px}
-  .tool-separator{height:22px}
-  .workspace{position:relative;grid-template-columns:minmax(0,1fr);min-width:0}
-  .stage{padding:6px;min-width:0}
-  .surface-frame{width:100%;min-height:calc(100dvh - var(--toolbar-h) - 12px)}
-  .document-surface{padding:10px}
-  .document-page{
-    width:100%;
-    min-height:calc(100dvh - var(--toolbar-h) - 32px);
-    padding:34px 24px;
-    box-shadow:0 1px 5px rgba(0,0,0,.08);
-  }
-  .document-page h1{font-size:27px;margin-bottom:18px}
-  .sheet-grid{grid-template-columns:42px repeat(8,minmax(96px,1fr));min-width:810px}
-  .rightpanel{
-    position:absolute!important;
-    left:0!important;
-    right:0!important;
-    top:auto!important;
-    bottom:0!important;
-    width:100%!important;
-    max-width:none!important;
-    height:min(44dvh,390px)!important;
-    border-left:0!important;
-    border-top:1px solid var(--border)!important;
-    box-shadow:0 -8px 24px rgba(0,0,0,.12)!important;
-    z-index:30!important;
-  }
-  .rightpanel .panel-head{height:42px;min-height:42px}
-  .rightpanel .panel-body{padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
-  .field{grid-template-columns:82px minmax(0,1fr)}
-  .cad-hud{left:6px;right:6px;bottom:6px}
-}
-
-@media (max-width:480px){
-  :root{--toolbar-h:40px;--control:32px;--icon:18px;--gap:4px}
-  .toolbar{padding-inline:4px}
-  .icon-btn{border-radius:6px}
-  .stage{padding:4px}
-  .document-surface{padding:6px}
-  .document-page{padding:26px 18px;font-size:15px;line-height:1.55}
-  .document-page h1{font-size:24px}
-  .rightpanel{height:min(48dvh,360px)!important}
-  .panel-section{margin-bottom:10px;padding-bottom:10px}
-  .field{grid-template-columns:74px minmax(0,1fr);gap:6px;font-size:12px}
-  .field input,.field select{height:32px}
-  .cad-panel-actions{grid-template-columns:1fr 1fr}
-  .cad-chip{font-size:10px;padding:4px 6px}
-}
-
-@media (max-width:360px){
-  .document-page{padding:22px 14px}
-  .field{grid-template-columns:68px minmax(0,1fr)}
-}
-
-
-/* UNISEFE CAD 2D · 3D STRUCTURAL WHITE INTERFACE */
-:root{
-  --toolbar-h:66px;
-  --panel-w:286px;
-  --border:#d7d7d7;
-  --bg:#ededed;
-  --surface:#fff;
-  --text:#151515;
-  --muted:#707070;
-}
-.topbar,.mode-tabs,#toolbar-context,#toolbar-sheet{display:none!important}
-.app{grid-template-rows:var(--toolbar-h) 1fr!important}
-.cad-structural-toolbar{
-  height:var(--toolbar-h)!important;
-  min-height:var(--toolbar-h)!important;
-  display:flex!important;
-  align-items:stretch!important;
-  gap:0!important;
-  padding:0 8px!important;
-  background:#fff!important;
-  border-bottom:1px solid var(--border)!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-}
-.cad-structural-toolbar .toolGroup{
-  position:relative;
-  display:flex!important;
-  align-items:center!important;
-  padding:17px 10px 4px!important;
-  border-right:1px solid #e4e4e4!important;
-  flex:0 0 auto!important;
-}
-.cad-structural-toolbar .toolGroup:last-child{border-right:0!important}
-.cad-structural-toolbar .toolLabel{
-  position:absolute;
-  left:10px;
-  top:4px;
-  font-size:8px;
-  line-height:1;
-  letter-spacing:.10em;
-  font-weight:650;
-  color:#818181;
-  user-select:none;
-}
-.cad-structural-toolbar .toolButtons{
-  display:flex;
-  align-items:center;
-  gap:2px;
-}
-.cad-structural-toolbar .toolButton{
-  width:30px!important;
-  height:30px!important;
-  min-width:30px!important;
-  padding:0!important;
-  display:grid!important;
-  place-items:center!important;
-  border:1px solid transparent!important;
-  border-radius:5px!important;
-  background:transparent!important;
-  color:#222!important;
-  cursor:pointer!important;
-}
-.cad-structural-toolbar .toolButton:hover{
-  background:#f2f2f2!important;
-  border-color:#ddd!important;
-}
-.cad-structural-toolbar .toolButton.active{
-  background:#111!important;
-  color:#fff!important;
-  border-color:#111!important;
-}
-.cad-structural-toolbar .toolButton svg{
-  width:17px!important;
-  height:17px!important;
-  stroke:currentColor!important;
-  fill:none!important;
-  stroke-width:1.65!important;
-  stroke-linecap:round!important;
-  stroke-linejoin:round!important;
-}
-.workspace{
-  grid-template-columns:minmax(0,1fr) var(--panel-w)!important;
-  background:#ececec!important;
-}
-.stage{
-  padding:10px!important;
-  background:#ececec!important;
-  overflow:hidden!important;
-  display:block!important;
-}
-.surface-frame{
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
-  background:#fff!important;
-  border:1px solid #d4d4d4!important;
-  box-shadow:0 1px 5px rgba(0,0,0,.06)!important;
-}
-#document-editor,#sheet-editor{display:none!important}
-#cad-editor{
-  display:block!important;
-  position:absolute!important;
-  inset:0!important;
-  background:#fff!important;
-}
-#cad-native{background:#fff!important}
-.rightpanel{
-  width:var(--panel-w)!important;
-  min-width:var(--panel-w)!important;
-  max-width:var(--panel-w)!important;
-  background:#fff!important;
-  border-left:1px solid var(--border)!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-}
-.panel-head{
-  justify-content:flex-start!important;
-  height:42px!important;
-  min-height:42px!important;
-  padding:0 10px 0 12px!important;
-  border-bottom:1px solid #dedede!important;
-}
-.panel-title{
-  font-size:12px!important;
-  font-weight:650!important;
-  letter-spacing:.02em!important;
-}
-.panel-body{
-  padding:10px 12px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-}
-#panel-document,#panel-sheet{display:none!important}
-#panel-cad{display:block!important}
-.panel-section{
-  padding:0 0 12px!important;
-  margin:0 0 12px!important;
-  border-bottom:1px solid #ededed!important;
-}
-.panel-section h3{
-  margin:0 0 7px!important;
-  font-size:9px!important;
-  color:#777!important;
-  letter-spacing:.10em!important;
-  font-weight:650!important;
-}
-.field{
-  grid-template-columns:76px minmax(0,1fr)!important;
-  gap:7px!important;
-  min-height:30px!important;
-  font-size:11px!important;
-}
-.field input,.field select{
-  height:27px!important;
-  border:1px solid #d5d5d5!important;
-  border-radius:4px!important;
-  padding:0 6px!important;
-  font-size:11px!important;
-}
-.cad-hud{
-  left:8px!important;
-  bottom:8px!important;
-  gap:4px!important;
-}
-.cad-chip{
-  padding:4px 7px!important;
-  border-radius:4px!important;
-  font-size:10px!important;
-  color:#555!important;
-  background:rgba(255,255,255,.94)!important;
-  border:1px solid #d9d9d9!important;
-}
-#panel-close{width:28px!important;height:28px!important}
-@media(max-width:720px){
-  :root{--toolbar-h:64px;--panel-w:100%}
-  .workspace{grid-template-columns:1fr!important}
-  .rightpanel{
-    position:absolute!important;
-    left:0!important;right:0!important;bottom:0!important;top:auto!important;
-    width:100%!important;min-width:0!important;max-width:none!important;
-    height:min(42dvh,350px)!important;
-    border-left:0!important;border-top:1px solid var(--border)!important;
-  }
-  .cad-structural-toolbar .toolGroup{padding-inline:6px!important}
-  .stage{padding:5px!important}
-}
-
+:root{--toolbar-h:66px;--panel-w:286px;--mobile-panel-h:300px;--border:#d7d7d7;--bg:#ececec;--surface:#fff;--text:#151515;--muted:#707070}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);overflow:hidden}button,input,select{font:inherit;color:inherit}.app{width:100vw;height:100dvh;display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr);min-width:0;overflow:hidden}
+.cad-structural-toolbar{height:var(--toolbar-h);min-height:var(--toolbar-h);display:flex;align-items:stretch;gap:0;padding:0 8px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;white-space:nowrap;-webkit-overflow-scrolling:touch}.cad-structural-toolbar .toolGroup{position:relative;display:flex;align-items:center;padding:17px 10px 4px;border-right:1px solid #e4e4e4;flex:0 0 auto}.cad-structural-toolbar .toolGroup:last-child{border-right:0}.cad-structural-toolbar .toolLabel{position:absolute;left:10px;top:4px;font-size:8px;line-height:1;letter-spacing:.10em;font-weight:650;color:#818181;user-select:none}.cad-structural-toolbar .toolButtons{display:flex;align-items:center;gap:2px}.cad-structural-toolbar .toolButton{width:30px;height:30px;min-width:30px;padding:0;display:grid;place-items:center;border:1px solid transparent;border-radius:5px;background:transparent;color:#222;cursor:pointer;flex:0 0 auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.cad-structural-toolbar .toolButton:hover{background:#f2f2f2;border-color:#ddd}.cad-structural-toolbar .toolButton.active{background:#111;color:#fff;border-color:#111}.cad-structural-toolbar .toolButton svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.workspace{position:relative;min-width:0;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) var(--panel-w);background:var(--bg);overflow:hidden}.stage{position:relative;min-width:0;min-height:0;padding:10px;background:var(--bg);overflow:hidden}.surface-frame{position:relative;width:100%;height:100%;min-width:0;min-height:0;background:#fff;border:1px solid #d4d4d4;box-shadow:0 1px 5px rgba(0,0,0,.06);overflow:hidden}.cad-surface,#cad-editor{position:absolute;inset:0;display:block;background:#fff;overflow:hidden}#cad-native{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;background:#fff;user-select:none}
+#cad-native .entity{fill:none;stroke:var(--entity-color,#444);stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .entity[data-kind="dashline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:4 3}#cad-native .entity[data-kind="dashdotline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:6 2 .5 2;stroke-linecap:round}#cad-native .entity.selected{stroke:#000;stroke-width:1.15}#cad-native text.entity{fill:var(--entity-color,#222);stroke:none;cursor:default}#cad-native .text-preview{fill:#555;pointer-events:none;user-select:none}#cad-native .dimension line,#cad-native .dimension path{vector-effect:non-scaling-stroke}#cad-native .dimension text{fill:var(--entity-color,#444);stroke:#fff;stroke-width:3px;paint-order:stroke fill;stroke-linejoin:round;vector-effect:non-scaling-stroke}#cad-native text.entity.selected{fill:var(--entity-color,#000);stroke:#fff;stroke-width:3px;paint-order:stroke fill;font-weight:650}#cad-native .dimension.selected line,#cad-native .dimension.selected path{stroke:#000;stroke-width:1.15}#cad-native .dimension.selected text{fill:#000}#cad-native .draft{fill:none;stroke:#777;stroke-width:.45;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}#cad-native .guide{stroke:#9aa3ad;stroke-width:.35;stroke-dasharray:4 5;vector-effect:non-scaling-stroke}#cad-native .dimension-tick{stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .selection-box{fill:rgba(80,120,180,.06);stroke:#5b6f86;stroke-width:.6;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}
+.field input.snap-toggle{width:18px!important;height:18px!important;min-width:18px!important;padding:0!important;justify-self:start;accent-color:#111;cursor:pointer}
+.cad-hud{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;pointer-events:none;flex-wrap:wrap}.cad-chip{padding:4px 7px;border-radius:4px;font-size:10px;color:#555;background:rgba(255,255,255,.94);border:1px solid #d9d9d9}
+.rightpanel{width:var(--panel-w);min-width:var(--panel-w);max-width:var(--panel-w);min-height:0;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}.panel-head{height:42px;min-height:42px;display:flex;align-items:center;justify-content:flex-start;padding:0 10px 0 12px;border-bottom:1px solid #dedede}.panel-title{font-size:12px;font-weight:650;letter-spacing:.02em}.panel-body{flex:1 1 auto;min-height:0;padding:10px 12px;overflow-y:auto;overflow-x:hidden}.panel-section{padding:0 0 12px;margin:0 0 12px;border-bottom:1px solid #ededed}.panel-section:last-child{border-bottom:0}.panel-section h3{margin:0 0 7px;font-size:9px;text-transform:uppercase;color:#777;letter-spacing:.10em;font-weight:650}.field{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:7px;min-height:30px;font-size:11px}.field input,.field select{width:100%;min-width:0;height:27px;border:1px solid #d5d5d5;border-radius:4px;padding:0 6px;background:#fff;font-size:11px}.field input[type="checkbox"]{width:16px;height:16px;min-width:16px;padding:0;justify-self:start;accent-color:#111}.cad-panel-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.cad-panel-actions button{height:29px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer;font-size:11px}.cad-panel-actions button:hover,.cad-panel-actions button.active{background:#111;color:#fff}.panel-note{font-size:10px;color:var(--muted);line-height:1.4;margin-top:6px}riki-space{display:none}
+@media(max-width:1180px){:root{--panel-w:260px}.cad-structural-toolbar .toolGroup{padding-inline:7px}.field{grid-template-columns:68px minmax(0,1fr)}}
+@media(max-width:900px){:root{--panel-w:238px}.cad-structural-toolbar .toolGroup{padding:15px 5px 3px}.cad-structural-toolbar .toolLabel{left:5px;top:3px;font-size:7px}.cad-structural-toolbar .toolButtons{gap:1px}.cad-structural-toolbar .toolButton{width:27px;min-width:27px;height:27px}.cad-structural-toolbar .toolButton svg{width:15px;height:15px}.stage{padding:6px}.panel-body{padding:8px}.field{grid-template-columns:60px minmax(0,1fr);gap:5px;font-size:10px}.field input,.field select{height:26px;font-size:10px}}
+@media(max-width:720px){:root{--toolbar-h:76px;--mobile-panel-h:min(36dvh,300px)}.cad-structural-toolbar{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:36px;align-content:center;align-items:center;gap:0;height:var(--toolbar-h);min-height:var(--toolbar-h);padding:2px 4px;overflow:hidden;white-space:normal}.cad-structural-toolbar .toolGroup,.cad-structural-toolbar .toolButtons{display:contents}.cad-structural-toolbar .toolLabel{display:none}.cad-structural-toolbar .toolButton{width:100%;min-width:0;height:34px;min-height:34px;border-radius:4px;margin:0}.cad-structural-toolbar .toolButton svg{width:16px;height:16px}.workspace{grid-template-columns:minmax(0,1fr)}.stage{position:absolute;inset:0;padding:4px}.rightpanel{position:absolute;left:0;right:0;bottom:0;top:auto;width:100%;min-width:0;max-width:none;height:var(--mobile-panel-h);border-left:0;border-top:1px solid var(--border);box-shadow:0 -6px 18px rgba(0,0,0,.10);z-index:30}.panel-head{height:36px;min-height:36px;padding:0 10px}.panel-title{font-size:10px}.panel-body{padding:7px 10px calc(8px + env(safe-area-inset-bottom))}.panel-section{padding-bottom:8px;margin-bottom:8px}.panel-section h3{margin-bottom:5px;font-size:8px}.field{grid-template-columns:66px minmax(0,1fr);min-height:27px;font-size:10px}.field input,.field select{height:25px;font-size:10px}.cad-hud{left:5px;right:5px;bottom:calc(var(--mobile-panel-h) + 5px);gap:3px}.cad-chip{padding:3px 5px;font-size:9px;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+@media(max-width:480px){:root{--toolbar-h:112px;--mobile-panel-h:min(32dvh,250px)}.cad-structural-toolbar{grid-template-columns:repeat(8,minmax(0,1fr));grid-auto-rows:36px;padding:2px 3px}.cad-structural-toolbar .toolButton{height:34px;min-height:34px}.stage{padding:2px}.panel-head{height:32px;min-height:32px}.panel-body{padding:6px 8px calc(7px + env(safe-area-inset-bottom))}.field{grid-template-columns:58px minmax(0,1fr);gap:4px}.cad-hud{bottom:calc(var(--mobile-panel-h) + 4px)}.cad-chip{font-size:8px;padding:2px 4px;max-width:44vw}}
+@media(max-width:360px){:root{--toolbar-h:108px;--mobile-panel-h:min(30dvh,220px)}.cad-structural-toolbar{grid-auto-rows:35px;padding-inline:2px}.cad-structural-toolbar .toolButton{height:33px;min-height:33px}.cad-structural-toolbar .toolButton svg{width:15px;height:15px}.field{grid-template-columns:52px minmax(0,1fr);font-size:9px}.field input,.field select{font-size:9px}.cad-chip:nth-child(3),.cad-chip:nth-child(4){display:none}}
+@media(orientation:landscape) and (max-height:520px) and (max-width:900px){:root{--toolbar-h:74px;--mobile-panel-h:min(42dvh,180px)}.cad-structural-toolbar{grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:35px;padding:2px 4px}.cad-structural-toolbar .toolButton{height:33px;min-height:33px}.panel-head{height:30px;min-height:30px}.panel-body{padding-top:5px}}
+@media print{body{background:#fff}.cad-structural-toolbar,.rightpanel,.cad-hud{display:none!important}.app{display:block;height:auto}.workspace{display:block}.stage{position:fixed;inset:0;padding:0}.surface-frame{border:0;box-shadow:none}.cad-surface{position:absolute;inset:0}#cad-native{width:100vw;height:100vh}}
 </style>
 </head>
 <body>
+<!-- ===================== APPLICATION SHELL ===================== -->
 <div class="app">
 
-  <header class="topbar">
-
-    <nav class="mode-tabs" aria-label="Applicazioni">
-      <button class="mode-tab" aria-selected="true" data-mode="document" title="Document" aria-label="Document">
-        <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 11h6M9 15h6"/></svg>
-      </button>
-      <button class="mode-tab" aria-selected="false" data-mode="sheet" title="Sheet" aria-label="Sheet">
-        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/></svg>
-      </button>
-      <button class="mode-tab" aria-selected="false" data-mode="cad" title="CAD" aria-label="CAD">
-        <svg viewBox="0 0 24 24"><path d="M4 19 12 5l8 14z"/><path d="M8 16h8"/><circle cx="12" cy="10" r="1.5"/></svg>
-      </button>
-    </nav>
-
-    <div class="top-actions"></div>
-  </header>
-
-  
-<div class="toolbar cad-structural-toolbar" id="toolbar-cad-white">
+<div class="toolbar cad-structural-toolbar" id="toolbar-cad" aria-label="CAD tools">
   <div class="toolGroup">
     <div class="toolLabel">DRAW</div>
     <div class="toolButtons"><button class="toolButton" data-cad-name="select" data-cad-kind="tool" title="Select" aria-label="Select">
@@ -749,10 +52,8 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         <svg viewBox="0 0 24 24"><path d="M5 19 9 15M13 11l6-6"/><circle cx="11" cy="13" r=".8"/><circle cx="5" cy="19" r="1.25"/><circle cx="19" cy="5" r="1.25"/></svg>
       </button><button class="toolButton" data-cad-name="circle" data-cad-kind="tool" title="Circle" aria-label="Circle">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
-      </button><button class="toolButton" data-cad-name="arc-rif" data-cad-kind="tool" title="Arco Raggio-Inizio-Fine" aria-label="Arco Raggio-Inizio-Fine">
-        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/><path d="M12 12V7"/></svg>
-      </button><button class="toolButton" data-cad-name="arc-ifr" data-cad-kind="tool" title="Arco Inizio-Fine-Raggio" aria-label="Arco Inizio-Fine-Raggio">
-        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/><path d="M12 12h5"/></svg>
+      </button><button class="toolButton" data-cad-name="arc" data-cad-kind="tool" title="Arco · Inizio-Fine-Curvatura" aria-label="Arco · Inizio-Fine-Curvatura">
+        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/><circle cx="12" cy="9" r="1.1"/></svg>
       </button><button class="toolButton" data-cad-name="text" data-cad-kind="tool" title="Text" aria-label="Text">
         <svg viewBox="0 0 24 24"><path d="M7 19 12 5l5 14M9 14h6"/></svg>
       </button></div>
@@ -769,7 +70,7 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
   </div>
   <div class="toolGroup">
     <div class="toolLabel">EDIT</div>
-    <div class="toolButtons"><button class="toolButton" data-cad-name="move" data-cad-kind="tool" title="Move" aria-label="Move"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="m12 3-2 3M12 3l2 3M12 21l-2-3M12 21l2-3M3 12l3-2M3 12l3 2M21 12l-3-2M21 12l-3 2"/></svg></button><button class="toolButton" data-cad-name="copy" data-cad-kind="tool" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="1"/><path d="M5 16H4V5h11v1"/></svg></button><button class="toolButton" data-cad-name="trim" data-cad-kind="tool" title="Trim" aria-label="Trim"><svg viewBox="0 0 24 24"><path d="M5 5 19 19M5 19 19 5"/><path d="M9 9 5 5M15 15l4 4"/></svg></button><button class="toolButton" data-cad-name="extend" data-cad-kind="tool" title="Extend" aria-label="Extend"><svg viewBox="0 0 24 24"><path d="M5 19 13 11"/><path d="M13 11 20 4" stroke-dasharray="3 3"/><path d="M16 4h4v4"/></svg></button><button class="toolButton" data-cad-name="fillet" data-cad-kind="tool" title="Raccorda" aria-label="Raccorda">
+    <div class="toolButtons"><button class="toolButton" data-cad-name="undo" data-cad-kind="action" title="Undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7"/></svg></button><button class="toolButton" data-cad-name="move" data-cad-kind="tool" title="Move" aria-label="Move"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="m12 3-2 3M12 3l2 3M12 21l-2-3M12 21l2-3M3 12l3-2M3 12l3 2M21 12l-3-2M21 12l-3 2"/></svg></button><button class="toolButton" data-cad-name="copy" data-cad-kind="tool" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="1"/><path d="M5 16H4V5h11v1"/></svg></button><button class="toolButton" data-cad-name="trim" data-cad-kind="tool" title="Trim" aria-label="Trim"><svg viewBox="0 0 24 24"><path d="M5 5 19 19M5 19 19 5"/><path d="M9 9 5 5M15 15l4 4"/></svg></button><button class="toolButton" data-cad-name="extend" data-cad-kind="tool" title="Extend" aria-label="Extend"><svg viewBox="0 0 24 24"><path d="M5 19 13 11"/><path d="M13 11 20 4" stroke-dasharray="3 3"/><path d="M16 4h4v4"/></svg></button><button class="toolButton" data-cad-name="fillet" data-cad-kind="tool" title="Raccorda" aria-label="Raccorda">
         <svg viewBox="0 0 24 24"><path d="M5 19h4a10 10 0 0 0 10-10V5"/><path d="M5 15v4h4"/></svg>
       </button><button class="toolButton" data-cad-name="mirror" data-cad-kind="tool" title="Specchia" aria-label="Specchia"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2"/><path d="M4 18 9 6v12zM20 18 15 6v12z"/></svg></button><button class="toolButton" data-cad-name="rotate" data-cad-kind="tool" title="Ruota" aria-label="Ruota"><svg viewBox="0 0 24 24"><path d="M19 8a7 7 0 1 0 1 6"/><path d="M19 3v5h-5"/></svg></button><button class="toolButton" data-cad-name="delete" data-cad-kind="action" title="Delete" aria-label="Delete"><svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M8 10v8M12 10v8M16 10v8M7 7l1 14h8l1-14"/></svg></button></div>
   </div>
@@ -785,143 +86,114 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
   </div>
 </div>
 
+<!-- ===================== CAD WORKSPACE ========================= -->
 <main class="workspace">
-    <section class="stage">
-      <div class="surface-frame document-surface" id="app-surface">
-        <article id="document-editor" class="document-page" contenteditable="true" spellcheck="true" aria-label="Document editor">
-          <h1>Untitled document</h1>
-          <p>Start writing here...</p>
-        </article>
+  <section class="stage">
+    <div id="cad-editor" class="cad-surface" aria-label="CAD editor">
+      <svg id="cad-native" tabindex="0" xmlns="http://www.w3.org/2000/svg" aria-label="CAD native surface"><g id="cad-native-scene"></g><g id="cad-native-overlay"></g></svg>
+      <div class="cad-hud"><div class="cad-chip" id="cad-coords">x 0 · y 0</div><div class="cad-chip" id="cad-point">POINT · Δ 0 · BIT 1</div><div class="cad-chip" id="cad-command">LINE · pick first point</div><div class="cad-chip" id="cad-selection">no selection</div><div class="cad-chip" id="cad-count">0 entities</div></div>
+    </div>
+  </section>
 
-        <div id="sheet-editor" class="sheet-surface hidden" aria-label="Sheet editor">
-          <div class="sheet-formula">
-            <input id="sheet-namebox" class="sheet-namebox" value="A1" readonly>
-            <input id="sheet-formulabox" class="sheet-formulabox" placeholder="Formula or value">
-          </div>
-          <div class="sheet-wrap">
-            <div class="sheet-grid" id="sheet-grid">
-              <div class="sheet-head sheet-corner" id="sheet-select-all" title="Select all" aria-label="Select all"></div>
-              <div class="sheet-head">A</div><div class="sheet-head">B</div><div class="sheet-head">C</div><div class="sheet-head">D</div>
-              <div class="sheet-head">E</div><div class="sheet-head">F</div><div class="sheet-head">G</div><div class="sheet-head">H</div>
+<aside class="rightpanel" id="rightpanel">
+  <div class="panel-head"><div class="panel-title">UNISEFE CAD 2D</div></div>
+  <div class="panel-body">
+    <div id="panel-cad">
+      <section class="panel-section">
+        <h3>Line</h3>
+        <label class="field"><span>Color</span><input id="cad-line-color" type="color" value="#444444"></label>
+        <label class="field"><span>Width</span><input id="cad-line-width" type="number" min="0.1" max="20" step="0.05" value="0.55"></label>
+      </section>
+      <section class="panel-section">
+        <h3>View</h3>
+        <label class="field"><span>Snap</span><input id="cad-snap" value="1"></label>
+        <label class="field"><span>Medio</span><input class="snap-toggle" id="cad-snap-midpoint" type="checkbox" checked></label>
+        <label class="field"><span>Quadrante</span><input class="snap-toggle" id="cad-snap-quadrant" type="checkbox" checked></label>
+        <label class="field"><span>Intersection</span><input class="snap-toggle" id="cad-snap-intersection" type="checkbox" checked></label>
+        <label class="field"><span>Perpendicular</span><input class="snap-toggle" id="cad-snap-perpendicular" type="checkbox" checked></label>
+        <label class="field"><span>Tangent</span><input class="snap-toggle" id="cad-snap-tangent" type="checkbox" checked></label>
+        <label class="field"><span>Text</span><input id="cad-text-size" value="16"></label>
+        <label class="field"><span>Quote dec.</span><input id="cad-dim-decimals" type="number" min="0" max="12" step="1" value="2"></label>
+      </section>
+    </div>
+  </div>
+</aside>
 
-              <div class="sheet-rowhead">1</div>
-              <div class="sheet-cell" contenteditable="true" data-cell="A1"></div><div class="sheet-cell" contenteditable="true" data-cell="B1"></div><div class="sheet-cell" contenteditable="true" data-cell="C1"></div><div class="sheet-cell" contenteditable="true" data-cell="D1"></div>
-              <div class="sheet-cell" contenteditable="true" data-cell="E1"></div><div class="sheet-cell" contenteditable="true" data-cell="F1"></div><div class="sheet-cell" contenteditable="true" data-cell="G1"></div><div class="sheet-cell" contenteditable="true" data-cell="H1"></div>
-
-              <div class="sheet-rowhead">2</div>
-              <div class="sheet-cell" contenteditable="true" data-cell="A2"></div><div class="sheet-cell" contenteditable="true" data-cell="B2"></div><div class="sheet-cell" contenteditable="true" data-cell="C2"></div><div class="sheet-cell" contenteditable="true" data-cell="D2"></div>
-              <div class="sheet-cell" contenteditable="true" data-cell="E2"></div><div class="sheet-cell" contenteditable="true" data-cell="F2"></div><div class="sheet-cell" contenteditable="true" data-cell="G2"></div><div class="sheet-cell" contenteditable="true" data-cell="H2"></div>
-
-              <div class="sheet-rowhead">3</div>
-              <div class="sheet-cell" contenteditable="true" data-cell="A3"></div><div class="sheet-cell" contenteditable="true" data-cell="B3"></div><div class="sheet-cell" contenteditable="true" data-cell="C3"></div><div class="sheet-cell" contenteditable="true" data-cell="D3"></div>
-              <div class="sheet-cell" contenteditable="true" data-cell="E3"></div><div class="sheet-cell" contenteditable="true" data-cell="F3"></div><div class="sheet-cell" contenteditable="true" data-cell="G3"></div><div class="sheet-cell" contenteditable="true" data-cell="H3"></div>
-
-              <div class="sheet-rowhead">4</div>
-              <div class="sheet-cell" contenteditable="true" data-cell="A4"></div><div class="sheet-cell" contenteditable="true" data-cell="B4"></div><div class="sheet-cell" contenteditable="true" data-cell="C4"></div><div class="sheet-cell" contenteditable="true" data-cell="D4"></div>
-              <div class="sheet-cell" contenteditable="true" data-cell="E4"></div><div class="sheet-cell" contenteditable="true" data-cell="F4"></div><div class="sheet-cell" contenteditable="true" data-cell="G4"></div><div class="sheet-cell" contenteditable="true" data-cell="H4"></div>
-
-              <div class="sheet-rowhead">5</div>
-              <div class="sheet-cell" contenteditable="true" data-cell="A5"></div><div class="sheet-cell" contenteditable="true" data-cell="B5"></div><div class="sheet-cell" contenteditable="true" data-cell="C5"></div><div class="sheet-cell" contenteditable="true" data-cell="D5"></div>
-              <div class="sheet-cell" contenteditable="true" data-cell="E5"></div><div class="sheet-cell" contenteditable="true" data-cell="F5"></div><div class="sheet-cell" contenteditable="true" data-cell="G5"></div><div class="sheet-cell" contenteditable="true" data-cell="H5"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="cad-editor" class="cad-surface" aria-label="CAD editor">
-          <svg id="cad-native" tabindex="0" xmlns="http://www.w3.org/2000/svg" aria-label="CAD native surface"><g id="cad-native-scene"></g><g id="cad-native-overlay"></g></svg>
-          <div class="cad-hud">
-            <div class="cad-chip" id="cad-coords">x 0 · y 0</div>
-            <div class="cad-chip" id="cad-command">LINE · pick first point</div>
-            <div class="cad-chip" id="cad-selection">no selection</div>
-            <div class="cad-chip" id="cad-count">0 entities</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <aside class="rightpanel" id="rightpanel">
-      <div class="panel-head">
-        <div class="panel-title">UNISEFE CAD 2D</div>
-      </div>
-      <div class="panel-body">
-        <div id="panel-document">
-          <section class="panel-section">
-            <h3>General</h3>
-            <label class="field"><span>Name</span><input value="Untitled document"></label>
-            <label class="field"><span>Type</span><select><option>Document</option></select></label>
-          </section>
-          <section class="panel-section">
-            <h3>Page</h3>
-            <label class="field"><span>Width</span><input value="210 mm"></label>
-            <label class="field"><span>Height</span><input value="297 mm"></label>
-            <label class="field"><span>Margins</span><input value="22 mm"></label>
-          </section>
-          <section class="panel-section">
-            <h3>Text</h3>
-            <label class="field"><span>Font</span><input value="System"></label>
-            <label class="field"><span>Size</span><input value="16 px"></label>
-          </section>
-        </div>
-
-        <div id="panel-sheet" class="hidden">
-          <section class="panel-section">
-            <h3>Selected cell</h3>
-            <label class="field"><span>Address</span><input id="sheet-panel-address" value="A1" readonly></label>
-            <label class="field"><span>Value</span><input id="sheet-panel-value" value=""></label>
-          </section>
-          <section class="panel-section">
-            <h3>Cell format</h3>
-            <label class="field"><span>Type</span><select id="sheet-panel-type"><option>General</option><option>Number</option><option>Percent</option><option>Currency</option><option>Text</option></select></label>
-            <label class="field"><span>Align</span><select id="sheet-panel-align"><option>Left</option><option>Center</option><option>Right</option></select></label>
-            <label class="field"><span>Borders</span><select id="sheet-panel-border"><option value="grid">Grid</option><option value="all">All</option><option value="none">None</option></select></label>
-            <label class="field"><span>Fill</span><input id="sheet-fill-color" type="color" value="#ffffff"></label>
-            <label class="field"><span>Text</span><input id="sheet-text-color" type="color" value="#111111"></label>
-          </section>
-          <section class="panel-section">
-            <h3>Print / PDF</h3>
-            <label class="field"><span>Area</span><select id="sheet-print-area"><option value="selection">Selected cells</option><option value="window">Window</option><option value="all">Whole sheet</option></select></label>
-          </section>
-          <section class="panel-section">
-            <h3>Worksheet</h3>
-            <label class="field"><span>Rows</span><input value="5" readonly></label>
-            <label class="field"><span>Columns</span><input value="8" readonly></label>
-            <label class="field"><span>Col width</span><input id="sheet-col-width" type="number" min="50" max="500" step="5" value="120"></label>
-            <label class="field"><span>Row height</span><input id="sheet-row-height" type="number" min="20" max="200" step="2" value="32"></label>
-          </section>
-        </div>
-        <div id="panel-cad">
-          
-          <section class="panel-section">
-            <h3>Line</h3>
-            <label class="field"><span>Color</span><input id="cad-line-color" type="color" value="#444444"></label>
-            <label class="field"><span>Width</span><input id="cad-line-width" type="number" min="0.1" max="20" step="0.05" value="0.55"></label>
-          </section>
-          <section class="panel-section">
-            <h3>View</h3>
-            <label class="field"><span>Snap</span><input id="cad-snap" value="1"></label>
-            <label class="field"><span>Text</span><input id="cad-text-size" value="16"></label>
-          </section>
-          
-        </div>
-      </div>
-    </aside>
-  </main>
+</main>
 </div>
-<div id="print-layer" aria-hidden="true"></div>
-<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.2-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
+<!-- ===================== RIKI CANONICAL SPACE ================= -->
+<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.4-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
   <riki-byte name="CONSTITUTION"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SPACE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="CAD"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="TOOL"><riki-value>line</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SNAP"><riki-value>10</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SNAP_MIDPOINT"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SNAP_QUADRANT"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SNAP_INTERSECTION"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SNAP_PERPENDICULAR"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SNAP_TANGENT"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_SCALE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="TEXT_SIZE"><riki-value>16</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="DIM_DECIMALS"><riki-value>2</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="LINE_COLOR"><riki-value>#444444</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="LINE_WIDTH"><riki-value>0.55</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="FILLET_RADIUS"><riki-value>10</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="ARC_RADIUS"><riki-value>50</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT"><riki-value>0,0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_INPUT_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_INPUT_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_TARGET_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_TARGET_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="POINT_DELTA"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_POINT"><riki-value>0,0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_TARGET_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_TARGET_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="GUIDE_DELTA"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="DIMENSION"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="DIM_TARGET"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="DIM_VALUE"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="DIM_DELTA"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ANGDIMENSION"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ANGDIM_TARGET"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ANGDIM_VALUE"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ANGDIM_DELTA"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ALIGNDIMENSION"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ALIGNDIM_TARGET"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ALIGNDIM_VALUE"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ALIGNDIM_DELTA"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="SELF_TEST"><riki-value>0</riki-value><riki-bit>0</riki-bit></riki-byte>
+  <riki-byte name="CMD_SELECT"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_LINE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_DASHLINE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_DASHDOTLINE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_CIRCLE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <!-- Legacy arc command BYTEs retained only for backward state compatibility.
+       The active UI uses the single mouse-first ARC command. -->
+  <riki-byte name="CMD_ARC_RIF"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_ARC_IFR"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_TEXT"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_DIM"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_ANGDIM"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_ALIGNDIM"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_MOVE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_COPY"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_TRIM"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_EXTEND"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_FILLET"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_MIRROR"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_ROTATE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_DELETE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_FIT"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_SAVE"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_OPEN"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="CMD_UNDO"><riki-value>ready</riki-value><riki-bit>1</riki-bit></riki-byte>
 
   <riki-region name="DRAWING" permanent="true"></riki-region>
 
@@ -1016,6 +288,54 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     <riki-chain name="INT_X" expression="((X1*Y2-Y1*X2)*(X3-X4)-(X1-X2)*(X3*Y4-Y3*X4))/INT_DEN"></riki-chain>
     <riki-chain name="INT_Y" expression="((X1*Y2-Y1*X2)*(Y3-Y4)-(Y1-Y2)*(X3*Y4-Y3*X4))/INT_DEN"></riki-chain>
     <riki-chain name="SEG_T" expression="((PX-X1)*(X2-X1)+(PY-Y1)*(Y2-Y1))/MAX(EPS,(X2-X1)^2+(Y2-Y1)^2)"></riki-chain>
+    <riki-chain name="PERP_L2" expression="MAX(EPS,(X2-X1)^2+(Y2-Y1)^2)"></riki-chain>
+    <riki-chain name="PERP_T" expression="((PX-X1)*(X2-X1)+(PY-Y1)*(Y2-Y1))/PERP_L2"></riki-chain>
+    <riki-chain name="PERP_X" expression="X1+PERP_T*(X2-X1)"></riki-chain>
+    <riki-chain name="PERP_Y" expression="Y1+PERP_T*(Y2-Y1)"></riki-chain>
+    <riki-chain name="PERP_VALID" expression="IF(PERP_T>=0,IF(PERP_T<=1,1,0),0)"></riki-chain>
+    <riki-chain name="TAN_DX" expression="PX-CX"></riki-chain>
+    <riki-chain name="TAN_DY" expression="PY-CY"></riki-chain>
+    <riki-chain name="TAN_D2" expression="TAN_DX^2+TAN_DY^2"></riki-chain>
+    <riki-chain name="TAN_VALID" expression="IF(TAN_D2>RADIUS^2+EPS,1,0)"></riki-chain>
+    <riki-chain name="TAN_BASE" expression="RADIUS^2/MAX(EPS,TAN_D2)"></riki-chain>
+    <riki-chain name="TAN_OFF" expression="RADIUS*SQRT(MAX(0,TAN_D2-RADIUS^2))/MAX(EPS,TAN_D2)"></riki-chain>
+    <riki-chain name="TAN_X1" expression="CX+TAN_BASE*TAN_DX-TAN_OFF*TAN_DY"></riki-chain>
+    <riki-chain name="TAN_Y1" expression="CY+TAN_BASE*TAN_DY+TAN_OFF*TAN_DX"></riki-chain>
+    <riki-chain name="TAN_X2" expression="CX+TAN_BASE*TAN_DX+TAN_OFF*TAN_DY"></riki-chain>
+    <riki-chain name="TAN_Y2" expression="CY+TAN_BASE*TAN_DY-TAN_OFF*TAN_DX"></riki-chain>
+    <riki-chain name="LC_DX" expression="X2-X1"></riki-chain>
+    <riki-chain name="LC_DY" expression="Y2-Y1"></riki-chain>
+    <riki-chain name="LC_FX" expression="X1-CX"></riki-chain>
+    <riki-chain name="LC_FY" expression="Y1-CY"></riki-chain>
+    <riki-chain name="LC_A" expression="MAX(EPS,LC_DX^2+LC_DY^2)"></riki-chain>
+    <riki-chain name="LC_B" expression="2*(LC_FX*LC_DX+LC_FY*LC_DY)"></riki-chain>
+    <riki-chain name="LC_C" expression="LC_FX^2+LC_FY^2-RADIUS^2"></riki-chain>
+    <riki-chain name="LC_DISC" expression="LC_B^2-4*LC_A*LC_C"></riki-chain>
+    <riki-chain name="LC_VALID" expression="IF(LC_DISC>=0,1,0)"></riki-chain>
+    <riki-chain name="LC_T1" expression="(-LC_B-SQRT(MAX(0,LC_DISC)))/(2*LC_A)"></riki-chain>
+    <riki-chain name="LC_T2" expression="(-LC_B+SQRT(MAX(0,LC_DISC)))/(2*LC_A)"></riki-chain>
+    <riki-chain name="LC_X1" expression="X1+LC_T1*LC_DX"></riki-chain>
+    <riki-chain name="LC_Y1" expression="Y1+LC_T1*LC_DY"></riki-chain>
+    <riki-chain name="LC_X2" expression="X1+LC_T2*LC_DX"></riki-chain>
+    <riki-chain name="LC_Y2" expression="Y1+LC_T2*LC_DY"></riki-chain>
+    <riki-chain name="CC_DX" expression="C2X-C1X"></riki-chain>
+    <riki-chain name="CC_DY" expression="C2Y-C1Y"></riki-chain>
+    <riki-chain name="CC_D" expression="SQRT(CC_DX^2+CC_DY^2)"></riki-chain>
+    <riki-chain name="CC_VALID" expression="IF(CC_D>EPS,IF(CC_D<=R1+R2+EPS,IF(CC_D+EPS>=ABS(R1-R2),1,0),0),0)"></riki-chain>
+    <riki-chain name="CC_A" expression="(R1^2-R2^2+CC_D^2)/(2*MAX(EPS,CC_D))"></riki-chain>
+    <riki-chain name="CC_H" expression="SQRT(MAX(0,R1^2-CC_A^2))"></riki-chain>
+    <riki-chain name="CC_BX" expression="C1X+CC_A*CC_DX/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="CC_BY" expression="C1Y+CC_A*CC_DY/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="CC_X1" expression="CC_BX-CC_H*CC_DY/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="CC_Y1" expression="CC_BY+CC_H*CC_DX/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="CC_X2" expression="CC_BX+CC_H*CC_DY/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="CC_Y2" expression="CC_BY-CC_H*CC_DX/MAX(EPS,CC_D)"></riki-chain>
+    <riki-chain name="ARC_TEST_A0" expression="MOD(ATAN2(SY-CY,SX-CX),TAU)"></riki-chain>
+    <riki-chain name="ARC_TEST_A1" expression="MOD(ATAN2(EY-CY,EX-CX),TAU)"></riki-chain>
+    <riki-chain name="ARC_TEST_AP" expression="MOD(ATAN2(PY-CY,PX-CX),TAU)"></riki-chain>
+    <riki-chain name="ARC_TEST_SPAN" expression="IF(SWEEP==1,MOD(ARC_TEST_A1-ARC_TEST_A0,TAU),MOD(ARC_TEST_A0-ARC_TEST_A1,TAU))"></riki-chain>
+    <riki-chain name="ARC_TEST_POS" expression="IF(SWEEP==1,MOD(ARC_TEST_AP-ARC_TEST_A0,TAU),MOD(ARC_TEST_A0-ARC_TEST_AP,TAU))"></riki-chain>
+    <riki-chain name="ARC_TEST_VALID" expression="IF(ARC_TEST_POS<=ARC_TEST_SPAN+EPS,1,0)"></riki-chain>
     <riki-chain name="MIR_DX" expression="X2-X1"></riki-chain>
     <riki-chain name="MIR_DY" expression="Y2-Y1"></riki-chain>
     <riki-chain name="MIR_L2" expression="MAX(EPS,MIR_DX^2+MIR_DY^2)"></riki-chain>
@@ -1129,6 +449,16 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
 
     <riki-chain name="SIGNED_DIST_Y" expression="DIST*IF(Y2<Y1,-1,1)"></riki-chain>
 
+    <riki-chain name="POINT_DELTA_X" expression="TARGET_X-CURRENT_X"></riki-chain>
+    <riki-chain name="POINT_DELTA_Y" expression="TARGET_Y-CURRENT_Y"></riki-chain>
+    <riki-chain name="POINT_DELTA_NORM" expression="SQRT(POINT_DELTA_X^2+POINT_DELTA_Y^2)"></riki-chain>
+    <riki-chain name="POINT_VALID" expression="IF(POINT_DELTA_NORM==0,1,0)"></riki-chain>
+    <riki-chain name="RESULT_DELTA" expression="TARGET-CURRENT"></riki-chain>
+    <riki-chain name="RESULT_VALID" expression="IF(RESULT_DELTA==0,1,0)"></riki-chain>
+    <riki-chain name="GUIDE_DELTA_X" expression="TARGET_X-CURRENT_X"></riki-chain>
+    <riki-chain name="GUIDE_DELTA_Y" expression="TARGET_Y-CURRENT_Y"></riki-chain>
+    <riki-chain name="GUIDE_DELTA_NORM" expression="SQRT(GUIDE_DELTA_X^2+GUIDE_DELTA_Y^2)"></riki-chain>
+    <riki-chain name="GUIDE_VALID" expression="IF(GUIDE_DELTA_NORM==0,1,0)"></riki-chain>
     <riki-chain name="CIRCLE_HIT" expression="ABS(DIST-RADIUS)"></riki-chain>
     <riki-chain name="STYLE_WIDTH" expression="MAX(0.1,WIDTH)"></riki-chain>
     <riki-chain name="STYLE_TEXT_SIZE" expression="MAX(1,SIZE)"></riki-chain>
@@ -1141,8 +471,7 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     <riki-relation kind="tool" name="dashdotline" label="Dash-dot line"></riki-relation>
     <riki-relation kind="tool" name="fillet" label="Raccorda"></riki-relation>
     <riki-relation kind="tool" name="circle" label="Circle"></riki-relation>
-    <riki-relation kind="tool" name="arc-rif" label="Arc R-I-F"></riki-relation>
-    <riki-relation kind="tool" name="arc-ifr" label="Arc I-F-R"></riki-relation>
+    <riki-relation kind="tool" name="arc" label="Arc"></riki-relation>
     <riki-relation kind="tool" name="dim" label="Dim"></riki-relation>
     <riki-relation kind="tool" name="angdim" label="Angular Dim"></riki-relation>
     <riki-relation kind="tool" name="aligndim" label="Aligned Progressive Dim"></riki-relation>
@@ -1151,6 +480,8 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     <riki-relation kind="tool" name="move" label="Move"></riki-relation>
     <riki-relation kind="tool" name="trim" label="Trim"></riki-relation>
     <riki-relation kind="tool" name="extend" label="Extend"></riki-relation>
+    <riki-relation kind="tool" name="mirror" label="Mirror"></riki-relation>
+    <riki-relation kind="tool" name="rotate" label="Rotate"></riki-relation>
     <riki-relation kind="action" name="undo" label="Undo"></riki-relation>
     <riki-relation kind="action" name="delete" label="Delete"></riki-relation>
     <riki-relation kind="action" name="fit" label="Fit"></riki-relation>
@@ -1160,1197 +491,19 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     <riki-relation kind="action" name="text-up" label="A+"></riki-relation>
   </riki-region>
 </riki-space>
-<input id="cad-openProject" type="file" accept=".riki,.json,application/json,text/html" hidden>
-
+<!-- ===================== RUNTIME I/O =========================== -->
+<input id="cad-openProject" type="file" accept=".riki,.json,application/json" hidden>
 <script>
-(() => {
-  "use strict";
-
-  const PRINT = (() => {
-    const layer=document.getElementById("print-layer");
-    function clear(){if(layer){layer.innerHTML="";layer.removeAttribute("data-mode")}}
-    function open(content,mode){
-      if(!layer)return;
-      clear();
-      if(typeof content==="string")layer.innerHTML=content; else if(content)layer.append(content);
-      layer.dataset.mode=mode||"";
-      layer.setAttribute("aria-hidden","false");
-      const cleanup=()=>{layer.setAttribute("aria-hidden","true");clear();window.removeEventListener("afterprint",cleanup)};
-      window.addEventListener("afterprint",cleanup);
-      requestAnimationFrame(()=>requestAnimationFrame(()=>window.print()));
-    }
-    return Object.freeze({open,clear});
-  })();
-
-  const CORE = (() => {
-    const SPACE = {
-      NOME: "RIKI_OFFICE",
-      BYTE: "RIKI_OFFICE",
-      BIT: 1,
-      ACTIVE_APP: "document",
-      REGIONS: Object.create(null)
-    };
-
-    function register(name, module) {
-      if (SPACE.REGIONS[name]) throw new Error("Duplicate RIKI region: " + name);
-      SPACE.REGIONS[name] = module;
-      validate();
-    }
-
-    function validate() {
-      SPACE.BIT = Object.values(SPACE.REGIONS).every(m => !m || m.BIT === 1) ? 1 : 0;
-      document.body.dataset.rikiBit = String(SPACE.BIT);
-      return SPACE.BIT;
-    }
-
-    function activate(name) {
-      SPACE.ACTIVE_APP = name;
-      document.body.dataset.mode = name;
-      Object.entries(SPACE.REGIONS).forEach(([key, module]) => {
-        if (module && typeof module.activate === "function") {
-          module.activate(key === name);
-        }
-      });
-      validate();
-    }
-
-    return Object.freeze({ SPACE, register, validate, activate });
-  })();
-
-  const UI = (() => {
-    const tabs = [...document.querySelectorAll(".mode-tab")];
-    const panel = document.getElementById("rightpanel");
-    const panelTitle = panel?.querySelector(".panel-title");
-    const frame = document.getElementById("app-surface");
-
-    function title(text) {
-      if (panelTitle) panelTitle.textContent = text;
-    }
-
-    function select(name) {
-      tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.mode === name)));
-    }
-
-    function frameMode(name) {
-      if (!frame) return;
-      frame.classList.toggle("document-surface", name === "document");
-      frame.style.padding = (name === "sheet" || name === "cad") ? "0" : "";
-      frame.style.background = (name === "sheet" || name === "cad") ? "#fff" : "";
-    }
-
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        select(tab.dataset.mode);
-        frameMode(tab.dataset.mode);
-        CORE.activate(tab.dataset.mode);
-      });
-    });
-
-    document.getElementById("panel-close")?.addEventListener("click", () => {
-      panel?.classList.toggle("hidden");
-    });
-
-    return Object.freeze({ title, select, frameMode });
-  })();
-
-  const DOCUMENT = (() => {
-    const editor = document.getElementById("document-editor");
-    const toolbar = document.getElementById("toolbar-context");
-    const panel = document.getElementById("panel-document");
-
-    const state = {
-      NOME: "DOCUMENT",
-      BYTE: "DOCUMENT",
-      VALORE: editor?.innerHTML || "",
-      BIT: editor ? 1 : 0,
-      CATENE: ["DOCUMENT_TEXT", "DOCUMENT_TITLE"]
-    };
-
-    function sync() {
-      if (!editor) return;
-      state.VALORE = editor.innerHTML;
-      state.BIT = 1;
-      CORE.validate();
-    }
-
-    editor?.addEventListener("input", sync);
-
-    document.querySelectorAll(".doc-tool").forEach(btn => {
-      btn.addEventListener("mousedown", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "document") return;
-        e.preventDefault();
-        editor?.focus();
-        document.execCommand(btn.dataset.cmd, false, null);
-        sync();
-      });
-    });
-
-    document.getElementById("doc-print")?.addEventListener("click",()=>{
-      if(CORE.SPACE.ACTIVE_APP!=="document"||!editor)return;
-      const clone=editor.cloneNode(true);
-      clone.removeAttribute("contenteditable");
-      clone.classList.add("print-document");
-      PRINT.open(clone,"document");
-    });
-
-    function activate(on) {
-      editor?.classList.toggle("hidden", !on);
-      toolbar?.classList.toggle("hidden", !on);
-      panel?.classList.toggle("hidden", !on);
-      if (on) UI.title("Document · BIT " + state.BIT);
-    }
-
-    return Object.freeze({ ...state, activate, sync });
-  })();
-
-  const SHEET = (() => {
-    const root = document.getElementById("sheet-editor");
-    const toolbar = document.getElementById("toolbar-sheet");
-    const panel = document.getElementById("panel-sheet");
-    const formula = document.getElementById("sheet-formulabox");
-    const namebox = document.getElementById("sheet-namebox");
-    const panelAddress = document.getElementById("sheet-panel-address");
-    const panelValue = document.getElementById("sheet-panel-value");
-    const colWidthInput = document.getElementById("sheet-col-width");
-    const rowHeightInput = document.getElementById("sheet-row-height");
-    const fillColorInput = document.getElementById("sheet-fill-color");
-    const textColorInput = document.getElementById("sheet-text-color");
-    const typeInput = document.getElementById("sheet-panel-type");
-    const alignInput = document.getElementById("sheet-panel-align");
-    const borderInput = document.getElementById("sheet-panel-border");
-    const selectAllCorner = document.getElementById("sheet-select-all");
-    const printAreaInput = document.getElementById("sheet-print-area");
-    const cells = [...document.querySelectorAll(".sheet-cell")];
-    const columnHeads = [...document.querySelectorAll(".sheet-head")].filter(h => /^[A-H]$/.test(h.textContent.trim()));
-    const rowHeads = [...document.querySelectorAll(".sheet-rowhead")];
-
-    const values = Object.create(null);
-    const columnWidths = Object.create(null);
-    const rowHeights = Object.create(null);
-    const selectedColumns = new Set();
-    const selectedRows = new Set();
-    const selectedCells = new Set();
-    const cellFill = Object.create(null);
-    const cellTextColor = Object.create(null);
-    const cellFontWeight = Object.create(null);
-    const cellFontStyle = Object.create(null);
-    const cellTextDecoration = Object.create(null);
-    const cellAlign = Object.create(null);
-    const cellType = Object.create(null);
-    const cellBorderMode = Object.create(null);
-    let anchorCell = "A1";
-    let dragSelecting = false;
-    let dragAnchor = "A1";
-    let headerSelectionActive = false;
-    const mergedRanges = new Map();
-
-    const state = {
-      NOME: "SHEET",
-      BYTE: "SHEET",
-      VALORE: values,
-      BIT: root && cells.length ? 1 : 0,
-      SELECTION: "A1",
-      FORMULA_CELL: null,
-      FORMULA_BUFFER: "",
-      CATENE: ["SHEET_CELLS", "SHEET_SELECTION"]
-    };
-
-    function rawValue(addr) {
-      return values[addr] ?? "";
-    }
-
-    function numericValue(addr, stack) {
-      const raw = rawValue(addr);
-      if (typeof raw === "number") return raw;
-      const s = String(raw).trim();
-
-      if (s.startsWith("=")) {
-        return evaluateFormula(s, stack || new Set([addr]));
-      }
-
-      const n = Number(s.replace(",", "."));
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function evaluateFormula(formulaText, stack) {
-      const source = String(formulaText || "").trim();
-      if (!source.startsWith("=")) return source;
-
-      let expr = source.slice(1).toUpperCase();
-      if (!expr.trim()) return "=";
-
-      expr = expr.replace(/\b(SUM|AVERAGE|MIN|MAX)\(([A-H][1-5]):([A-H][1-5])\)/g,
-        (_, fn, a1, a2) => {
-          const p1 = addrParts(a1), p2 = addrParts(a2);
-          if (!p1 || !p2) return "0";
-          const vals = [];
-          const c1 = Math.min(p1.colIndex, p2.colIndex);
-          const c2 = Math.max(p1.colIndex, p2.colIndex);
-          const r1 = Math.min(p1.row, p2.row);
-          const r2 = Math.max(p1.row, p2.row);
-          for (let r=r1; r<=r2; r++) {
-            for (let c=c1; c<=c2; c++) {
-              vals.push(numericValue(addrFrom(c,r), new Set(stack || [])));
-            }
-          }
-          if (!vals.length) return "0";
-          if (fn === "SUM") return String(vals.reduce((a,b)=>a+b,0));
-          if (fn === "AVERAGE") return String(vals.reduce((a,b)=>a+b,0)/vals.length);
-          if (fn === "MIN") return String(Math.min(...vals));
-          if (fn === "MAX") return String(Math.max(...vals));
-          return "0";
-        }
-      );
-
-      expr = expr.replace(/\b([A-H][1-5])\b/g, (_, ref) => {
-        const guard = stack || new Set();
-        if (guard.has(ref)) return "0";
-        const next = new Set(guard);
-        next.add(ref);
-        return String(numericValue(ref, next));
-      });
-
-      if (!/^[0-9+\-*/().\s]+$/.test(expr)) return "#ERROR";
-
-      try {
-        const result = Function('"use strict";return (' + expr + ')')();
-        return Number.isFinite(result) ? result : "#ERROR";
-      } catch {
-        return "#ERROR";
-      }
-    }
-
-    function formatDisplay(addr, rawDisplay) {
-      const mode = cellType[addr] || "General";
-      const s = String(rawDisplay ?? "");
-      if (mode === "Text") return s;
-
-      const n = Number(s);
-      if (!Number.isFinite(n)) return s;
-
-      if (mode === "Number") return n.toLocaleString(undefined, {maximumFractionDigits: 2});
-      if (mode === "Percent") return (n * 100).toLocaleString(undefined, {maximumFractionDigits: 2}) + "%";
-      if (mode === "Currency") return n.toLocaleString(undefined, {style:"currency", currency:"EUR"});
-      return s;
-    }
-
-    function displayValue(addr) {
-      const raw = rawValue(addr);
-      const s = String(raw ?? "");
-
-      if (state.FORMULA_CELL === addr) return s;
-
-      if (s === "=") return s;
-
-      const shown = s.startsWith("=")
-        ? String(evaluateFormula(s, new Set([addr])))
-        : s;
-
-      return formatDisplay(addr, shown);
-    }
-
-    function addrParts(addr) {
-      const m = String(addr || "").match(/^([A-H])([1-5])$/);
-      if (!m) return null;
-      return { col:m[1], row:Number(m[2]), colIndex:m[1].charCodeAt(0)-64 };
-    }
-
-    function addrFrom(colIndex, row) {
-      return String.fromCharCode(64 + colIndex) + row;
-    }
-
-    function placeSheetGrid() {
-      const grid = document.getElementById("sheet-grid");
-      if (!grid) return;
-
-      const allHeads = [...grid.querySelectorAll(".sheet-head")];
-      if (allHeads[0]) {
-        allHeads[0].style.gridColumn = "1";
-        allHeads[0].style.gridRow = "1";
-      }
-
-      columnHeads.forEach((head, i) => {
-        head.style.gridColumn = String(i + 2);
-        head.style.gridRow = "1";
-      });
-
-      rowHeads.forEach((head, i) => {
-        head.style.gridColumn = "1";
-        head.style.gridRow = String(i + 2);
-      });
-
-      cells.forEach(cell => {
-        const p = addrParts(cell.dataset.cell);
-        if (!p) return;
-        cell.style.gridColumn = String(p.colIndex + 1);
-        cell.style.gridRow = String(p.row + 1);
-      });
-    }
-
-    function currentFillTargets() {
-      if (selectedCells.size) return [...selectedCells];
-
-      if (selectedColumns.size) {
-        const out = [];
-        [...selectedColumns].forEach(col => {
-          for (let r = 1; r <= 5; r++) out.push(col + r);
-        });
-        return out;
-      }
-
-      if (selectedRows.size) {
-        const out = [];
-        [...selectedRows].forEach(row => {
-          for (let c = 1; c <= 8; c++) out.push(addrFrom(c, row));
-        });
-        return out;
-      }
-
-      return [state.SELECTION];
-    }
-
-    function currentRectSelection() {
-      if (selectedCells.size > 1) {
-        const pts = [...selectedCells].map(addrParts).filter(Boolean);
-        if (pts.length) {
-          return {
-            c1: Math.min(...pts.map(p => p.colIndex)),
-            c2: Math.max(...pts.map(p => p.colIndex)),
-            r1: Math.min(...pts.map(p => p.row)),
-            r2: Math.max(...pts.map(p => p.row))
-          };
-        }
-      }
-
-      if (selectedColumns.size && selectedRows.size) {
-        const cols = [...selectedColumns].map(c => c.charCodeAt(0)-64).sort((a,b)=>a-b);
-        const rows = [...selectedRows].sort((a,b)=>a-b);
-        return {
-          c1: cols[0], c2: cols[cols.length-1],
-          r1: rows[0], r2: rows[rows.length-1]
-        };
-      }
-
-      if (selectedColumns.size) {
-        const cols = [...selectedColumns].map(c => c.charCodeAt(0)-64).sort((a,b)=>a-b);
-        const p = addrParts(state.SELECTION);
-        return { c1:cols[0], c2:cols[cols.length-1], r1:p.row, r2:p.row };
-      }
-
-      if (selectedRows.size) {
-        const rows = [...selectedRows].sort((a,b)=>a-b);
-        const p = addrParts(state.SELECTION);
-        return { c1:p.colIndex, c2:p.colIndex, r1:rows[0], r2:rows[rows.length-1] };
-      }
-
-      return null;
-    }
-
-    function mergeCells() {
-      const rect = currentRectSelection();
-      if (!rect) return;
-      if (rect.c1 === rect.c2 && rect.r1 === rect.r2) return;
-
-      const master = addrFrom(rect.c1, rect.r1);
-      const members = [];
-
-      for (let r = rect.r1; r <= rect.r2; r++) {
-        for (let c = rect.c1; c <= rect.c2; c++) {
-          const addr = addrFrom(c, r);
-          if (addr !== master) members.push(addr);
-        }
-      }
-
-      mergedRanges.set(master, {
-        master,
-        members,
-        c1:rect.c1, c2:rect.c2, r1:rect.r1, r2:rect.r2
-      });
-
-      selectedCells.clear();
-      selectedCells.add(master);
-      anchorCell = master;
-      state.SELECTION = master;
-      renderAllCells();
-      renderSelection();
-    }
-
-    function splitCells() {
-      const current = state.SELECTION;
-      let master = null;
-
-      if (mergedRanges.has(current)) {
-        master = current;
-      } else {
-        for (const [key, range] of mergedRanges) {
-          if (range.members.includes(current)) {
-            master = key;
-            break;
-          }
-        }
-      }
-
-      if (!master) return;
-      mergedRanges.delete(master);
-      selectedCells.clear();
-      selectedCells.add(master);
-      anchorCell = master;
-      state.SELECTION = master;
-      renderAllCells();
-      renderSelection();
-    }
-
-    function selectedColumn() {
-      return String(state.SELECTION || "A1").match(/^[A-H]/)?.[0] || "A";
-    }
-
-    function selectedRow() {
-      return Number(String(state.SELECTION || "A1").match(/\d+$/)?.[0] || 1);
-    }
-
-    function activeColumns() {
-      return selectedColumns.size ? [...selectedColumns] : [selectedColumn()];
-    }
-
-    function activeRows() {
-      return selectedRows.size ? [...selectedRows] : [selectedRow()];
-    }
-
-    function renderHeaderSelection() {
-      columnHeads.forEach(h => h.classList.toggle("is-selected", selectedColumns.has(h.textContent.trim())));
-      rowHeads.forEach(h => h.classList.toggle("is-selected", selectedRows.has(Number(h.textContent.trim()))));
-    }
-
-    function applyColumnWidth(col, width) {
-      const index = col.charCodeAt(0) - 64;
-      const grid = document.getElementById("sheet-grid");
-      if (!grid) return;
-
-      columnWidths[col] = width;
-
-      const cols = ["46px"];
-      for (let i = 1; i <= 8; i++) {
-        const letter = String.fromCharCode(64 + i);
-        cols.push((columnWidths[letter] || 120) + "px");
-      }
-      grid.style.gridTemplateColumns = cols.join(" ");
-    }
-
-    function applyRowHeight(row, height) {
-      rowHeights[row] = height;
-
-      const grid = document.getElementById("sheet-grid");
-      if (!grid) return;
-
-      const rows = ["32px"];
-      for (let r = 1; r <= 5; r++) {
-        rows.push((rowHeights[r] || 32) + "px");
-      }
-      grid.style.gridTemplateRows = rows.join(" ");
-    }
-
-    function selectCellRange(a, b) {
-      const pa = addrParts(a);
-      const pb = addrParts(b);
-      if (!pa || !pb) return;
-
-      selectedCells.clear();
-
-      const c1 = Math.min(pa.colIndex, pb.colIndex);
-      const c2 = Math.max(pa.colIndex, pb.colIndex);
-      const r1 = Math.min(pa.row, pb.row);
-      const r2 = Math.max(pa.row, pb.row);
-
-      for (let r = r1; r <= r2; r++) {
-        for (let c = c1; c <= c2; c++) {
-          selectedCells.add(addrFrom(c, r));
-        }
-      }
-    }
-
-    function renderSelection() {
-      const raw = rawValue(state.SELECTION);
-      if (namebox) namebox.value = state.SELECTION;
-      if (formula && document.activeElement !== formula) formula.value = raw;
-      if (panelAddress) panelAddress.value = state.SELECTION;
-      if (panelValue && document.activeElement !== panelValue) panelValue.value = raw;
-
-      const cols = activeColumns();
-      const rows = activeRows();
-
-      if (colWidthInput && document.activeElement !== colWidthInput) {
-        const vals = cols.map(c => columnWidths[c] || 120);
-        colWidthInput.value = vals.every(v => v === vals[0]) ? vals[0] : "";
-        colWidthInput.placeholder = vals.every(v => v === vals[0]) ? "" : "mixed";
-      }
-
-      if (rowHeightInput && document.activeElement !== rowHeightInput) {
-        const vals = rows.map(r => rowHeights[r] || 32);
-        rowHeightInput.value = vals.every(v => v === vals[0]) ? vals[0] : "";
-        rowHeightInput.placeholder = vals.every(v => v === vals[0]) ? "" : "mixed";
-      }
-
-      renderHeaderSelection();
-
-      if (fillColorInput && document.activeElement !== fillColorInput) {
-        const targets = currentFillTargets();
-        const colors = targets.map(a => cellFill[a] || "#ffffff");
-        fillColorInput.value = colors.length && colors.every(c => c === colors[0]) ? colors[0] : "#ffffff";
-      }
-
-      if (textColorInput && document.activeElement !== textColorInput) {
-        const targets = currentFillTargets();
-        const colors = targets.map(a => cellTextColor[a] || "#111111");
-        textColorInput.value = colors.length && colors.every(c => c === colors[0]) ? colors[0] : "#111111";
-      }
-
-      const fmtTargets = currentFillTargets();
-
-      if (alignInput && document.activeElement !== alignInput) {
-        const vals = fmtTargets.map(a => cellAlign[a] || "Left");
-        alignInput.value = vals.every(v => v === vals[0]) ? vals[0] : "Left";
-      }
-
-      if (typeInput && document.activeElement !== typeInput) {
-        const vals = fmtTargets.map(a => cellType[a] || "General");
-        typeInput.value = vals.every(v => v === vals[0]) ? vals[0] : "General";
-      }
-
-      if (borderInput && document.activeElement !== borderInput) {
-        const vals = fmtTargets.map(a => cellBorderMode[a] || "grid");
-        borderInput.value = vals.every(v => v === vals[0]) ? vals[0] : "grid";
-      }
-
-      if (selectAllCorner) {
-        selectAllCorner.classList.toggle("is-selected", selectedCells.size === cells.length);
-      }
-
-      cells.forEach(cell => {
-        cell.classList.toggle("is-active", !headerSelectionActive && cell.dataset.cell === state.SELECTION);
-        cell.classList.toggle("is-selected", !headerSelectionActive && selectedCells.has(cell.dataset.cell));
-      });
-    }
-
-    function renderAllCells() {
-      placeSheetGrid();
-
-      cells.forEach(cell => {
-        cell.classList.remove("is-merged-master","is-merged-hidden");
-        cell.style.visibility = "";
-
-        const p = addrParts(cell.dataset.cell);
-        if (p) {
-          cell.style.gridColumn = String(p.colIndex + 1);
-          cell.style.gridRow = String(p.row + 1);
-        }
-      });
-
-      for (const [master, range] of mergedRanges) {
-        const masterCell = document.querySelector('.sheet-cell[data-cell="' + master + '"]');
-        if (!masterCell) continue;
-
-        masterCell.classList.add("is-merged-master");
-
-        masterCell.style.gridColumn =
-          String(range.c1 + 1) + " / " + String(range.c2 + 2);
-
-        masterCell.style.gridRow =
-          String(range.r1 + 1) + " / " + String(range.r2 + 2);
-
-        range.members.forEach(addr => {
-          const cell = document.querySelector('.sheet-cell[data-cell="' + addr + '"]');
-          if (cell) cell.classList.add("is-merged-hidden");
-        });
-      }
-
-      cells.forEach(cell => {
-        const addr = cell.dataset.cell;
-        cell.style.backgroundColor = cellFill[addr] || "";
-        cell.style.color = cellTextColor[addr] || "";
-        cell.style.fontWeight = cellFontWeight[addr] || "";
-        cell.style.fontStyle = cellFontStyle[addr] || "";
-        cell.style.textDecoration = cellTextDecoration[addr] || "";
-        cell.style.textAlign = (cellAlign[addr] || "Left").toLowerCase();
-        cell.classList.toggle("format-border-all", cellBorderMode[addr] === "all");
-        cell.classList.toggle("format-border-none", cellBorderMode[addr] === "none");
-
-        if (document.activeElement === cell) return;
-
-        cell.textContent = displayValue(addr);
-      });
-    }
-
-    function setCell(addr, value) {
-      values[addr] = String(value ?? "");
-      state.SELECTION = addr;
-      renderAllCells();
-      renderSelection();
-      CORE.validate();
-    }
-
-    cells.forEach(cell => {
-      cell.addEventListener("mousedown", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-
-        const addr = cell.dataset.cell;
-        headerSelectionActive = false;
-
-        if (
-          state.FORMULA_CELL &&
-          state.FORMULA_CELL !== addr &&
-          String(state.FORMULA_BUFFER || "").startsWith("=")
-        ) {
-          e.preventDefault();
-
-          state.FORMULA_BUFFER += addr;
-          values[state.FORMULA_CELL] = state.FORMULA_BUFFER;
-
-          const origin = document.querySelector(
-            '.sheet-cell[data-cell="' + state.FORMULA_CELL + '"]'
-          );
-
-          if (origin) {
-            origin.textContent = state.FORMULA_BUFFER;
-            origin.focus();
-
-            const range = document.createRange();
-            range.selectNodeContents(origin);
-            range.collapse(false);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-          }
-
-          if (formula) formula.value = state.FORMULA_BUFFER;
-          if (panelValue) panelValue.value = state.FORMULA_BUFFER;
-          state.SELECTION = state.FORMULA_CELL;
-          renderSelection();
-          return;
-        }
-
-        selectedColumns.clear();
-        selectedRows.clear();
-
-        if (e.shiftKey) {
-          e.preventDefault();
-          selectCellRange(anchorCell || state.SELECTION, addr);
-          state.SELECTION = addr;
-          renderSelection();
-          return;
-        }
-
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          if (selectedCells.has(addr)) selectedCells.delete(addr);
-          else selectedCells.add(addr);
-
-          if (!selectedCells.size) selectedCells.add(addr);
-
-          state.SELECTION = addr;
-          anchorCell = addr;
-          renderSelection();
-          return;
-        }
-
-        selectedCells.clear();
-        selectedCells.add(addr);
-        state.SELECTION = addr;
-        anchorCell = addr;
-        dragAnchor = addr;
-        dragSelecting = true;
-        renderSelection();
-      });
-
-      cell.addEventListener("mouseenter", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        if (!dragSelecting || !(e.buttons & 1)) return;
-
-        e.preventDefault();
-        selectCellRange(dragAnchor, cell.dataset.cell);
-        state.SELECTION = cell.dataset.cell;
-        renderSelection();
-      });
-
-      cell.addEventListener("focus", () => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        state.SELECTION = cell.dataset.cell;
-        const raw = rawValue(cell.dataset.cell);
-        if (String(raw).startsWith("=")) {
-          cell.textContent = raw;
-          state.FORMULA_CELL = cell.dataset.cell;
-          state.FORMULA_BUFFER = raw;
-        }
-        renderSelection();
-      });
-      cell.addEventListener("blur", () => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        cell.textContent = displayValue(cell.dataset.cell);
-      });
-
-
-      cell.addEventListener("input", () => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-
-        const value = cell.textContent || "";
-        setCell(cell.dataset.cell, value);
-
-        if (value.startsWith("=")) {
-          state.FORMULA_CELL = cell.dataset.cell;
-          state.FORMULA_BUFFER = value;
-        } else if (state.FORMULA_CELL === cell.dataset.cell) {
-          state.FORMULA_CELL = null;
-          state.FORMULA_BUFFER = "";
-        }
-      });
-
-      cell.addEventListener("keydown", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-
-        if (e.key === "Enter") {
-          e.preventDefault();
-          const value = String(cell.textContent || "").replace(/\n+/g, "");
-          values[cell.dataset.cell] = value;
-          state.SELECTION = cell.dataset.cell;
-          state.FORMULA_CELL = null;
-          state.FORMULA_BUFFER = "";
-          renderAllCells();
-          renderSelection();
-          CORE.validate();
-          cell.blur();
-          return;
-        }
-
-        if (e.key === "Escape") {
-          e.preventDefault();
-          state.FORMULA_CELL = null;
-          state.FORMULA_BUFFER = "";
-          cell.blur();
-          renderSelection();
-        }
-      });
-    });
-
-    window.addEventListener("mouseup", () => {
-      dragSelecting = false;
-    });
-
-    formula?.addEventListener("input", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      const value = formula.value || "";
-      setCell(state.SELECTION, value);
-
-      if (value.startsWith("=")) {
-        state.FORMULA_CELL = state.SELECTION;
-        state.FORMULA_BUFFER = value;
-      } else {
-        state.FORMULA_CELL = null;
-        state.FORMULA_BUFFER = "";
-      }
-    });
-    formula?.addEventListener("keydown", e => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      if (e.key === "Enter") {
-        e.preventDefault();
-        values[state.SELECTION] = formula.value || "";
-        state.FORMULA_CELL = null;
-        state.FORMULA_BUFFER = "";
-        renderAllCells();
-        renderSelection();
-        CORE.validate();
-        formula.blur();
-      }
-      if (e.key === "Escape") {
-        e.preventDefault();
-        state.FORMULA_CELL = null;
-        state.FORMULA_BUFFER = "";
-        formula.blur();
-        renderSelection();
-      }
-    });
-
-    panelValue?.addEventListener("change", () => setCell(state.SELECTION, panelValue.value));
-
-    selectAllCorner?.addEventListener("click", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      headerSelectionActive = false;
-      selectedColumns.clear();
-      selectedRows.clear();
-      selectedCells.clear();
-      cells.forEach(cell => selectedCells.add(cell.dataset.cell));
-      state.SELECTION = "A1";
-      anchorCell = "A1";
-      renderSelection();
-    });
-
-    columnHeads.forEach(head => {
-      head.addEventListener("click", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        const col = head.textContent.trim();
-
-        headerSelectionActive = true;
-        selectedCells.clear();
-
-        if (!e.ctrlKey && !e.metaKey) {
-          selectedColumns.clear();
-          selectedRows.clear();
-        }
-
-        if (selectedColumns.has(col)) selectedColumns.delete(col);
-        else selectedColumns.add(col);
-
-        renderSelection();
-      });
-    });
-
-    rowHeads.forEach(head => {
-      head.addEventListener("click", e => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        const row = Number(head.textContent.trim());
-
-        headerSelectionActive = true;
-        selectedCells.clear();
-
-        if (!e.ctrlKey && !e.metaKey) {
-          selectedRows.clear();
-          selectedColumns.clear();
-        }
-
-        if (selectedRows.has(row)) selectedRows.delete(row);
-        else selectedRows.add(row);
-
-        renderSelection();
-      });
-    });
-
-    cells.forEach(cell => {
-      cell.addEventListener("focus", () => {
-        headerSelectionActive = false;
-        if (selectedColumns.size || selectedRows.size) {
-          selectedColumns.clear();
-          selectedRows.clear();
-          renderHeaderSelection();
-        }
-      });
-    });
-
-    alignInput?.addEventListener("change", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      currentFillTargets().forEach(addr => cellAlign[addr] = alignInput.value);
-      renderAllCells();
-      renderSelection();
-    });
-
-    typeInput?.addEventListener("change", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      currentFillTargets().forEach(addr => cellType[addr] = typeInput.value);
-      renderAllCells();
-      renderSelection();
-    });
-
-    borderInput?.addEventListener("change", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      currentFillTargets().forEach(addr => cellBorderMode[addr] = borderInput.value);
-      renderAllCells();
-      renderSelection();
-    });
-
-    fillColorInput?.addEventListener("input", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      const color = fillColorInput.value || "#ffffff";
-      currentFillTargets().forEach(addr => {
-        cellFill[addr] = color;
-      });
-      renderAllCells();
-      renderSelection();
-    });
-
-    textColorInput?.addEventListener("input", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      const color = textColorInput.value || "#111111";
-      currentFillTargets().forEach(addr => {
-        cellTextColor[addr] = color;
-      });
-      renderAllCells();
-      renderSelection();
-    });
-
-    colWidthInput?.addEventListener("change", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      const width = Math.max(50, Math.min(500, Number(colWidthInput.value) || 120));
-      activeColumns().forEach(col => applyColumnWidth(col, width));
-      colWidthInput.value = width;
-      renderSelection();
-    });
-
-    rowHeightInput?.addEventListener("change", () => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-      const height = Math.max(20, Math.min(200, Number(rowHeightInput.value) || 32));
-      activeRows().forEach(row => applyRowHeight(row, height));
-      rowHeightInput.value = height;
-      renderSelection();
-    });
-
-    function selectionRectAddresses() {
-      const rect = currentRectSelection();
-      if (!rect) return [[state.SELECTION]];
-
-      const rows = [];
-      for (let r=rect.r1; r<=rect.r2; r++) {
-        const row = [];
-        for (let c=rect.c1; c<=rect.c2; c++) row.push(addrFrom(c,r));
-        rows.push(row);
-      }
-      return rows;
-    }
-
-    function selectionToTSV() {
-      return selectionRectAddresses()
-        .map(row => row.map(addr => String(rawValue(addr))).join("\t"))
-        .join("\n");
-    }
-
-    function pasteTSV(tsv) {
-      const rows = String(tsv || "").replace(/\r/g,"").split("\n");
-      const start = addrParts(state.SELECTION);
-      if (!start) return;
-
-      rows.forEach((line, ri) => {
-        if (start.row + ri > 5) return;
-        line.split("\t").forEach((val, ci) => {
-          if (start.colIndex + ci > 8) return;
-          values[addrFrom(start.colIndex + ci, start.row + ri)] = val;
-        });
-      });
-
-      renderAllCells();
-      renderSelection();
-    }
-
-    document.querySelectorAll(".sheet-tool").forEach(btn => {
-      btn.addEventListener("click", () => {
-        if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-        const cell = document.querySelector('.sheet-cell[data-cell="' + state.SELECTION + '"]');
-        if (!cell) return;
-
-        if (btn.dataset.action === "clear") {
-          currentFillTargets().forEach(addr => values[addr] = "");
-          renderAllCells();
-          renderSelection();
-          return;
-        }
-        if (btn.dataset.action === "merge") {
-          mergeCells();
-          return;
-        }
-        if (btn.dataset.action === "split") {
-          splitCells();
-          return;
-        }
-        if (btn.dataset.action === "bold") {
-          const targets = currentFillTargets();
-          const on = targets.some(a => cellFontWeight[a] !== "700");
-          targets.forEach(a => cellFontWeight[a] = on ? "700" : "");
-          renderAllCells();
-          return;
-        }
-
-        if (btn.dataset.action === "italic") {
-          const targets = currentFillTargets();
-          const on = targets.some(a => cellFontStyle[a] !== "italic");
-          targets.forEach(a => cellFontStyle[a] = on ? "italic" : "");
-          renderAllCells();
-          return;
-        }
-
-        if (btn.dataset.action === "underline") {
-          const targets = currentFillTargets();
-          const on = targets.some(a => cellTextDecoration[a] !== "underline");
-          targets.forEach(a => cellTextDecoration[a] = on ? "underline" : "");
-          renderAllCells();
-          return;
-        }
-
-        if (btn.dataset.action === "border-all") {
-          currentFillTargets().forEach(a => cellBorderMode[a] = "all");
-          renderAllCells();
-          renderSelection();
-          return;
-        }
-
-        if (btn.dataset.action === "border-none") {
-          currentFillTargets().forEach(a => cellBorderMode[a] = "none");
-          renderAllCells();
-          renderSelection();
-          return;
-        }
-
-        if (btn.dataset.action === "sum") {
-          const rect = currentRectSelection();
-          if (rect && (rect.c1 !== rect.c2 || rect.r1 !== rect.r2)) {
-            const a = addrFrom(rect.c1, rect.r1);
-            const b = addrFrom(rect.c2, rect.r2);
-            values[state.SELECTION] = "=SUM(" + a + ":" + b + ")";
-            renderAllCells();
-            renderSelection();
-            return;
-          }
-
-          const p = addrParts(state.SELECTION);
-          let total = 0;
-          for (let r=1; r<p.row; r++) {
-            total += numericValue(addrFrom(p.colIndex, r), new Set());
-          }
-          values[state.SELECTION] = String(total);
-          renderAllCells();
-          renderSelection();
-          return;
-        }
-      });
-    });
-
-    function printSelectionTable(){
-      let rect=currentRectSelection();
-      if(!rect){const p=addrParts(state.SELECTION);rect={c1:p.colIndex,c2:p.colIndex,r1:p.row,r2:p.row}}
-      const table=document.createElement("table");table.className="print-sheet-table";
-      for(let r=rect.r1;r<=rect.r2;r++){
-        const tr=document.createElement("tr");
-        for(let c=rect.c1;c<=rect.c2;c++){
-          const addr=addrFrom(c,r);
-          let covered=false;
-          for(const range of mergedRanges.values()){if(range.members.includes(addr)){covered=true;break}}
-          if(covered)continue;
-          const td=document.createElement("td");
-          td.textContent=displayValue(addr);
-          const source=document.querySelector('.sheet-cell[data-cell="'+addr+'"]');
-          if(source){
-            const cs=getComputedStyle(source);
-            td.style.backgroundColor=cs.backgroundColor;td.style.color=cs.color;td.style.fontWeight=cs.fontWeight;
-            td.style.fontStyle=cs.fontStyle;td.style.textDecoration=cs.textDecoration;td.style.textAlign=cs.textAlign;
-            td.style.borderColor=cs.borderColor;
-          }
-          const merge=mergedRanges.get(addr);
-          if(merge){td.colSpan=Math.max(1,merge.c2-merge.c1+1);td.rowSpan=Math.max(1,merge.r2-merge.r1+1)}
-          tr.append(td);
-        }
-        table.append(tr);
-      }
-      return table;
-    }
-
-    function printSheetWindow(){
-      const wrap=document.createElement("div");wrap.className="print-sheet-window";
-      wrap.style.width=Math.max(320,root.clientWidth)+"px";wrap.style.height=Math.max(240,root.clientHeight)+"px";
-      const inner=document.createElement("div");inner.className="print-sheet-window-inner";
-      const clone=root.cloneNode(true);clone.classList.remove("hidden");clone.style.width=root.scrollWidth+"px";clone.style.height=root.scrollHeight+"px";clone.style.overflow="visible";
-      clone.querySelectorAll(".sheet-formula").forEach(el=>el.remove());
-      inner.style.left=(-root.scrollLeft)+"px";inner.style.top=(-root.scrollTop)+"px";inner.append(clone);wrap.append(inner);return wrap;
-    }
-
-    document.getElementById("sheet-print")?.addEventListener("click",()=>{
-      if(CORE.SPACE.ACTIVE_APP!=="sheet"||!root)return;
-      const mode=printAreaInput?.value||"selection";
-      if(mode==="selection"){PRINT.open(printSelectionTable(),"sheet-selection");return}
-      if(mode==="window"){PRINT.open(printSheetWindow(),"sheet-window");return}
-      const clone=root.cloneNode(true);clone.classList.remove("hidden");clone.style.height="auto";clone.style.overflow="visible";
-      clone.querySelectorAll(".sheet-formula").forEach(el=>el.remove());
-      PRINT.open(clone,"sheet-all");
-    });
-
-    window.addEventListener("keydown", async e => {
-      if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
-
-      const active = document.activeElement;
-      const editingCell = active && active.classList && active.classList.contains("sheet-cell");
-      const editingFormula = active === formula;
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c" && !editingCell && !editingFormula) {
-        e.preventDefault();
-        try { await navigator.clipboard.writeText(selectionToTSV()); } catch {}
-        return;
-      }
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v" && !editingCell && !editingFormula) {
-        e.preventDefault();
-        try {
-          const t = await navigator.clipboard.readText();
-          pasteTSV(t);
-        } catch {}
-        return;
-      }
-
-      if ((e.key === "Delete" || e.key === "Backspace") && !editingCell && !editingFormula) {
-        e.preventDefault();
-        currentFillTargets().forEach(addr => values[addr] = "");
-        renderAllCells();
-        renderSelection();
-      }
-    });
-
-    function activate(on) {
-      if (on && !selectedCells.size) selectedCells.add(state.SELECTION);
-      root?.classList.toggle("hidden", !on);
-      toolbar?.classList.toggle("hidden", !on);
-      panel?.classList.toggle("hidden", !on);
-      if (on) {
-        UI.title("Sheet · BIT " + state.BIT);
-        placeSheetGrid();
-        renderAllCells();
-        renderSelection();
-      }
-    }
-
-    return Object.freeze({ ...state, activate, setCell });
-  })();
-
-  const CAD = (() => {
-    const root = document.getElementById("cad-editor");
-    const toolbar = document.getElementById("toolbar-cad");
-    const panel = document.getElementById("panel-cad");
-    const space = document.getElementById("cad-riki-space");
-
-    const state = {
-      NOME: "CAD",
-      BYTE: "CAD",
-      BIT: root && space ? 1 : 0,
-    };
-
-    function activate(on) {
-      root?.classList.toggle("hidden", !on);
-      toolbar?.classList.toggle("hidden", !on);
-      panel?.classList.toggle("hidden", !on);
-
-      if (on) {
-        UI.title("CAD · BIT " + state.BIT);
-        requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-      }
-    }
-
-    return Object.freeze({ ...state, activate });
-  })();
-
-  CORE.register("document", DOCUMENT);
-  CORE.register("sheet", SHEET);
-  CORE.register("cad", CAD);
-
-  UI.select("cad");
-  UI.frameMode("cad");
-  CORE.activate("cad");
-
-  Object.defineProperty(window, "RIKI_OFFICE", {
-    value: CORE.SPACE,
-    writable: false,
-    configurable: false
-  });
-})();
-</script><script>
 (()=>{
 'use strict';
+/* ==================== RUNTIME BINDINGS ==================== */
 const NS='http://www.w3.org/2000/svg',space=document.querySelector('#cad-riki-space');
 const svg=document.querySelector('#cad-native'),scene=document.querySelector('#cad-native-scene'),overlay=document.querySelector('#cad-native-overlay');
-const toolbar=document.querySelector('#toolbar-cad'),coords=document.querySelector('#cad-coords'),command=document.querySelector('#cad-command'),selectionText=document.querySelector('#cad-selection'),count=document.querySelector('#cad-count');
+const toolbar=document.querySelector('#toolbar-cad'),coords=document.querySelector('#cad-coords'),pointHud=document.querySelector('#cad-point'),command=document.querySelector('#cad-command'),selectionText=document.querySelector('#cad-selection'),count=document.querySelector('#cad-count');
 const openProject=document.querySelector('#cad-openProject');
-const byte=n=>space.querySelector(`riki-byte[name="${n}"] riki-value`),get=n=>byte(n)?.textContent??'',set=(n,v)=>{const e=byte(n);if(e)e.textContent=String(v)};
+const byte=n=>space.querySelector(`riki-byte[name="${n}"] riki-value`),bit=n=>space.querySelector(`riki-byte[name="${n}"] riki-bit`),get=n=>byte(n)?.textContent??'',set=(n,v)=>{const e=byte(n);if(e)e.textContent=String(v)},setBit=(n,v)=>{const e=bit(n);if(e)e.textContent=String(v?1:0)};
 
+/* ==================== BYTE ADAPTER ======================== */
 const BYTE=(()=>{
   const is=v=>!!v&&v.__rikiByte===1;
   const read=v=>{
@@ -2384,6 +537,7 @@ const BYTE=(()=>{
 })();
 const num=n=>BYTE.space(n);
 
+/* ==================== RIKI CHAIN INTERPRETER ============== */
 const RIKI=(()=>{
   const region=space.querySelector('riki-region[name="CHAINS"]');
   const source=new Map([...region.querySelectorAll(':scope > riki-chain')].map(e=>[e.getAttribute('name'),e.getAttribute('expression')||'0']));
@@ -2424,16 +578,47 @@ const RIKI=(()=>{
 const C=(name,ctx={})=>RIKI.value(name,BYTE.context(ctx,name)),
       CV=(names,ctx={})=>RIKI.values(names,BYTE.context(ctx,names.join('+')));
 
+/* ==================== SESSION STATE ======================= */
 let seq=0,selected=null,selectedSet=new Set(),selectionDrag=null,draft=null,pan=null,history=[];
 const lineColorInput=document.getElementById('cad-line-color'),lineWidthInput=document.getElementById('cad-line-width');
-let guideState={x:null,y:null,point:null};
+let guideState={x:null,y:null,point:null,tech:null},lastSnapKind='none';
+/* ==================== MULTI-REFERENCE TRACKING ============ */
+const GUIDE_TRACK_MAX=4,guideLocks=[];
+function clearGuideLocks(){guideLocks.length=0}
+function normGuide(a,b){const dx=Number(b.x)-Number(a.x),dy=Number(b.y)-Number(a.y),L=Math.hypot(dx,dy);if(!(L>1e-12))return null;let ux=dx/L,uy=dy/L;if(ux<0||(Math.abs(ux)<1e-12&&uy<0)){ux=-ux;uy=-uy}return{a:{x:Number(a.x),y:Number(a.y)},b:{x:Number(a.x)+ux,y:Number(a.y)+uy},ux,uy}}
+function guideDistance(p,g){const dx=Number(p.x)-g.a.x,dy=Number(p.y)-g.a.y;return Math.abs(dx*(-g.uy)+dy*g.ux)}
+function sameGuide(a,b,tol){const cross=Math.abs(a.ux*b.uy-a.uy*b.ux);return cross<1e-6&&guideDistance(a.a,b)<=tol}
+function armGuide(a,b,kind='track',source=''){const g=normGuide(a,b);if(!g)return null;g.kind=kind;g.source=source;const sc=Number(num('VIEW_SCALE'))||1,mergeTol=8/sc;/* One canonical entity may arm only one guide of the same technical kind at a time. */if(source)for(const q of guideLocks)if(q.kind===kind&&q.source===source)return q;/* Parallel references inside the magnetic band are one tracking reference, not two almost-coincident guides. The newly acquired guide is the geometrically current one, so replace the older lock instead of merely hiding it. */for(let i=0;i<guideLocks.length;i++){const q=guideLocks[i];if(sameGuide(g,q,mergeTol)){guideLocks[i]=g;return g}}if(guideLocks.length>=GUIDE_TRACK_MAX)guideLocks.shift();guideLocks.push(g);return g}
+function mergeLocksToExactAxes(p){const sc=Number(num('VIEW_SCALE'))||1,tol=8/sc;for(let i=guideLocks.length-1;i>=0;i--){const g=guideLocks[i];const horizontal=Math.abs(g.uy)<1e-6,vertical=Math.abs(g.ux)<1e-6;if(horizontal&&Math.abs(g.a.y-Number(p.y))<=tol)guideLocks.splice(i,1);else if(vertical&&Math.abs(g.a.x-Number(p.x))<=tol)guideLocks.splice(i,1)}armGuide(p,{x:Number(p.x)+1,y:Number(p.y)},'track-x','exact-point');armGuide(p,{x:Number(p.x),y:Number(p.y)+1},'track-y','exact-point')}
+function lineLineInfinite(a,b){const ax=a.a.x,ay=a.a.y,adx=a.ux,ady=a.uy,bx=b.a.x,by=b.a.y,bdx=b.ux,bdy=b.uy,den=adx*bdy-ady*bdx;if(Math.abs(den)<1e-10)return null;const t=((bx-ax)*bdy-(by-ay)*bdx)/den;return{x:ax+t*adx,y:ay+t*ady}}
+
+/* ==================== CANONICAL ENTITY REGISTRY =========== */
 const entityIndex=new Map(),paintedSelection=new Set(),PERF={dimensionCreates:0,dimensionUpdates:0,selectionTouches:0};
-const rebuildEntityIndex=()=>{entityIndex.clear();for(const e of scene.children)if(e.dataset?.byte)entityIndex.set(e.dataset.byte,e)};
-const indexEntity=e=>{if(e?.dataset?.byte)entityIndex.set(e.dataset.byte,e);return e};
+const drawingRegion=space.querySelector('riki-region[name="DRAWING"]');
+const entityByteNode=id=>drawingRegion?.querySelector(`:scope > riki-byte[name="${CSS.escape(String(id))}"]`)||null;
+function descriptorOf(e,alive=1){
+  const attrs=Object.fromEntries([...e.attributes].map(a=>[a.name,a.value]));
+  return Object.freeze({byte:e.dataset.byte,kind:e.dataset.kind||'',tag:e.tagName.toLowerCase(),attrs,text:e.tagName.toLowerCase()==='text'?e.textContent:'',alive:alive?1:0})
+}
+function ensureEntityByte(e){
+  if(!e?.dataset?.byte||!drawingRegion)return null;
+  let b=entityByteNode(e.dataset.byte);
+  if(!b){b=document.createElement('riki-byte');b.setAttribute('name',e.dataset.byte);b.setAttribute('kind','entity');b.setAttribute('permanent','true');b.innerHTML='<riki-value></riki-value><riki-bit>1</riki-bit>';drawingRegion.append(b)}
+  return b
+}
+function writeEntityByte(e,alive=1){
+  const b=ensureEntityByte(e);if(!b)return;
+  const v=b.querySelector('riki-value'),bt=b.querySelector('riki-bit');if(v)v.textContent=JSON.stringify(descriptorOf(e,alive));if(bt){if(!alive)bt.textContent='0';else if(e.dataset.bit!=null)bt.textContent=String(e.dataset.bit==='0'?0:1);else if(!bt.textContent)bt.textContent='1'}
+}
+function setEntityBit(e,ok){const b=e?.dataset?.byte?entityByteNode(e.dataset.byte):null,bt=b?.querySelector('riki-bit');if(bt)bt.textContent=ok?'1':'0'}
+function entityStates(){const out={};for(const b of drawingRegion?.querySelectorAll(':scope > riki-byte[kind="entity"]')||[]){try{const d=JSON.parse(b.querySelector('riki-value')?.textContent||'{}');d.__bit=Number(b.querySelector('riki-bit')?.textContent||0);out[b.getAttribute('name')]=d}catch{}}return out}
+function syncAllEntityBytes(){for(const e of entityIndex.values())writeEntityByte(e,1)}
+const rebuildEntityIndex=()=>{entityIndex.clear();for(const e of scene.children)if(e.dataset?.byte){entityIndex.set(e.dataset.byte,e);writeEntityByte(e,1)}};
+const indexEntity=e=>{if(e?.dataset?.byte){entityIndex.set(e.dataset.byte,e);writeEntityByte(e,1)}return e};
 const unindexEntity=e=>{if(e?.dataset?.byte)entityIndex.delete(e.dataset.byte);return e};
 const entityByByte=id=>id?entityIndex.get(id)||null:null;
 const entities=()=>[...entityIndex.values()];
-const next=()=>`B${++seq}`;
+const next=()=>`E${++seq}`;
 rebuildEntityIndex();
 const selectedIds=()=>selectedSet.size?[...selectedSet]:(selected?[selected]:[]);
 const selectedEntities=()=>selectedIds().map(entityByByte).filter(Boolean);
@@ -2448,42 +633,383 @@ function syncSelectionClasses(){
 }
 
 function S(tag,a={}){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))if(v!=null)e.setAttribute(k,v);return e}
-function pt(e){const m=svg.getScreenCTM();if(m){const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return{x:p.x,y:p.y}}const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return{x:vb.x+(e.clientX-r.left)*vb.width/Math.max(1,r.width),y:vb.y+(e.clientY-r.top)*vb.height/Math.max(1,r.height)}}
+/* ==================== DELTA-ZERO CLOSURE =================== */
+const POINT=(()=>{
+  let revisions=0;
+  const freeze=(x,y,label='POINT')=>{
+    const bx=BYTE.literal(Number(x),`${label}.X.CLOSED`),by=BYTE.literal(Number(y),`${label}.Y.CLOSED`);
+    return Object.freeze({__rikiPoint:1,label,x:bx,y:by,BYTE_X:bx,BYTE_Y:by,BIT:1,DELTA:0})
+  };
+  const close=(candidate,label='POINT')=>{
+    const x=Number(candidate?.x),y=Number(candidate?.y);
+    if(!Number.isFinite(x)||!Number.isFinite(y))throw Error('RIKI POINT invalid coordinate');
+    set('POINT_TARGET_X',x);set('POINT_TARGET_Y',y);
+    set('POINT_X',x);set('POINT_Y',y);
+    const v=CV(['POINT_DELTA_X','POINT_DELTA_Y','POINT_DELTA_NORM','POINT_VALID'],{
+      TARGET_X:BYTE.space('POINT_TARGET_X'),TARGET_Y:BYTE.space('POINT_TARGET_Y'),
+      CURRENT_X:BYTE.space('POINT_X'),CURRENT_Y:BYTE.space('POINT_Y')
+    });
+    const delta=Number(v.POINT_DELTA_NORM);
+    const ok=v.POINT_VALID===1&&delta===0;
+    set('POINT_DELTA',delta);set('POINT',`${x},${y}`);setBit('POINT',ok);revisions++;
+    if(pointHud)pointHud.textContent=`POINT · Δ ${delta} · BIT ${ok?1:0}`;
+    if(!ok)throw Error(`RIKI POINT closure violation: Δ=${delta}`);
+    return freeze(x,y,label)
+  };
+  const input=(e)=>{
+    set('POINT_INPUT_X',e.clientX);set('POINT_INPUT_Y',e.clientY);
+    const cx=Number(get('POINT_INPUT_X')),cy=Number(get('POINT_INPUT_Y')),m=svg.getScreenCTM();
+    if(m){const p=new DOMPoint(cx,cy).matrixTransform(m.inverse());return close({x:p.x,y:p.y},'POINT.RAW')}
+    const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+    return close({x:vb.x+(cx-r.left)*vb.width/Math.max(1,r.width),y:vb.y+(cy-r.top)*vb.height/Math.max(1,r.height)},'POINT.RAW')
+  };
+  const audit=()=>Object.freeze({byte:'POINT',x:Number(get('POINT_X')),y:Number(get('POINT_Y')),delta:Number(get('POINT_DELTA')),bit:Number(bit('POINT')?.textContent||0),revisions});
+  return Object.freeze({close,input,freeze,audit})
+})();
+const GUIDE=(()=>{
+  let revisions=0;
+  const freeze=(x,y,label='GUIDE.POINT')=>{
+    const bx=BYTE.space('GUIDE_X'),by=BYTE.space('GUIDE_Y');
+    return Object.freeze({__rikiGuidePoint:1,label,x:bx,y:by,BYTE_X:bx,BYTE_Y:by,BIT:1,DELTA:0})
+  };
+  const close=(candidate,label='GUIDE.POINT')=>{
+    const x=Number(candidate?.x),y=Number(candidate?.y);
+    if(!Number.isFinite(x)||!Number.isFinite(y))throw Error('RIKI GUIDE POINT invalid coordinate');
+    set('GUIDE_TARGET_X',x);set('GUIDE_TARGET_Y',y);
+    set('GUIDE_X',x);set('GUIDE_Y',y);
+    const v=CV(['GUIDE_DELTA_X','GUIDE_DELTA_Y','GUIDE_DELTA_NORM','GUIDE_VALID'],{
+      TARGET_X:BYTE.space('GUIDE_TARGET_X'),TARGET_Y:BYTE.space('GUIDE_TARGET_Y'),
+      CURRENT_X:BYTE.space('GUIDE_X'),CURRENT_Y:BYTE.space('GUIDE_Y')
+    });
+    const delta=Number(v.GUIDE_DELTA_NORM),ok=v.GUIDE_VALID===1&&delta===0;
+    set('GUIDE_DELTA',delta);set('GUIDE_POINT',`${x},${y}`);setBit('GUIDE_POINT',ok);revisions++;
+    if(!ok)throw Error(`RIKI GUIDE POINT closure violation: Δ=${delta}`);
+    return freeze(x,y,label)
+  };
+  const audit=()=>Object.freeze({byte:'GUIDE_POINT',x:Number(get('GUIDE_X')),y:Number(get('GUIDE_Y')),delta:Number(get('GUIDE_DELTA')),bit:Number(bit('GUIDE_POINT')?.textContent||0),revisions});
+  return Object.freeze({close,audit})
+})();
+const RESULT=(()=>{
+  const close=(prefix,target,root)=>{
+    const t=Number(target);if(!Number.isFinite(t)){setBit(root,false);throw Error(`RIKI ${root} invalid result`)}
+    set(`${prefix}_TARGET`,t);set(`${prefix}_VALUE`,t);
+    const v=CV(['RESULT_DELTA','RESULT_VALID'],{TARGET:BYTE.space(`${prefix}_TARGET`),CURRENT:BYTE.space(`${prefix}_VALUE`)}),delta=Number(v.RESULT_DELTA),ok=v.RESULT_VALID===1&&delta===0;
+    set(`${prefix}_DELTA`,delta);set(root,t);setBit(root,ok);if(!ok)throw Error(`RIKI ${root} closure violation: Δ=${delta}`);
+    return BYTE.space(`${prefix}_VALUE`)
+  };
+  return Object.freeze({close})
+})();
+const CMD_NAME=n=>'CMD_'+String(n||'').toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+function commandState(name,state='ready',ok=true){const n=CMD_NAME(name);if(byte(n)){set(n,state);setBit(n,ok)}updateCadBit();return ok}
+function updateCadBit(){
+  const required=['POINT','GUIDE_POINT','DIMENSION','ANGDIMENSION','ALIGNDIMENSION','SELF_TEST'];
+  const active=CMD_NAME(get('TOOL'));
+  const roots=required.map(n=>Number(bit(n)?.textContent||0));if(bit(active))roots.push(Number(bit(active)?.textContent||0));
+  let ok=roots.every(v=>v===1);for(const b of drawingRegion?.querySelectorAll(':scope > riki-byte[kind="entity"]')||[])if((b.querySelector('riki-bit')?.textContent||'0')!=='1'&&JSON.parse(b.querySelector('riki-value')?.textContent||'{"alive":0}').alive===1){ok=false;break}
+  setBit('CAD',ok);return ok
+}
+function precision(v){return Number.isFinite(Number(v))?String(Number(v)):String(v)}
+function dimensionText(v){
+  const n=Number(v);
+  if(!Number.isFinite(n))return String(v);
+  const d=Math.max(0,Math.min(12,Math.trunc(Number(get('DIM_DECIMALS'))||0)));
+  return n.toFixed(d)
+}
+function pt(e){return POINT.input(e)}
 function movePoint(x,y,tx,ty){return{x:C('MOVE_X',{X1:x,TX:tx}),y:C('MOVE_Y',{Y1:y,TY:ty})}}
 function midpoint(a,b){const q={X1:a.x,Y1:a.y,X2:b.x,Y2:b.y};return{x:C('MID_X',q),y:C('MID_Y',q)}}
+/* ==================== SNAP ENGINE ========================== */
+/* --- Discrete Snap Sources -------------------------------- */
+const snapOn=name=>Number(get(name))===1;
 function magneticCandidates(){
-  const out=[],push=(x,y,kind)=>{if(Number.isFinite(x)&&Number.isFinite(y))out.push({x,y,kind})};
+  // Every discrete snap keeps its canonical source entity. The metadata is used only
+  // to arm post-point technical references; it never changes the snap coordinate.
+  const out=[],push=(x,y,kind,e=null)=>{if(Number.isFinite(x)&&Number.isFinite(y))out.push({x,y,kind,entity:e})};
   for(const e of entities()){
     const k=e.dataset.kind;
-    if(k==='line'||k==='dashline'||k==='dashdotline'){const a={x:+e.getAttribute('x1'),y:+e.getAttribute('y1')},b={x:+e.getAttribute('x2'),y:+e.getAttribute('y2')},m=midpoint(a,b);push(a.x,a.y,'point');push(b.x,b.y,'point');push(m.x,m.y,'mid')}
-    else if(k==='circle')push(+e.getAttribute('cx'),+e.getAttribute('cy'),'center');
-    else if(k==='arc'){push(+e.dataset.cx,+e.dataset.cy,'center');push(+e.dataset.sx,+e.dataset.sy,'point');push(+e.dataset.ex,+e.dataset.ey,'point')}
-    else if(k==='text')push(+e.getAttribute('x'),+e.getAttribute('y'),'point');
-    else if(k==='dim'){push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point');push(+e.dataset.cx,+e.dataset.cy,'point')}
-    else if(k==='angdim'){push(+e.dataset.vx,+e.dataset.vy,'point');push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point');push(+e.dataset.cx,+e.dataset.cy,'point')}
-    else if(k==='aligndim'){push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point')}
+    if(k==='line'||k==='dashline'||k==='dashdotline'){const a={x:+e.getAttribute('x1'),y:+e.getAttribute('y1')},b={x:+e.getAttribute('x2'),y:+e.getAttribute('y2')},m=midpoint(a,b);push(a.x,a.y,'point',e);push(b.x,b.y,'point',e);if(snapOn('SNAP_MIDPOINT'))push(m.x,m.y,'mid',e)}
+    else if(k==='circle'){const cx=+e.getAttribute('cx'),cy=+e.getAttribute('cy'),r=+e.getAttribute('r');push(cx,cy,'center',e);if(snapOn('SNAP_QUADRANT')){push(cx+r,cy,'quadrant',e);push(cx-r,cy,'quadrant',e);push(cx,cy+r,'quadrant',e);push(cx,cy-r,'quadrant',e)}}
+    else if(k==='arc'){const cx=+e.dataset.cx,cy=+e.dataset.cy,sx=+e.dataset.sx,sy=+e.dataset.sy,r=C('DIST',{X1:cx,Y1:cy,X2:sx,Y2:sy});push(cx,cy,'center',e);push(+e.dataset.sx,+e.dataset.sy,'point',e);push(+e.dataset.ex,+e.dataset.ey,'point',e);if(snapOn('SNAP_QUADRANT'))for(const q of [{x:cx+r,y:cy},{x:cx-r,y:cy},{x:cx,y:cy+r},{x:cx,y:cy-r}])if(arcAccept(e,q))push(q.x,q.y,'quadrant',e)}
+    else if(k==='text')push(+e.getAttribute('x'),+e.getAttribute('y'),'point',e);
+    else if(k==='dim'){push(+e.dataset.ax,+e.dataset.ay,'point',e);push(+e.dataset.bx,+e.dataset.by,'point',e);push(+e.dataset.cx,+e.dataset.cy,'point',e)}
+    else if(k==='angdim'){push(+e.dataset.vx,+e.dataset.vy,'point',e);push(+e.dataset.ax,+e.dataset.ay,'point',e);push(+e.dataset.bx,+e.dataset.by,'point',e);push(+e.dataset.cx,+e.dataset.cy,'point',e)}
+    else if(k==='aligndim'){push(+e.dataset.ax,+e.dataset.ay,'point',e);push(+e.dataset.bx,+e.dataset.by,'point',e)}
   }
   return out;
 }
+/* --- Canonical Geometry Adapters -------------------------- */
+function lineSnapGeom(e){
+  return e&&['line','dashline','dashdotline'].includes(e.dataset.kind)?{x1:+e.getAttribute('x1'),y1:+e.getAttribute('y1'),x2:+e.getAttribute('x2'),y2:+e.getAttribute('y2')}:null
+}
+function circleSnapGeom(e){
+  if(!e)return null;
+  if(e.dataset.kind==='circle')return{cx:+e.getAttribute('cx'),cy:+e.getAttribute('cy'),r:+e.getAttribute('r'),arc:false,e};
+  if(e.dataset.kind==='arc'){
+    const cx=+e.dataset.cx,cy=+e.dataset.cy,sx=+e.dataset.sx,sy=+e.dataset.sy;
+    return{cx,cy,r:C('DIST',{X1:cx,Y1:cy,X2:sx,Y2:sy}),arc:true,e}
+  }
+  return null
+}
+function arcAccept(e,p){
+  if(!e||e.dataset.kind!=='arc')return true;
+  const f=arcFlags(e),v=C('ARC_TEST_VALID',{CX:+e.dataset.cx,CY:+e.dataset.cy,SX:+e.dataset.sx,SY:+e.dataset.sy,EX:+e.dataset.ex,EY:+e.dataset.ey,PX:p.x,PY:p.y,SWEEP:f.sweep});
+  return v===1
+}
+/* --- Tangency Geometry ------------------------------------ */
+function tangentPointsFromExternal(p,c){
+  if(!p||!c)return[];
+  const v=CV(['TAN_VALID','TAN_X1','TAN_Y1','TAN_X2','TAN_Y2'],{PX:p.x,PY:p.y,CX:c.cx,CY:c.cy,RADIUS:c.r});
+  if(v.TAN_VALID!==1)return[];
+  return [{x:v.TAN_X1,y:v.TAN_Y1},{x:v.TAN_X2,y:v.TAN_Y2}].filter(q=>arcAccept(c.e,q))
+}
+function tangentSourceAt(p){
+  if(!p||!snapOn('SNAP_TANGENT'))return null;
+  const tol=C('SNAP_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1})*1.35;
+  let best=null,bestD=Infinity;
+  for(const e of entities()){
+    const c=circleSnapGeom(e);if(!c)continue;
+    const d=Math.abs(C('DIST',{X1:p.x,Y1:p.y,X2:c.cx,Y2:c.cy})-c.r);
+    if(d<=tol&&d<bestD&&arcAccept(e,p)){best=c;bestD=d}
+  }
+  return best
+}
+function deferredTangentPoint(seed,cursor,source){
+  if(!seed||!cursor||!source||!snapOn('SNAP_TANGENT'))return null;
+  const ps=tangentPointsFromExternal(cursor,source);if(!ps.length)return null;
+  let best=null,bestD=Infinity;
+  for(const p of ps){const d=C('SNAP_D',{X1:seed.x,Y1:seed.y,X2:p.x,Y2:p.y});if(d<bestD){best=p;bestD=d}}
+  return best
+}
+/* --- Exact Technical Snap Solutions ----------------------- */
+function technicalSnapCandidates(cursor){
+  const out=[],es=entities(),lines=es.map(e=>({e,g:lineSnapGeom(e)})).filter(x=>x.g),circles=es.map(e=>circleSnapGeom(e)).filter(Boolean);
+  const push=(p,kind,source='')=>{if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))out.push({x:p.x,y:p.y,kind,source})};
+  if(snapOn('SNAP_INTERSECTION')){
+    for(let i=0;i<lines.length;i++)for(let j=i+1;j<lines.length;j++){
+      const a=lines[i].g,b=lines[j].g,v=CV(['INT_VALID','INT_X','INT_Y'],{X1:a.x1,Y1:a.y1,X2:a.x2,Y2:a.y2,X3:b.x1,Y3:b.y1,X4:b.x2,Y4:b.y2});
+      if(v.INT_VALID!==1)continue;const p={x:v.INT_X,y:v.INT_Y},ta=C('SEG_T',{PX:p.x,PY:p.y,X1:a.x1,Y1:a.y1,X2:a.x2,Y2:a.y2}),tb=C('SEG_T',{PX:p.x,PY:p.y,X1:b.x1,Y1:b.y1,X2:b.x2,Y2:b.y2});
+      if(ta>=-1e-10&&ta<=1+1e-10&&tb>=-1e-10&&tb<=1+1e-10)push(p,'intersection','line-line')
+    }
+    for(const L of lines)for(const c of circles){
+      const a=L.g,v=CV(['LC_VALID','LC_T1','LC_T2','LC_X1','LC_Y1','LC_X2','LC_Y2'],{X1:a.x1,Y1:a.y1,X2:a.x2,Y2:a.y2,CX:c.cx,CY:c.cy,RADIUS:c.r});
+      if(v.LC_VALID!==1)continue;
+      const ps=[{t:v.LC_T1,x:v.LC_X1,y:v.LC_Y1},{t:v.LC_T2,x:v.LC_X2,y:v.LC_Y2}];
+      for(const p of ps)if(p.t>=-1e-10&&p.t<=1+1e-10&&arcAccept(c.e,p))push(p,'intersection','line-circle')
+    }
+    for(let i=0;i<circles.length;i++)for(let j=i+1;j<circles.length;j++){
+      const a=circles[i],b=circles[j],v=CV(['CC_VALID','CC_X1','CC_Y1','CC_X2','CC_Y2'],{C1X:a.cx,C1Y:a.cy,R1:a.r,C2X:b.cx,C2Y:b.cy,R2:b.r});
+      if(v.CC_VALID!==1)continue;for(const p of [{x:v.CC_X1,y:v.CC_Y1},{x:v.CC_X2,y:v.CC_Y2}])if(arcAccept(a.e,p)&&arcAccept(b.e,p))push(p,'intersection','circle-circle')
+    }
+  }
+  const anchor=draft?.a||draft?.base||draft?.c||null;
+  if(anchor&&snapOn('SNAP_PERPENDICULAR')){
+    for(const L of lines){const a=L.g,v=CV(['PERP_VALID','PERP_X','PERP_Y'],{PX:anchor.x,PY:anchor.y,X1:a.x1,Y1:a.y1,X2:a.x2,Y2:a.y2});if(v.PERP_VALID===1)push({x:v.PERP_X,y:v.PERP_Y},'perpendicular','line')}
+  }
+  if(anchor&&snapOn('SNAP_TANGENT')){
+    for(const c of circles)for(const p of tangentPointsFromExternal(anchor,c))push(p,'tangent',c.arc?'arc':'circle')
+  }
+  return out
+}
+function projectToGuide(p,a,b){
+  const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;
+  if(!(l2>1e-24))return null;
+  const t=((p.x-a.x)*dx+(p.y-a.y)*dy)/l2;
+  return{x:a.x+t*dx,y:a.y+t*dy}
+}
+function lineBodySnapCandidates(cursor){
+  const out=[];
+  for(const e of entities()){
+    const L=lineSnapGeom(e);if(!L)continue;
+    const ax=Number(L.x1),ay=Number(L.y1),bx=Number(L.x2),by=Number(L.y2);
+    const dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy;if(!(l2>1e-24))continue;
+    const t=((Number(cursor.x)-ax)*dx+(Number(cursor.y)-ay)*dy)/l2;
+    if(t<0||t>1)continue;
+    out.push({x:ax+t*dx,y:ay+t*dy,kind:'on-line',source:e.dataset.byte||e.dataset.kind||'line'});
+  }
+  return out
+}
+/* --- Reference Acquisition / Temporary GUIDE_LOCKS -------- */
+function updateGuideTracking(cursor){
+  if(Number(get('SNAP'))===0){clearGuideLocks();return}
+  const scale=Number(num('VIEW_SCALE'))||1,acquire=6/scale,release=18/scale;
+  // A locked guide survives only while the cursor keeps travelling in its direction.
+  for(let i=guideLocks.length-1;i>=0;i--)if(guideDistance(cursor,guideLocks[i])>release)guideLocks.splice(i,1);
+  // Passing close to a discrete magnetic point arms horizontal + vertical references.
+  // After a real command point exists, the same snap may also arm one technical
+  // reference belonging to its canonical source entity. Nothing technical is armed
+  // before the first point and passive entity hover never creates PERP/TANGENT guides.
+  const commandAnchor=draft?.a||draft?.base||draft?.c||null;
+  for(const c of magneticCandidates()){
+    const d=C('SNAP_D',{X1:cursor.x,Y1:cursor.y,X2:c.x,Y2:c.y});
+    if(d>acquire)continue;
+    armGuide(c,{x:Number(c.x)+1,y:Number(c.y)},'track-x',c.kind||'point');
+    armGuide(c,{x:Number(c.x),y:Number(c.y)+1},'track-y',c.kind||'point');
+    if(!commandAnchor||!c.entity)continue;
+    const sourceByte=c.entity.dataset.byte||c.entity.dataset.kind||'entity';
+    const L=lineSnapGeom(c.entity);
+    if(L&&snapOn('SNAP_PERPENDICULAR')){
+      const dx=L.x2-L.x1,dy=L.y2-L.y1;
+      if(Math.abs(dx)+Math.abs(dy)>1e-15){
+        const source=`${sourceByte}:${c.kind}:${Number(c.x)},${Number(c.y)}`;
+        armGuide(c,{x:Number(c.x)-dy,y:Number(c.y)+dx},'snap-perpendicular',source)
+      }
+    }
+    const cg=circleSnapGeom(c.entity);
+    if(cg&&c.kind!=='center'&&snapOn('SNAP_TANGENT')){
+      const rx=Number(c.x)-cg.cx,ry=Number(c.y)-cg.cy;
+      if(Math.abs(rx)+Math.abs(ry)>1e-15&&arcAccept(c.entity,c)){
+        const source=`${sourceByte}:${c.kind}:${Number(c.x)},${Number(c.y)}`;
+        armGuide(c,{x:Number(c.x)-ry,y:Number(c.y)+rx},'snap-tangent',source)
+      }
+    }
+  }
+}
+/* --- Protected Command-Owned Guides ----------------------- */
+function commandGuides(){
+  // The current line owns two protected construction axes through its first point.
+  // They are command state, not collected references: they never decay, never consume
+  // GUIDE_TRACK_MAX slots and can combine with any temporary GUIDE_LOCK.
+  if(!draft||!draft.a||!['line','dashline','dashdotline'].includes(draft.kind))return[];
+  const a={x:Number(draft.a.x),y:Number(draft.a.y)};
+  return[
+    {...normGuide(a,{x:a.x+1,y:a.y}),kind:'command-x',source:'command-base-x',protected:true},
+    {...normGuide(a,{x:a.x,y:a.y+1}),kind:'command-y',source:'command-base-y',protected:true}
+  ].filter(g=>g&&Number.isFinite(g.ux)&&Number.isFinite(g.uy))
+}
+/* --- Multi-Reference Exact Resolution --------------------- */
+function lockedGuideSnap(cursor){
+  const owned=commandGuides();
+  if(!owned.length&&!guideLocks.length)return null;
+  const scale=Number(num('VIEW_SCALE'))||1,magnet=10/scale;
+  let best=null,bestD=Infinity,bestRank=Infinity;
+  const consider=(point,kind,locks,rank)=>{
+    if(!point)return;const d=C('SNAP_D',{X1:cursor.x,Y1:cursor.y,X2:point.x,Y2:point.y});
+    if(d<=magnet&&(rank<bestRank||(rank===bestRank&&d<bestD))){bestD=d;bestRank=rank;best={point,kind,locks}}
+  };
+  // Locked-guide SNAP is reserved for exact geometric points only.
+  // A single guide is a direction, not an infinite sequence of snap points.
+  for(const g of owned)for(const q of guideLocks)consider(lineLineInfinite(g,q),'command-track-intersection',[g,q],0);
+  for(let i=0;i<guideLocks.length;i++)for(let j=i+1;j<guideLocks.length;j++)consider(lineLineInfinite(guideLocks[i],guideLocks[j]),'track-intersection',[guideLocks[i],guideLocks[j]],1);
+  return best
+}
+/* --- Directional Guide Constraint ------------------------- */
+function softGuideConstraint(cursor){
+  const all=[...commandGuides(),...guideLocks];
+  if(!all.length)return null;
+  const scale=Number(num('VIEW_SCALE'))||1,band=5/scale;
+  let best=null,bestD=Infinity;
+  for(const g of all){
+    const q=projectToGuide(cursor,g.a,g.b);if(!q)continue;
+    const d=C('SNAP_D',{X1:cursor.x,Y1:cursor.y,X2:q.x,Y2:q.y});
+    if(d<=band&&d<bestD){bestD=d;best={point:q,guide:g}}
+  }
+  return best
+}
+/* --- Post-Point Technical Guide Projection ---------------- */
+function technicalGuideProjection(cursor){
+  const anchor=draft?.a||draft?.base||draft?.c||null;
+  if(!anchor)return null;
+  const tol=C('SNAP_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1}),es=entities();
+  let best=null,bestD=Infinity;
+  const consider=(a,b,kind,source)=>{
+    const q=projectToGuide(cursor,a,b);if(!q)return;
+    const d=C('SNAP_D',{X1:cursor.x,Y1:cursor.y,X2:q.x,Y2:q.y});
+    if(d<=tol&&d<bestD){bestD=d;best={point:q,a:{x:Number(a.x),y:Number(a.y)},b:{x:Number(b.x),y:Number(b.y)},kind,source}}
+  };
+  if(snapOn('SNAP_PERPENDICULAR')){
+    for(const e of es){const L=lineSnapGeom(e);if(!L)continue;
+      const dx=L.x2-L.x1,dy=L.y2-L.y1;if(Math.abs(dx)+Math.abs(dy)<=1e-15)continue;
+      // retta per anchor, normale alla linea bersaglio
+      consider(anchor,{x:Number(anchor.x)-dy,y:Number(anchor.y)+dx},'perpendicular-guide','line')
+    }
+  }
+  if(snapOn('SNAP_TANGENT')){
+    for(const e of es){const c=circleSnapGeom(e);if(!c)continue;
+      for(const tp of tangentPointsFromExternal(anchor,c))consider(anchor,tp,'tangent-guide',c.arc?'arc':'circle')
+    }
+  }
+  return best
+}
+/* --- Visual Guide Projection / Deduplication -------------- */
 function drawGuides(){
-  overlay.querySelectorAll('.guide-live,.guide-point').forEach(e=>e.remove());
-  const vb=svg.viewBox.baseVal,sc=num('VIEW_SCALE')||1;
-  if(guideState.x!==null)overlay.append(S('line',{x1:guideState.x,y1:vb.y,x2:guideState.x,y2:C('MOVE_Y',{Y1:vb.y,TY:vb.height}),class:'guide guide-live'}));
-  if(guideState.y!==null)overlay.append(S('line',{x1:vb.x,y1:guideState.y,x2:C('MOVE_X',{X1:vb.x,TX:vb.width}),y2:guideState.y,class:'guide guide-live'}));
+  overlay.querySelectorAll('.guide-live,.guide-point,.guide-tech').forEach(e=>e.remove());
+  const vb=svg.viewBox.baseVal,sc=num('VIEW_SCALE')||1,L=vb.width+vb.height,visual=[],visualTol=8/sc;
+  const addVisual=(a,b,attrs)=>{
+    const g=normGuide(a,b);if(!g)return false;
+    for(const q of visual){const cross=Math.abs(g.ux*q.uy-g.uy*q.ux);if(cross<1e-6&&guideDistance(g.a,q)<=visualTol)return false}
+    visual.push(g);const dx=g.ux,dy=g.uy;
+    overlay.append(S('line',{x1:g.a.x-dx*L,y1:g.a.y-dy*L,x2:g.a.x+dx*L,y2:g.a.y+dy*L,...attrs}));return true
+  };
+  // Draw the currently winning guide first. Locked references remain internally distinct,
+  // but visually coincident guides are rendered only once (within ~2 screen px).
+  if(guideState.tech)addVisual(guideState.tech.a,guideState.tech.b,{class:'guide guide-tech','stroke-dasharray':'6 4'});
+  if(guideState.x!==null)addVisual({x:guideState.x,y:vb.y},{x:guideState.x,y:vb.y+1},{class:'guide guide-live'});
+  if(guideState.y!==null)addVisual({x:vb.x,y:guideState.y},{x:vb.x+1,y:guideState.y},{class:'guide guide-live'});
+  for(const g of commandGuides())addVisual(g.a,g.b,{class:'guide guide-live guide-command'});
+  for(const g of guideLocks)addVisual(g.a,g.b,{class:'guide guide-tech guide-track','stroke-dasharray':'3 5'});
   if(guideState.point)overlay.append(S('circle',{cx:guideState.point.x,cy:guideState.point.y,r:C('GUIDE_R',{VIEW_SCALE:sc}),class:'guide-point',fill:'none',stroke:'#111','stroke-width':.6,'vector-effect':'non-scaling-stroke'}));
 }
+/* --- Snap Priority Resolver ------------------------------- */
 function snap(p){
-  if(num('SNAP')===0){guideState={x:null,y:null,point:null};drawGuides();return p}
-  const scale=num('VIEW_SCALE')||1,tol=C('SNAP_TOL',{VIEW_SCALE:scale}),cands=magneticCandidates();
-  let out={x:p.x,y:p.y},best=null,bestD=Infinity;guideState={x:null,y:null,point:null};
-  for(const c of cands){const d=C('SNAP_D',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y});if(d<bestD&&d<=tol){best=c;bestD=d}}
-  if(best){out={x:best.x,y:best.y};guideState={x:best.x,y:best.y,point:best};drawGuides();return out}
+  // Strong snap is discrete: endpoints, midpoint, centers, quadrants and true geometric solutions only.
+  // The body of a line is a directional reference, never an arbitrary snap point.
+  if(Number(get('SNAP'))===0){guideState={x:null,y:null,point:null,tech:null};lastSnapKind='none';drawGuides();return p}
+  updateGuideTracking(p);
+  const scale=num('VIEW_SCALE')||1,tol=C('SNAP_TOL',{VIEW_SCALE:scale}),cands=magneticCandidates(),tech=technicalSnapCandidates(p);
+  let out={x:Number(p.x),y:Number(p.y)},best=null,bestD=Infinity;guideState={x:null,y:null,point:null,tech:null};lastSnapKind='none';
+  for(const c of [...cands,...tech]){const d=C('SNAP_D',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y});if(d<bestD&&d<=tol){best=c;bestD=d}}
+  if(best){
+    out={x:best.x,y:best.y};
+    mergeLocksToExactAxes(best);
+    guideState={x:best.x,y:best.y,point:best,tech:null};
+    lastSnapKind=best.kind||'point';
+    GUIDE.close(best,`GUIDE.${best.kind||'POINT'}`);
+    drawGuides();
+    return POINT.close(out,'POINT.SNAP.GUIDE')
+  }
+  const locked=lockedGuideSnap(p);
+  if(locked){
+    out={x:locked.point.x,y:locked.point.y};
+    const g=locked.locks[0];
+    // A guide-guide solution is a construction constraint, not an object snap.
+    // Keep the magnetic geometric solution but do not render the snap-point marker.
+    guideState={x:null,y:null,point:null,tech:g?{a:g.a,b:g.b,kind:locked.kind}:null};
+    lastSnapKind='guide-construction';
+    GUIDE.close(out,`GUIDE.${locked.kind}`);drawGuides();return POINT.close(out,'POINT.GUIDE.CONSTRUCTION')
+  }
+  const tg=technicalGuideProjection(p);
+  if(tg){
+    out={x:tg.point.x,y:tg.point.y};
+    // Technical guide projection constrains direction but does not masquerade as a discrete snap point.
+    guideState={x:null,y:null,point:null,tech:{a:tg.a,b:tg.b,kind:tg.kind}};
+    lastSnapKind='guide-direction';
+    GUIDE.close(out,`GUIDE.${tg.kind}`);
+    drawGuides();
+    return POINT.close(out,'POINT.GUIDE.TECH')
+  }
+  const soft=softGuideConstraint(p);
+  if(soft){
+    out={x:soft.point.x,y:soft.point.y};
+    const g=soft.guide;
+    guideState={x:null,y:null,point:null,tech:{a:g.a,b:g.b,kind:g.kind}};
+    lastSnapKind='guide-direction';
+    GUIDE.close(out,`GUIDE.${g.kind||'DIRECTION'}`);
+    drawGuides();
+    return POINT.close(out,'POINT.GUIDE.DIRECTION')
+  }
   const anchor=draft&&draft.a?draft.a:null;
-  if(anchor){if(C('SNAP_DX',{X1:p.x,X2:anchor.x})<=tol){out.x=anchor.x;guideState.x=anchor.x}if(C('SNAP_DY',{Y1:p.y,Y2:anchor.y})<=tol){out.y=anchor.y;guideState.y=anchor.y}}
-  if(guideState.x===null){for(const c of cands)if(C('SNAP_DX',{X1:p.x,X2:c.x})<=tol){out.x=c.x;guideState.x=c.x;break}}
-  if(guideState.y===null){for(const c of cands)if(C('SNAP_DY',{Y1:p.y,Y2:c.y})<=tol){out.y=c.y;guideState.y=c.y;break}}
-  drawGuides();return out;
+  let guideRef=null;
+  if(anchor){
+    if(C('SNAP_DX',{X1:p.x,X2:anchor.x})<=tol){out.x=Number(anchor.x);guideState.x=Number(anchor.x);guideRef={x:out.x,y:out.y,label:'GUIDE.ANCHOR.X'}}
+    if(C('SNAP_DY',{Y1:p.y,Y2:anchor.y})<=tol){out.y=Number(anchor.y);guideState.y=Number(anchor.y);guideRef={x:out.x,y:out.y,label:'GUIDE.ANCHOR.Y'}}
+  }
+  if(guideState.x===null){for(const c of cands)if(C('SNAP_DX',{X1:p.x,X2:c.x})<=tol){out.x=c.x;guideState.x=c.x;guideRef={x:out.x,y:out.y,label:`GUIDE.${c.kind||'POINT'}.X`};break}}
+  if(guideState.y===null){for(const c of cands)if(C('SNAP_DY',{Y1:p.y,Y2:c.y})<=tol){out.y=c.y;guideState.y=c.y;guideRef={x:out.x,y:out.y,label:`GUIDE.${c.kind||'POINT'}.Y`};break}}
+  if(guideState.x!==null||guideState.y!==null){lastSnapKind='guide-axis';GUIDE.close({x:out.x,y:out.y},guideRef?.label||'GUIDE.AXIS')}
+  drawGuides();
+  return POINT.close(out,'POINT.SNAP');
 }
+/* ==================== VIEW PROJECTION ====================== */
 function syncScreenStyles(){
   const sc=num('VIEW_SCALE')||1;
   for(const e of entityIndex.values()){
@@ -2496,13 +1022,51 @@ function syncScreenStyles(){
     else if(k==='aligndim')updateAlignDim(e)
   }
 }
-function view(){const r=svg.getBoundingClientRect(),q={SCREEN_W:r.width,SCREEN_H:r.height,VIEW_SCALE:num('VIEW_SCALE')||1,VIEW_X:num('VIEW_X'),VIEW_Y:num('VIEW_Y')},v=CV(['VIEW_W','VIEW_H','VIEW_X0','VIEW_Y0'],q);svg.setAttribute('viewBox',`${v.VIEW_X0} ${v.VIEW_Y0} ${v.VIEW_W} ${v.VIEW_H}`);syncScreenStyles()}
-function state(){return{format:'UNISEFE-CAD',version:'0.0.2-alpha',chains:'RIKI-BYTE-STRICT',bytes:Object.fromEntries([...space.querySelectorAll(':scope > riki-byte')].map(b=>[b.getAttribute('name'),b.querySelector('riki-value')?.textContent??''])),drawing:scene.innerHTML}}
-function restore(d){if(!d||!d.drawing)throw Error();scene.innerHTML=d.drawing;rebuildEntityIndex();paintedSelection.clear();if(d.bytes)for(const[k,v]of Object.entries(d.bytes))if(byte(k))set(k,v);seq=0;for(const e of entities()){const n=+(e.dataset.byte||'').slice(1)||0;if(n>seq)seq=n}clearSelection();draft=null;view();refresh()}
-async function save(){const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-v0.0.2-alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();command.textContent='SAVE · UNISEFE CAD v0.0.2 alpha saved'}catch(e){if(e.name!=='AbortError')command.textContent='SAVE · failed'}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-v0.0.2-alpha.riki';a.click();URL.revokeObjectURL(a.href)}}
-openProject?.addEventListener('change',()=>{const f=openProject.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=String(rd.result),m=t.match(/<svg id="cad-native"[\s\S]*?<g id="cad-native-scene">([\s\S]*?)<\/g>/);if(m){scene.innerHTML=m[1];rebuildEntityIndex();paintedSelection.clear();syncScreenStyles();refresh()}else restore(JSON.parse(t))}catch{command.textContent='OPEN · invalid file'}};rd.readAsText(f);openProject.value=''});
-function saveHistory(){history.push(scene.innerHTML);if(history.length>100)history.shift()}
-function undo(){if(!history.length)return;scene.innerHTML=history.pop();rebuildEntityIndex();paintedSelection.clear();clearSelection();syncScreenStyles();refresh()}
+let lastValidView=null;
+function view(){
+  const r=svg.getBoundingClientRect();
+  if(!Number.isFinite(r.width)||!Number.isFinite(r.height)||r.width<8||r.height<8){if(lastValidView)svg.setAttribute('viewBox',lastValidView);return}
+  const scale=Number(num('VIEW_SCALE'))||1,cx=Number(num('VIEW_X'))||0,cy=Number(num('VIEW_Y'))||0;
+  if(!Number.isFinite(scale)||scale<=0||!Number.isFinite(cx)||!Number.isFinite(cy))return;
+  const q={SCREEN_W:r.width,SCREEN_H:r.height,VIEW_SCALE:scale,VIEW_X:cx,VIEW_Y:cy},v=CV(['VIEW_W','VIEW_H','VIEW_X0','VIEW_Y0'],q);
+  if(![v.VIEW_X0,v.VIEW_Y0,v.VIEW_W,v.VIEW_H].every(Number.isFinite)||v.VIEW_W<=0||v.VIEW_H<=0){if(lastValidView)svg.setAttribute('viewBox',lastValidView);return}
+  lastValidView=`${v.VIEW_X0} ${v.VIEW_Y0} ${v.VIEW_W} ${v.VIEW_H}`;
+  svg.setAttribute('viewBox',lastValidView);syncScreenStyles()
+}
+/* ==================== PERSISTENCE AND HISTORY ============== */
+/* --- Canonical State Serialization ------------------------ */
+function globalBytes(){return Object.fromEntries([...space.querySelectorAll(':scope > riki-byte')].map(b=>[b.getAttribute('name'),Object.freeze({value:b.querySelector('riki-value')?.textContent??'',bit:Number(b.querySelector('riki-bit')?.textContent||0)})]))}
+function state(){syncAllEntityBytes();return{format:'UNISEFE-CAD-RIKI',version:'0.0.4-alpha',chains:'RIKI-BYTE-STRICT',bytes:globalBytes(),drawing:entityStates()}}
+function restoreGlobalBytes(bs){
+  for(const [k,raw] of Object.entries(bs||{})){
+    if(!byte(k))continue;
+    if(raw&&typeof raw==='object'&&Object.prototype.hasOwnProperty.call(raw,'value')){set(k,raw.value);if(raw.bit!=null)setBit(k,Number(raw.bit)===1)}
+    else set(k,raw)
+  }
+}
+/* --- Canonical State Restoration -------------------------- */
+function applyDescriptor(d){
+  if(!d?.byte)return null;let e=entityByByte(d.byte);
+  if(!d.alive){if(e){unindexEntity(e);e.remove()}return null}
+  if(!e){e=S(d.tag||'g',{});scene.append(e);entityIndex.set(d.byte,e)}
+  for(const a of [...e.attributes])if(!(a.name in (d.attrs||{})))e.removeAttribute(a.name);
+  for(const[k,v]of Object.entries(d.attrs||{}))e.setAttribute(k,String(v));
+  if((d.tag||'').toLowerCase()==='text')e.textContent=d.text||'';
+  writeEntityByte(e,1);if(d.__bit!=null){const eb=entityByteNode(d.byte)?.querySelector('riki-bit');if(eb)eb.textContent=String(Number(d.__bit)===1?1:0)}return e
+}
+function applyDrawing(ds){
+  const states=ds||{};for(const e of [...entities()])if(!states[e.dataset.byte]){writeEntityByte(e,0);unindexEntity(e);e.remove()}
+  for(const d of Object.values(states))applyDescriptor(d);
+  seq=0;for(const id of Object.keys(entityStates())){const n=+String(id).replace(/^E/,'')||0;if(n>seq)seq=n}
+  paintedSelection.clear();clearSelection();draft=null;selectionDrag=null;syncScreenStyles();view();refresh()
+}
+function restore(d){if(!d||!d.drawing)throw Error();restoreGlobalBytes(d.bytes);applyDrawing(d.drawing);updateCadBit()}
+async function save(){syncAllEntityBytes();const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-2D-v0.0.4-Alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();commandState('save','closed',true);command.textContent='SAVE · UNISEFE CAD v0.0.4 Alpha saved'}catch(e){if(e.name!=='AbortError'){commandState('save','error',false);command.textContent='SAVE · failed'}}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-2D-v0.0.4-Alpha.riki';a.click();URL.revokeObjectURL(a.href);commandState('save','closed',true)}}
+openProject?.addEventListener('change',()=>{const f=openProject.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=String(rd.result),j=JSON.parse(t);restore(j);commandState('open','closed',true)}catch{commandState('open','error',false);command.textContent='OPEN · invalid RIKI state'}};rd.readAsText(f);openProject.value=''});
+function snapshot(){syncAllEntityBytes();return Object.freeze({drawing:structuredClone(entityStates()),bytes:structuredClone(globalBytes())})}
+function restoreSnapshot(s){if(!s)return;restoreGlobalBytes(s.bytes);applyDrawing(s.drawing||{});updateCadBit()}
+function saveHistory(){history.push(snapshot());if(history.length>100)history.shift()}
+function undo(){if(!history.length)return;restoreSnapshot(history.pop());commandState('undo','closed',true)}
 function colorable(e){return !!e}
 function widthable(e){return !!e&&e.dataset?.kind!=='text'}
 function styleOf(e){return{color:e?.style?.getPropertyValue('--entity-color')||get('LINE_COLOR')||'#444444',width:Number(e?.style?.getPropertyValue('--entity-width'))||Number(get('LINE_WIDTH'))||.55}}
@@ -2527,6 +1091,7 @@ function setLineProperty(prop,value){
   }
   refresh()
 }
+/* ==================== ENTITY FACTORY ======================= */
 function add(tag,a){saveHistory();const e=S(tag,{...a,'data-byte':next(),class:'entity'});applyLineStyle(e);scene.append(e);indexEntity(e);setSingleSelection(e.dataset.byte);refresh();return e}
 function geom(a,b,c){return{X1:a?.x??0,Y1:a?.y??0,X2:b?.x??0,Y2:b?.y??0,X3:c?.x??0,Y3:c?.y??0}}
 function setTextPose(e,x,y,angle=Number(e?.dataset?.angle)||0){
@@ -2556,6 +1121,7 @@ function arcRadiusFromPoint(a,b,p){
         v=CV(['ARCS_SAFE','ARCS_SIGNED_R'],q);
   return v.ARCS_SAFE===1&&Number.isFinite(v.ARCS_SIGNED_R)?v.ARCS_SIGNED_R:null;
 }
+/* --- Primitive Entity Constructors ------------------------ */
 function makeArcRadius(a,b,r){
   const f=arcRadiusCalc(a,b,r);if(!f)return null;
   set('ARC_RADIUS',r);
@@ -2579,6 +1145,7 @@ function part(g,tag,name,a={}){
 }
 function dimArrowPath(x,y,ux,uy,size){const nx=-uy,ny=ux,back=size,half=size*.42;return`M ${x} ${y} L ${x+ux*back+nx*half} ${y+uy*back+ny*half} M ${x} ${y} L ${x+ux*back-nx*half} ${y+uy*back-ny*half}`}
 function dimArrow(x,y,ux,uy,size,e=null){return attrs(e||S('path'),{d:dimArrowPath(x,y,ux,uy,size)})}
+/* ==================== DIMENSION PROJECTION ================= */
 function updateDim(g){
   const q={X1:+g.dataset.ax,Y1:+g.dataset.ay,X2:+g.dataset.bx,Y2:+g.dataset.by,X3:+g.dataset.cx,Y3:+g.dataset.cy,VIEW_SCALE:num('VIEW_SCALE')||1},
         v=CV(['DIM_L','DIM_UX','DIM_UY','DIM_NX','DIM_NY','DIM_QAX','DIM_QAY','DIM_QBX','DIM_QBY','DIM_ARROW','DIM_EXT_AX','DIM_EXT_AY','DIM_EXT_BX','DIM_EXT_BY','DIM_EXT_QAX','DIM_EXT_QAY','DIM_EXT_QBX','DIM_EXT_QBY','DIM_TEXT_X','DIM_TEXT_Y','DIM_READABLE_ANGLE'],q);
@@ -2588,39 +1155,43 @@ function updateDim(g){
   dimArrow(v.DIM_QAX,v.DIM_QAY,v.DIM_UX,v.DIM_UY,v.DIM_ARROW,part(g,'path','arrow-a'));
   dimArrow(v.DIM_QBX,v.DIM_QBY,-v.DIM_UX,-v.DIM_UY,v.DIM_ARROW,part(g,'path','arrow-b'));
   const t=part(g,'text','text',{x:v.DIM_TEXT_X,y:v.DIM_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),transform:`rotate(${v.DIM_READABLE_ANGLE} ${v.DIM_TEXT_X} ${v.DIM_TEXT_Y})`,class:'dimension-text'});
-  t.textContent=String(Number(v.DIM_L.toFixed(2)))
+  const dv=RESULT.close('DIM',v.DIM_L,'DIMENSION');g.dataset.value=precision(dv);g.dataset.delta=String(get('DIM_DELTA'));g.dataset.bit=String(bit('DIMENSION')?.textContent||0);setEntityBit(g,true);t.textContent=dimensionText(dv)
 }
 function updateAngDim(g){
   const q={VX:+g.dataset.vx,VY:+g.dataset.vy,AX:+g.dataset.ax,AY:+g.dataset.ay,BX:+g.dataset.bx,BY:+g.dataset.by,CX:+g.dataset.cx,CY:+g.dataset.cy,VIEW_SCALE:num('VIEW_SCALE')||1},
         v=CV(['ANG_VALID','ANG_DEG','ANG_RADIUS','ANG_SWEEP','ANG_OVER','ANG_ARROW','ANG_U1X','ANG_U1Y','ANG_U2X','ANG_U2Y','ANG_START_X','ANG_START_Y','ANG_END_X','ANG_END_Y','ANG_T1X','ANG_T1Y','ANG_T2X','ANG_T2Y','ANG_TEXT_X','ANG_TEXT_Y'],q);
-  if(v.ANG_VALID!==1){g.hidden=true;return}g.hidden=false;
+  if(v.ANG_VALID!==1){g.hidden=true;g.dataset.bit='0';setBit('ANGDIMENSION',false);setEntityBit(g,false);return}g.hidden=false;
   part(g,'line','ray-a',{x1:q.VX+v.ANG_U1X*(2/q.VIEW_SCALE),y1:q.VY+v.ANG_U1Y*(2/q.VIEW_SCALE),x2:q.VX+v.ANG_U1X*(v.ANG_RADIUS+v.ANG_OVER),y2:q.VY+v.ANG_U1Y*(v.ANG_RADIUS+v.ANG_OVER)});
   part(g,'line','ray-b',{x1:q.VX+v.ANG_U2X*(2/q.VIEW_SCALE),y1:q.VY+v.ANG_U2Y*(2/q.VIEW_SCALE),x2:q.VX+v.ANG_U2X*(v.ANG_RADIUS+v.ANG_OVER),y2:q.VY+v.ANG_U2Y*(v.ANG_RADIUS+v.ANG_OVER)});
   part(g,'path','arc',{d:`M ${v.ANG_START_X} ${v.ANG_START_Y} A ${v.ANG_RADIUS} ${v.ANG_RADIUS} 0 0 ${v.ANG_SWEEP} ${v.ANG_END_X} ${v.ANG_END_Y}`});
   dimArrow(v.ANG_START_X,v.ANG_START_Y,v.ANG_T1X,v.ANG_T1Y,v.ANG_ARROW,part(g,'path','arrow-a'));
   dimArrow(v.ANG_END_X,v.ANG_END_Y,v.ANG_T2X,v.ANG_T2Y,v.ANG_ARROW,part(g,'path','arrow-b'));
   const t=part(g,'text','text',{x:v.ANG_TEXT_X,y:v.ANG_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),class:'dimension-text'});
-  t.textContent=`${Number(v.ANG_DEG.toFixed(2))}°`
+  const av=RESULT.close('ANGDIM',v.ANG_DEG,'ANGDIMENSION');g.dataset.value=precision(av);g.dataset.delta=String(get('ANGDIM_DELTA'));g.dataset.bit=String(bit('ANGDIMENSION')?.textContent||0);setEntityBit(g,true);t.textContent=`${dimensionText(av)}°`
 }
 
 function updateAlignDim(g){
   const q={X1:+g.dataset.ax,Y1:+g.dataset.ay,X2:+g.dataset.bx,Y2:+g.dataset.by,OFFSET:Number(g.dataset.offset)||0,VIEW_SCALE:num('VIEW_SCALE')||1},
         v=CV(['ALIGN_L','ALIGN_UX','ALIGN_UY','ALIGN_NX','ALIGN_NY','ALIGN_QAX','ALIGN_QAY','ALIGN_QBX','ALIGN_QBY','ALIGN_ARROW','ALIGN_EXT_AX','ALIGN_EXT_AY','ALIGN_EXT_BX','ALIGN_EXT_BY','ALIGN_LINE_X2','ALIGN_LINE_Y2','ALIGN_TEXT_X','ALIGN_TEXT_Y','ALIGN_READABLE_ANGLE'],q);
-  if(!(v.ALIGN_L>1e-9)){g.hidden=true;return}g.hidden=false;
+  if(!(v.ALIGN_L>1e-9)){g.hidden=true;g.dataset.bit='0';setBit('ALIGNDIMENSION',false);setEntityBit(g,false);return}g.hidden=false;
   part(g,'line','ext-a',{x1:q.X1,y1:q.Y1,x2:v.ALIGN_EXT_AX,y2:v.ALIGN_EXT_AY,class:'dimension-extension'});
   part(g,'line','ext-b',{x1:q.X2,y1:q.Y2,x2:v.ALIGN_EXT_BX,y2:v.ALIGN_EXT_BY,class:'dimension-extension'});
   part(g,'line','dim-line',{x1:v.ALIGN_QAX,y1:v.ALIGN_QAY,x2:v.ALIGN_LINE_X2,y2:v.ALIGN_LINE_Y2});
   dimArrow(v.ALIGN_QAX,v.ALIGN_QAY,v.ALIGN_UX,v.ALIGN_UY,v.ALIGN_ARROW,part(g,'path','arrow-a'));
   dimArrow(v.ALIGN_QBX,v.ALIGN_QBY,-v.ALIGN_UX,-v.ALIGN_UY,v.ALIGN_ARROW,part(g,'path','arrow-b'));
   const t=part(g,'text','text',{x:v.ALIGN_TEXT_X,y:v.ALIGN_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),transform:`rotate(${v.ALIGN_READABLE_ANGLE} ${v.ALIGN_TEXT_X} ${v.ALIGN_TEXT_Y})`,class:'dimension-text'});
-  t.textContent=String(Number(v.ALIGN_L.toFixed(2)))
+  const lv=RESULT.close('ALIGNDIM',v.ALIGN_L,'ALIGNDIMENSION');g.dataset.value=precision(lv);g.dataset.delta=String(get('ALIGNDIM_DELTA'));g.dataset.bit=String(bit('ALIGNDIMENSION')?.textContent||0);setEntityBit(g,true);t.textContent=dimensionText(lv)
 }
+function syncTechSnapControls(){
+  for(const [id,name] of [['cad-snap-midpoint','SNAP_MIDPOINT'],['cad-snap-quadrant','SNAP_QUADRANT'],['cad-snap-intersection','SNAP_INTERSECTION'],['cad-snap-perpendicular','SNAP_PERPENDICULAR'],['cad-snap-tangent','SNAP_TANGENT']]){const el=document.getElementById(id);if(el)el.checked=snapOn(name)}
+}
+/* ==================== APPLICATION REFRESH ================== */
 function refresh(){
-  syncSelectionClasses();
+  syncAllEntityBytes();syncSelectionClasses();syncTechSnapControls();
   const n=entityIndex.size,ns=selectedSet.size;
   count.textContent=`${n} ${n===1?'entity':'entities'}`;
   selectionText.textContent=ns?`${ns} selected`:'no selection';
-  syncLineControls();updateCommand()
+  syncLineControls();updateCommand();const active=get('TOOL');if(byte(CMD_NAME(active)))commandState(active,draft?'active':'closed',!draft);updateCadBit()
 }
 function updateCommand(){
   const t=get('TOOL');
@@ -2653,10 +1224,12 @@ function updateCommand(){
   if(t==='aligndim'&&draft){command.textContent=draft.stage==='offset'?'QUOTA ALLINEATA · allontana linea di quota':draft.stage==='points'?'QUOTA ALLINEATA · clicca punti successivi · Esc termina':'QUOTA ALLINEATA · scegli origine';return}
   if(t==='text'&&draft){command.textContent=`TESTO${draft.edit?' MODIFICA':''} · ${draft.buffer||'scrivi...'} · Enter conferma`;return}
   if(t==='fillet'){if(draft?.kind==='fillet'){const b=draft.buffer?` · ${draft.buffer}`:'';command.textContent=`RACCORDA · R ${Number(draft.radius).toFixed(2)}${b} · muovi / digita raggio · Enter o click`;return}command.textContent='RACCORDA · seleziona vertice comune';return}
-  if(t==='arc-rif'){if(!draft){command.textContent='ARCO R-I-F · digita raggio';return}if(draft.stage==='radius'){command.textContent=`ARCO R-I-F · raggio ${draft.buffer||draft.radius} · Enter`;return}if(draft.stage==='start'){command.textContent=`ARCO R-I-F · R ${draft.radius} · scegli inizio`;return}command.textContent=`ARCO R-I-F · R ${Number(draft.radius).toFixed(2)} · scegli fine · arco visibile entro 2R`;return}
-  if(t==='arc-ifr'){if(!draft){command.textContent='ARCO I-F-R · scegli inizio';return}if(draft.stage==='end'){command.textContent='ARCO I-F-R · scegli fine';return}if(draft.stage==='radius'){command.textContent=`ARCO I-F-R · R ${Number(draft.radius||0).toFixed(2)}${draft.buffer?` · ${draft.buffer}`:''} · muovi / digita · Enter o click`;return}}
+  if(t==='circle'&&draft){command.textContent='CERCHIO · muovi/click oppure digita R raggio · D diametro';return}
+  if(['line','dashline','dashdotline'].includes(t)&&draft){command.textContent=`${t.toUpperCase()} · punto successivo · distanza oppure @d<angolo`;return}
+  if(t==='arc'){if(!draft){command.textContent='ARCO · scegli inizio';return}if(draft.stage==='end'){command.textContent='ARCO · scegli fine · coordinate o @d<angolo';return}if(draft.stage==='curve'){command.textContent='ARCO · muovi lato/curvatura · R + raggio oppure click';return}}
   command.textContent=draft?`${t.toUpperCase()} · continue`:`${t.toUpperCase()} · ${t==='select'?'click oppure trascina riquadro · Ctrl aggiunge/toglie':'pick first point'}`
 }
+/* ==================== SELECTION AND EDITING ================ */
 function segmentHit(p,a,b){return C('HIT_D',{PX:p.x,PY:p.y,X1:a.x,Y1:a.y,X2:b.x,Y2:b.y})}
 function entityHit(e,p){
   const k=e.dataset.kind,tol=C('HIT_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1});
@@ -2710,14 +1283,14 @@ function confirmEditorSelection(firstPoint=null){
   return true
 }
 function finishSelectionBox(){if(!selectionDrag)return;const a=selectionDrag.start,b=selectionDrag.current,box={x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(b.x-a.x),height:Math.abs(b.y-a.y)},cross=b.x<a.x,ids=[];for(const e of entities()){let q;try{q=e.getBBox()}catch{continue}const inside=q.x>=box.x&&q.y>=box.y&&q.x+q.width<=box.x+box.width&&q.y+q.height<=box.y+box.height;if(cross?boxIntersects(q,box):inside)ids.push(e.dataset.byte)}selectMany(ids,selectionDrag.add);selectionDrag=null;drawSelectionBox();if(!confirmEditorSelection())refresh()}
-function deleteSelection(){const es=selectedEntities();if(!es.length)return false;saveHistory();for(const e of es){unindexEntity(e);e.remove()}clearSelection();refresh();return true}
+function deleteSelection(){const es=selectedEntities();if(!es.length)return false;saveHistory();for(const e of es){writeEntityByte(e,0);unindexEntity(e);e.remove()}clearSelection();refresh();return true}
 function lineEnds(e){return[{x:+e.getAttribute('x1'),y:+e.getAttribute('y1'),slot:1},{x:+e.getAttribute('x2'),y:+e.getAttribute('y2'),slot:2}]}
 function lineIntersection(a,b){
   const q={X1:BYTE.attr(a,'x1'),Y1:BYTE.attr(a,'y1'),X2:BYTE.attr(a,'x2'),Y2:BYTE.attr(a,'y2'),X3:BYTE.attr(b,'x1'),Y3:BYTE.attr(b,'y1'),X4:BYTE.attr(b,'x2'),Y4:BYTE.attr(b,'y2')};
   const v=CV(['INT_VALID','INT_X','INT_Y'],q);return v.INT_VALID===1&&Number.isFinite(v.INT_X)&&Number.isFinite(v.INT_Y)?{x:v.INT_X,y:v.INT_Y}:null
 }
 function cadLine(e){return !!e&&['line','dashline','dashdotline'].includes(e.dataset.kind)}
-function segmentParameter(e,p){return C('SEG_T',{X1:BYTE.attr(e,'x1'),Y1:BYTE.attr(e,'y1'),X2:BYTE.attr(e,'x2'),Y2:BYTE.attr(e,'y2'),PX:BYTE.ref(()=>p.x,null,'SEG.PX'),PY:BYTE.ref(()=>p.y,null,'SEG.PY')})}
+function segmentParameter(e,p){return C('SEG_T',{X1:BYTE.attr(e,'x1'),Y1:BYTE.attr(e,'y1'),X2:BYTE.attr(e,'x2'),Y2:BYTE.attr(e,'y2'),PX:p.x,PY:p.y})}
 function editLinePlan(mode,boundary,target,click){
   if(!cadLine(boundary)||!cadLine(target)||boundary===target)return null;
   const ip=lineIntersection(boundary,target);if(!ip)return null;
@@ -2777,22 +1350,29 @@ function commitFillet(){
   const trim=(i,t)=>{if(i.slot===1){i.e.setAttribute('x1',t.x);i.e.setAttribute('y1',t.y)}else{i.e.setAttribute('x2',t.x);i.e.setAttribute('y2',t.y)}};trim(f.i1,f.t1);trim(f.i2,f.t2);
   const arc=S('path',{d:`M ${f.t1.x} ${f.t1.y} A ${r} ${r} 0 0 ${f.sweep} ${f.t2.x} ${f.t2.y}`,'data-byte':next(),'data-kind':'arc',class:'entity','data-cx':f.c.x,'data-cy':f.c.y,'data-sx':f.t1.x,'data-sy':f.t1.y,'data-ex':f.t2.x,'data-ey':f.t2.y});applyLineStyle(arc);scene.append(arc);indexEntity(arc);setSingleSelection(arc.dataset.byte);draft=null;overlay.querySelectorAll('.draft').forEach(e=>e.remove());refresh();command.textContent=`RACCORDA · R ${r}`
 }
-function clearDraft(){if(draft?.edit)draft.edit.style.visibility='';draft=null;overlay.querySelectorAll('.draft').forEach(e=>e.remove());refresh()}
+/* ==================== COMMAND PREVIEW / TRANSFORMS ========= */
+function clearDraft(){if(draft?.edit)draft.edit.style.visibility='';draft=null;cadAngleLock=null;cadValueBuffer='';cadValueMode='';clearGuideLocks();guideState={x:null,y:null,point:null,tech:null};overlay.querySelectorAll('.draft').forEach(e=>e.remove());drawGuides();refresh()}
+/* --- Command Preview Projection --------------------------- */
 function preview(){
   overlay.querySelectorAll('.draft').forEach(e=>e.remove());if(!draft)return;const{kind,a,b,c}=draft;let e,q=geom(a,b,c);
-  if((kind==='line'||kind==='dashline'||kind==='dashdotline')&&b)e=S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'draft', 'stroke-dasharray':kind==='dashline'?'4 3':kind==='dashdotline'?'6 2 .5 2':null,'stroke-linecap':kind==='dashdotline'?'round':null});
+  if((kind==='line'||kind==='dashline'||kind==='dashdotline')&&b){const pa=draft.tangentPreview||a;e=S('line',{x1:pa.x,y1:pa.y,x2:b.x,y2:b.y,class:'draft', 'stroke-dasharray':kind==='dashline'?'4 3':kind==='dashdotline'?'6 2 .5 2':null,'stroke-linecap':kind==='dashdotline'?'round':null})}
   if(kind==='circle'&&b)e=S('circle',{cx:a.x,cy:a.y,r:C('DIST',q),class:'draft'});
   if(kind==='arc'&&b&&c)e=S('path',{d:arcPath(a,b,c),class:'draft'});
-  if(kind==='arc-rif'&&a&&b){
-    const f=arcRadiusCalc(a,b,Number(draft.radius)),g=S('g',{class:'draft'});
+  if(kind==='arc'&&a&&b){
+    const g=S('g',{class:'draft'});
     g.append(S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,'stroke-dasharray':'2 3'}));
-    if(f)g.append(S('path',{d:f.path,'stroke-dasharray':null,'stroke-width':.65,'vector-effect':'non-scaling-stroke'}));
-    e=g;
-  }
-  if(kind==='arc-ifr'&&a&&b){
-    const f=arcRadiusCalc(a,b,Number(draft.radius)),g=S('g',{class:'draft'});
-    g.append(S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,'stroke-dasharray':'2 3'}));
-    if(f)g.append(S('path',{d:f.path,'stroke-dasharray':null,'stroke-width':.65,'vector-effect':'non-scaling-stroke'}));
+    if(draft.stage==='curve'&&draft.curve){
+      let r=null;
+      if(cadValueMode==='RADIUS'&&cadValueBuffer){
+        const rv=cadNumber(cadValueBuffer);
+        if(rv!=null&&rv>0){
+          const ax=b.x-a.x,ay=b.y-a.y,bx=draft.curve.x-a.x,by=draft.curve.y-a.y;
+          r=(ax*by-ay*bx)>=0?rv:-rv
+        }
+      }else if(cadValueMode!=='RADIUS')r=arcRadiusFromPoint(a,b,draft.curve);
+      const f=r==null?null:arcRadiusCalc(a,b,r);
+      if(f)g.append(S('path',{d:f.path,'stroke-dasharray':null,'stroke-width':.65,'vector-effect':'non-scaling-stroke'}));
+    }
     e=g;
   }
   if(kind==='dim'&&a&&b){const g=S('g',{class:'draft dimension','data-ax':a.x,'data-ay':a.y,'data-bx':b.x,'data-by':b.y,'data-cx':(c||b).x,'data-cy':(c||b).y});updateDim(g);e=g}
@@ -2871,6 +1451,7 @@ function commitTransformMany(es,fn,flipArc=false){if(!es.length)return false;sav
 function commitMirrorCopies(es,fn,flipArc=false){if(!es.length)return false;saveHistory();const ids=[];for(const entity of es){const copy=entity.cloneNode(true);copy.dataset.byte=next();copy.classList.remove('selected','draft');copy.classList.add('entity');transformEntity(entity,fn,flipArc,copy);scene.append(copy);indexEntity(copy);ids.push(copy.dataset.byte)}selectMany(ids);clearDraft();return true}
 function beginTransform(kind,pick=null){let es=selectedEntities();if(!es.length&&pick){setSingleSelection(pick.dataset.byte);es=[pick]}if(!es.length)return null;draft=kind==='mirror'?{kind,entities:es,stage:'axis1',a:null,b:null}:{kind,entities:es,stage:'center',c:null,a:null,b:null,angle:0,buffer:''};refresh();return draft}
 function center(e){const b=e.getBBox();return midpoint({x:b.x,y:b.y},{x:C('MOVE_X',{X1:b.x,TX:b.width}),y:C('MOVE_Y',{Y1:b.y,TY:b.height})})}
+/* ==================== POINTER INPUT CONTROLLER ============= */
 svg.addEventListener('dblclick',e=>{
   const p=pt(e),q=pickTarget(e,p);
   if(!q||q.dataset.kind!=='text')return;
@@ -2881,9 +1462,10 @@ svg.addEventListener('dblclick',e=>{
   preview();refresh();svg.focus()
 });
 svg.addEventListener('pointerdown',e=>{
-  svg.focus();const p=snap(pt(e));
+  svg.focus();let p=snap(pt(e));
   if(e.button===1||e.button===2||e.altKey||e.shiftKey){pan={cx:e.clientX,cy:e.clientY,x:num('VIEW_X'),y:num('VIEW_Y'),scale:num('VIEW_SCALE')||1};svg.setPointerCapture(e.pointerId);return}
   const tool=get('TOOL');
+  p=applyCadAngleLock(p);
   if(selectionPhaseActive()&&draft.kind===tool){
     const raw=pt(e),q=pickTarget(e,raw),add=e.ctrlKey||e.metaKey;
     if(q){
@@ -2946,9 +1528,30 @@ svg.addEventListener('pointerdown',e=>{
     }
     return
   }
-  if(tool==='line'||tool==='dashline'||tool==='dashdotline'||tool==='circle'){if(!draft){draft={kind:tool,a:p,b:p};preview()}else{draft.b=p;make(tool,draft.a,draft.b);clearDraft()}return}
-  if(tool==='arc-rif'){if(!draft)return;if(draft.stage==='radius'){draft.stage='start';draft.buffer='';refresh();return}if(draft.stage==='start'){draft.a=p;draft.b=p;draft.stage='end';preview();refresh()}else{draft.b=p;if(makeArcRadius(draft.a,draft.b,Number(draft.radius)))clearDraft();else{command.textContent='ARCO R-I-F · raggio minore di metà corda';preview()}}return}
-  if(tool==='arc-ifr'){if(!draft){draft={kind:'arc-ifr',a:p,b:p,stage:'end',radius:Number(get('ARC_RADIUS'))||50,buffer:''};preview();refresh()}else if(draft.stage==='end'){draft.b=p;draft.stage='radius';draft.buffer='';const rr=arcRadiusFromPoint(draft.a,draft.b,p);if(rr)draft.radius=rr;preview();refresh()}else if(draft.stage==='radius'){if(Number.isFinite(Number(draft.radius))&&makeArcRadius(draft.a,draft.b,Number(draft.radius)))clearDraft();else{command.textContent='ARCO I-F-R · sposta il mouse lontano dalla corda o digita il raggio';preview()}}return}
+  if(tool==='line'||tool==='dashline'||tool==='dashdotline'||tool==='circle'){
+    if(!draft){
+      draft={kind:tool,a:p,b:p,tangentPreview:null};
+      if(tool!=='circle'&&snapOn('SNAP_TANGENT')&&lastSnapKind==='none'){const src=tangentSourceAt(p);if(src){draft.tangentSource=src;draft.tangentSeed={x:Number(p.x),y:Number(p.y)}}}
+      preview()
+    }else{
+      draft.b=p;
+      let start=draft.a;
+      if(tool!=='circle'&&draft.tangentSource){const tp=deferredTangentPoint(draft.tangentSeed,p,draft.tangentSource);if(tp)start=POINT.close(tp,'POINT.TANGENT.START')}
+      make(tool,start,draft.b);clearDraft()
+    }
+    return
+  }
+  if(tool==='arc'){
+    if(!draft){draft={kind:'arc',a:p,b:p,curve:p,stage:'end'};preview();refresh()}
+    else if(draft.stage==='end'){
+      if(!enterArcRadiusStage(p))return
+    }else if(draft.stage==='curve'){
+      draft.curve=p;const r=arcRadiusFromPoint(draft.a,draft.b,p);
+      if(r!=null&&makeArcRadius(draft.a,draft.b,r))clearDraft();
+      else{command.textContent='ARCO · allontanati un poco dalla corda';preview()}
+    }
+    return
+  }
   if(tool==='dim'){if(!draft){draft={kind:'dim',a:p,b:p,c:p,stage:1};preview();refresh()}else if(draft.stage===1){draft.b=p;draft.c=p;draft.stage=2;preview();refresh()}else{draft.c=p;make('dim',draft.a,draft.b,draft.c);clearDraft()}return}
   if(tool==='angdim'){if(!draft){draft={kind:'angdim',a:p,b:p,c:p,d:p,stage:1};preview();refresh()}else if(draft.stage===1){draft.b=p;draft.c=p;draft.d=p;draft.stage=2;preview();refresh()}else if(draft.stage===2){draft.c=p;draft.d=p;draft.stage=3;preview();refresh()}else{draft.d=p;make('angdim',draft.a,draft.b,draft.c,draft.d);clearDraft()}return}
   if(tool==='aligndim'){
@@ -2963,7 +1566,7 @@ svg.addEventListener('pointerdown',e=>{
   }
 });
 svg.addEventListener('pointermove',e=>{
-  const raw=pt(e);if(selectionDrag){selectionDrag.current=raw;drawSelectionBox();coords.textContent=`x ${raw.x.toFixed(2)} · y ${raw.y.toFixed(2)}`;return}const p=snap(raw);coords.textContent=`x ${p.x.toFixed(2)} · y ${p.y.toFixed(2)}`;
+  const raw=pt(e);if(selectionDrag){selectionDrag.current=raw;drawSelectionBox();coords.textContent=`x ${Number(raw.x).toFixed(2)} · y ${Number(raw.y).toFixed(2)}`;return}let p=snap(raw);p=applyCadAngleLock(p);lastCadPointer={x:Number(p.x),y:Number(p.y)};coords.textContent=`x ${Number(p.x).toFixed(2)} · y ${Number(p.y).toFixed(2)}`;
   if(pan){set('VIEW_X',C('PAN_VIEW_X',{START_VIEW_X:pan.x,CLIENT_X:e.clientX,START_CLIENT_X:pan.cx,START_SCALE:pan.scale}));set('VIEW_Y',C('PAN_VIEW_Y',{START_VIEW_Y:pan.y,CLIENT_Y:e.clientY,START_CLIENT_Y:pan.cy,START_SCALE:pan.scale}));view();return}
   if(draft){
     if(draft.kind==='mirror'){if(draft.stage==='axis2'){draft.b=p;preview();updateCommand()}return}
@@ -2971,8 +1574,7 @@ svg.addEventListener('pointermove',e=>{
     if(draft.kind==='trim'||draft.kind==='extend'){const target=pickTarget(e,p);draft.plan=editLinePlan(draft.kind,draft.boundary,target,p);preview();updateCommand();return}
     if((draft.kind==='move'||draft.kind==='copy')&&draft.stage==='to'){draft.to=p;preview();updateCommand();return}
     if(draft.kind==='fillet'){if(!draft.buffer){draft.radius=C('DIST',{X1:draft.g.v.x,Y1:draft.g.v.y,X2:p.x,Y2:p.y});}preview();refresh()}
-    else if(draft.kind==='arc-rif'){if(draft.stage==='end'){draft.b=p;preview();refresh();return}}
-    else if(draft.kind==='arc-ifr'){if(draft.stage==='end')draft.b=p;else if(draft.stage==='radius'&&!draft.buffer){draft.radius=arcRadiusFromPoint(draft.a,draft.b,p)}}
+    else if(draft.kind==='arc'){if(draft.stage==='end')draft.b=p;else if(draft.stage==='curve')draft.curve=p}
     else if(draft.kind==='dim'){if(draft.stage===1){draft.b=p;draft.c=p}else draft.c=p}
     else if(draft.kind==='angdim'){if(draft.stage===1){draft.b=p;draft.c=p;draft.d=p}else if(draft.stage===2){draft.c=p;draft.d=p}else draft.d=p}
     else if(draft.kind==='aligndim'){
@@ -2980,19 +1582,195 @@ svg.addEventListener('pointermove',e=>{
         draft.offset=C('SIGNED_DIST_Y',{X1:draft.a.x,Y1:draft.a.y,X2:p.x,Y2:p.y});draft.b={x:C('MOVE_X',{X1:draft.a.x,TX:1}),y:draft.a.y}
       }else draft.b=p
     }
-    else if(draft.stage===1||draft.b)draft.b=p;
+    else if(draft.stage===1||draft.b){
+      draft.b=p;
+      if(['line','dashline','dashdotline'].includes(draft.kind)&&draft.tangentSource){const tp=deferredTangentPoint(draft.tangentSeed,p,draft.tangentSource);draft.tangentPreview=tp?POINT.close(tp,'POINT.TANGENT.START.PREVIEW'):null}
+    }
     if(draft?.kind!=='fillet')preview()
   }
 });
-svg.addEventListener('pointerup',e=>{if(selectionDrag){finishSelectionBox();try{svg.releasePointerCapture(e.pointerId)}catch{}return}pan=null});svg.addEventListener('pointerleave',()=>{guideState={x:null,y:null,point:null};drawGuides()});svg.addEventListener('contextmenu',e=>e.preventDefault());
+svg.addEventListener('pointerup',e=>{if(selectionDrag){finishSelectionBox();try{svg.releasePointerCapture(e.pointerId)}catch{}return}pan=null});svg.addEventListener('pointerleave',()=>{clearGuideLocks();guideState={x:null,y:null,point:null,tech:null};lastSnapKind='none';drawGuides()});svg.addEventListener('contextmenu',e=>e.preventDefault());
 svg.addEventListener('wheel',e=>{
   e.preventDefault();
-  const r=svg.getBoundingClientRect(),old=num('VIEW_SCALE')||1;
+  const r=svg.getBoundingClientRect();
+  if(!Number.isFinite(r.width)||!Number.isFinite(r.height)||r.width<8||r.height<8)return;
+  const old=Number(num('VIEW_SCALE'))||1,oldX=Number(num('VIEW_X'))||0,oldY=Number(num('VIEW_Y'))||0;
   let delta=e.deltaY;if(e.deltaMode===1)delta*=16;else if(e.deltaMode===2)delta*=r.height||1;
-  const q={OLD_SCALE:old,DELTA:delta,CLIENT_X:e.clientX,CLIENT_Y:e.clientY,LEFT:r.left,TOP:r.top,SCREEN_W:r.width,SCREEN_H:r.height,VIEW_X:num('VIEW_X'),VIEW_Y:num('VIEW_Y')},
-        ns=C('ZOOM_SCALE',q),v=CV(['ZOOM_CENTER_X','ZOOM_CENTER_Y'],{...q,NEW_SCALE:ns});
-  set('VIEW_SCALE',ns);set('VIEW_X',v.ZOOM_CENTER_X);set('VIEW_Y',v.ZOOM_CENTER_Y);view()
+  const q={OLD_SCALE:old,DELTA:delta,CLIENT_X:e.clientX,CLIENT_Y:e.clientY,LEFT:r.left,TOP:r.top,SCREEN_W:r.width,SCREEN_H:r.height,VIEW_X:oldX,VIEW_Y:oldY},
+        ns=Number(C('ZOOM_SCALE',q)),v=CV(['ZOOM_CENTER_X','ZOOM_CENTER_Y'],{...q,NEW_SCALE:ns});
+  const nx=Number(v.ZOOM_CENTER_X),ny=Number(v.ZOOM_CENTER_Y);
+  if(!Number.isFinite(ns)||ns<=0||!Number.isFinite(nx)||!Number.isFinite(ny))return;
+  set('VIEW_SCALE',ns);set('VIEW_X',nx);set('VIEW_Y',ny);view()
 },{passive:false});
+/* --- AutoCAD-Compatible Keyboard Command Line ------------
+   Aliases match AutoCAD where the current framework has an equivalent
+   command. Custom UNISEFE tools keep explicit names instead of claiming
+   a non-existent AutoCAD alias. Keyboard commands dispatch through run(),
+   exactly like toolbar buttons: there is no parallel command engine.
+   ----------------------------------------------------------- */
+const KEY_COMMANDS=Object.freeze({
+  L:['line','tool'], LINE:['line','tool'],
+  C:['circle','tool'], CIRCLE:['circle','tool'],
+  A:['arc','tool'], ARC:['arc','tool'],
+  DT:['text','tool'], TEXT:['text','tool'],
+  DIM:['dim','tool'], DLI:['dim','tool'], DIMLINEAR:['dim','tool'],
+  DAN:['angdim','tool'], DIMANGULAR:['angdim','tool'],
+  DAL:['aligndim','tool'], DIMALIGNED:['aligndim','tool'],
+  M:['move','tool'], MOVE:['move','tool'],
+  CO:['copy','tool'], COPY:['copy','tool'],
+  TR:['trim','tool'], TRIM:['trim','tool'],
+  EX:['extend','tool'], EXTEND:['extend','tool'],
+  F:['fillet','tool'], FILLET:['fillet','tool'],
+  MI:['mirror','tool'], MIRROR:['mirror','tool'],
+  RO:['rotate','tool'], ROTATE:['rotate','tool'],
+  E:['delete','action'], ERASE:['delete','action'], DELETE:['delete','action'],
+  U:['undo','action'], UNDO:['undo','action'],
+  SELECT:['select','tool'],
+  DASHLINE:['dashline','tool'], DASHDOTLINE:['dashdotline','tool'],
+  FIT:['fit','action'], SAVE:['save','action'], QSAVE:['save','action'], OPEN:['open','action']
+});
+let keyCommandBuffer='';
+let cadValueBuffer='';
+let cadValueMode='';
+let cadAngleLock=null;
+let lastCadPointer=null;
+const CAD_POINT_TOOLS=new Set(['line','dashline','dashdotline','circle','arc']);
+function cadNumber(s){
+  const v=Number(String(s).trim().replace(',','.'));
+  return Number.isFinite(v)?v:null
+}
+function parseCadPointEntry(text,base,cursor){
+  let s=String(text||'').trim().replace(/\s+/g,'');
+  if(!s)return null;
+  let relative=false,absoluteDynamic=false;
+  if(s[0]==='@'){relative=true;s=s.slice(1)}
+  else if(s[0]==='#'){absoluteDynamic=true;s=s.slice(1)}
+  const polar=s.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+))<([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/);
+  if(polar){
+    const d=Number(polar[1]),deg=Number(polar[2]);if(!Number.isFinite(d)||!Number.isFinite(deg))return null;
+    const o=relative&&base?base:{x:0,y:0},a=deg*Math.PI/180;
+    return{x:o.x+d*Math.cos(a),y:o.y+d*Math.sin(a),kind:relative?'relative-polar':'absolute-polar'}
+  }
+  const cart=s.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)),([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/);
+  if(cart){
+    const x=Number(cart[1]),y=Number(cart[2]);if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+    if(relative&&base)return{x:base.x+x,y:base.y+y,kind:'relative-cartesian'};
+    return{x,y,kind:absoluteDynamic?'absolute-dynamic':'absolute-cartesian'}
+  }
+  const d=Number(s);
+  if(Number.isFinite(d)&&base&&cursor){
+    const dx=cursor.x-base.x,dy=cursor.y-base.y,n=Math.hypot(dx,dy);if(n<=1e-15)return null;
+    return{x:base.x+d*dx/n,y:base.y+d*dy/n,kind:'direct-distance'}
+  }
+  return null
+}
+function cadInputBase(){
+  const t=get('TOOL');
+  if(!draft)return null;
+  if(['line','dashline','dashdotline','circle'].includes(t))return draft.a||null;
+  if(t==='arc')return draft.stage==='end'?draft.a:(draft.stage==='curve'?draft.b:null);
+  if((t==='move'||t==='copy')&&draft.stage==='to')return draft.base||null;
+  if(t==='mirror'&&draft.stage==='axis2')return draft.a||null;
+  return null
+}
+function cadAngleLockBase(){
+  const tool=get('TOOL');
+  if(!draft)return null;
+  if(['line','dashline','dashdotline'].includes(tool))return draft.a||null;
+  if(tool==='arc'){
+    if(draft.stage==='end')return draft.a||null;
+    if(draft.stage==='curve')return draft.b||null;
+  }
+  return null
+}
+function applyCadAngleLock(p){
+  const base=cadAngleLockBase();
+  if(cadAngleLock==null||!base||!p)return p;
+  const dx=Number(p.x)-Number(base.x),dy=Number(p.y)-Number(base.y),d=Math.hypot(dx,dy);
+  if(!Number.isFinite(d)||d<=1e-15)return p;
+  const a=Number(cadAngleLock)*Math.PI/180;
+  return POINT.close({x:Number(base.x)+d*Math.cos(a),y:Number(base.y)+d*Math.sin(a)},'POINT.KEYBOARD.ANGLE')
+}
+function showCadValueInput(label='Input'){
+  const angle=cadAngleLock==null?'':` · ANGLE ${Number(cadAngleLock).toFixed(6).replace(/\.?0+$/,'')}°`;
+  command.textContent=`${label}: ${cadValueBuffer||'_'}${cadValueMode?` · ${cadValueMode}`:''}${angle}`
+}
+function enterArcRadiusStage(p=null){
+  if(!draft||draft.kind!=='arc'||draft.stage!=='end')return false;
+  const q=p||draft.b||lastCadPointer;if(!q)return false;
+  if(C('DIST',{X1:draft.a.x,Y1:draft.a.y,X2:q.x,Y2:q.y})<=1e-9)return false;
+  draft.b=POINT.close({x:Number(q.x),y:Number(q.y)},'POINT.ARC.CHORD.END');
+  draft.curve=lastCadPointer||draft.b;
+  draft.stage='curve';
+  cadAngleLock=null;cadValueBuffer='';cadValueMode='RADIUS';
+  showCadValueInput('ARC · RADIUS');preview();refresh();return true
+}
+function beginCadPoint(p){
+  const tool=get('TOOL'),q=POINT.close({x:Number(p.x),y:Number(p.y)},'POINT.KEYBOARD');
+  if(['line','dashline','dashdotline','circle'].includes(tool)){
+    if(!draft){draft={kind:tool,a:q,b:q,tangentPreview:null};preview();refresh();return true}
+    if(tool==='circle'){make('circle',draft.a,q);clearDraft();return true}
+    make(tool,draft.a,q);clearDraft();return true
+  }
+  if(tool==='arc'){
+    if(!draft){draft={kind:'arc',a:q,b:q,curve:q,stage:'end'};preview();refresh();return true}
+    if(draft.stage==='end'){
+      return enterArcRadiusStage(q)
+    }
+    if(draft.stage==='curve'){
+      const r=arcRadiusFromPoint(draft.a,draft.b,q);if(r!=null&&makeArcRadius(draft.a,draft.b,r)){clearDraft();return true}
+    }
+  }
+  return false
+}
+function commitCadValueInput(){
+  const tool=get('TOOL'),raw=cadValueBuffer.trim();
+  if(!raw)return false;
+  const angleOnly=raw.match(/^<([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/);
+  if(angleOnly){
+    const deg=Number(angleOnly[1]),base=cadAngleLockBase();
+    if(!Number.isFinite(deg)||!base)return false;
+    cadAngleLock=((deg%360)+360)%360;
+    cadValueBuffer='';cadValueMode='';
+    if(lastCadPointer){
+      const q=applyCadAngleLock(lastCadPointer);
+      if(draft?.kind==='arc'&&draft.stage==='end')draft.b=q;
+      else if(draft?.kind==='arc'&&draft.stage==='curve')draft.curve=q;
+      else if(draft&&['line','dashline','dashdotline'].includes(draft.kind))draft.b=q;
+      preview();refresh()
+    }
+    showCadValueInput(tool.toUpperCase());
+    return true
+  }
+  if(tool==='circle'&&draft){
+    const v=cadNumber(raw);if(v!=null&&v>0){
+      const r=cadValueMode==='DIAMETER'?v/2:v;
+      const q=POINT.close({x:draft.a.x+r,y:draft.a.y},cadValueMode==='DIAMETER'?'POINT.CIRCLE.DIAMETER':'POINT.CIRCLE.RADIUS');
+      make('circle',draft.a,q);cadValueBuffer='';cadValueMode='';clearDraft();return true
+    }
+  }
+  if(tool==='arc'&&draft?.stage==='curve'&&cadValueMode==='RADIUS'){
+    const v=cadNumber(raw);if(v!=null&&v>0){
+      const cur=draft.curve||lastCadPointer||draft.b,ax=draft.b.x-draft.a.x,ay=draft.b.y-draft.a.y,bx=cur.x-draft.a.x,by=cur.y-draft.a.y;
+      const sign=(ax*by-ay*bx)>=0?1:-1;
+      if(makeArcRadius(draft.a,draft.b,sign*v)){cadValueBuffer='';cadValueMode='';clearDraft();return true}
+      command.textContent='ARCO · raggio non valido per questa corda';return true
+    }
+  }
+  const p=parseCadPointEntry(raw,cadInputBase(),lastCadPointer);
+  if(p&&beginCadPoint(p)){cadValueBuffer='';cadValueMode='';return true}
+  return false
+}
+function showKeyCommand(){command.textContent=keyCommandBuffer?`Command: ${keyCommandBuffer}_`:'Command:'}
+function executeKeyCommand(){
+  const typed=keyCommandBuffer.trim().toUpperCase();
+  keyCommandBuffer='';
+  if(!typed){updateCommand();return false}
+  const spec=KEY_COMMANDS[typed];
+  if(!spec){command.textContent=`Unknown command: ${typed}`;return false}
+  run(spec[0],spec[1]);
+  return true
+}
 document.addEventListener('keydown',e=>{
   if(e.target.closest?.('input,textarea,select,[contenteditable=true]'))return;
   if(get('TOOL')==='text'&&draft?.kind==='text'){
@@ -3023,17 +1801,39 @@ document.addEventListener('keydown',e=>{
     if(!confirmEditorSelection())command.textContent=`${kind.toUpperCase()} · seleziona almeno un oggetto`;
     return
   }
+  /* AutoCAD-style precise geometric input.
+     - distance: direct distance in current cursor direction
+     - x,y: absolute Cartesian coordinate
+     - @x,y: relative Cartesian coordinate
+     - @distance<angle: relative polar coordinate
+     - <angle: lock direction only; mouse continues to control distance
+     - CIRCLE: R / D select radius or diameter
+     - ARC: after chord confirmation, numeric input is radius; cursor side selects arc side
+     All resolved points close through POINT/Delta-Zero. */
+  const activeTool=get('TOOL');
+  if(CAD_POINT_TOOLS.has(activeTool)){
+    if(e.key==='Escape'&&cadValueBuffer){e.preventDefault();cadValueBuffer='';cadValueMode='';updateCommand();return}
+    if(e.key==='Escape'&&cadAngleLock!=null){e.preventDefault();cadAngleLock=null;updateCommand();preview();refresh();return}
+    if(activeTool==='circle'&&draft&&!cadValueBuffer&&(e.key==='d'||e.key==='D'||e.key==='r'||e.key==='R')){
+      e.preventDefault();cadValueMode=(e.key.toUpperCase()==='D'?'DIAMETER':'RADIUS');showCadValueInput(activeTool.toUpperCase());return
+    }
+    if(activeTool==='arc'&&draft?.stage==='curve'&&!cadValueBuffer&&(e.key==='r'||e.key==='R')){
+      e.preventDefault();cadValueMode='RADIUS';showCadValueInput('ARC · RADIUS');return
+    }
+    if(activeTool==='arc'&&draft?.stage==='end'&&!cadValueBuffer&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();if(!enterArcRadiusStage(lastCadPointer||draft.b))command.textContent='ARCO · definisci prima la corda';return
+    }
+    if((e.key==='Enter'||e.key===' ')&&cadValueBuffer){e.preventDefault();if(!commitCadValueInput())command.textContent=`Input non valido: ${cadValueBuffer}`;return}
+    if(e.key==='Backspace'&&cadValueBuffer){e.preventDefault();cadValueBuffer=cadValueBuffer.slice(0,-1);showCadValueInput(activeTool.toUpperCase());return}
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&/^[0-9@#<,.+\-]$/.test(e.key)){
+      e.preventDefault();cadValueBuffer+=e.key;showCadValueInput(activeTool.toUpperCase());return
+    }
+  }
   if(draft?.kind==='rotate'&&draft.stage==='end'){
     if(e.key==='Escape'){e.preventDefault();clearDraft();return}
     if(e.key==='Enter'){e.preventDefault();let angle=draft.angle||0;if(draft.buffer){const deg=Number(draft.buffer.replace(',','.'));if(!Number.isFinite(deg))return;angle=C('DEG_RAD',{DEG:deg})}commitTransformMany(draft.entities,q=>rotatePoint(q,draft.c,angle));return}
     if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer&&draft.buffer!=='-'){const deg=Number(draft.buffer.replace(',','.'));if(Number.isFinite(deg))draft.angle=C('DEG_RAD',{DEG:deg})}preview();refresh();return}
     if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))||(e.key==='-'&&!draft.buffer)){e.preventDefault();draft.buffer+=e.key;const deg=Number(draft.buffer.replace(',','.'));if(Number.isFinite(deg))draft.angle=C('DEG_RAD',{DEG:deg});preview();refresh();return}
-  }
-  if(draft&&(draft.kind==='arc-rif'||draft.kind==='arc-ifr')&&draft.stage==='radius'){
-    if(e.key==='Escape'){e.preventDefault();clearDraft();return}
-    if(e.key==='Enter'){e.preventDefault();const r=Number((draft.buffer||String(draft.radius)).replace(',','.'));if(!Number.isFinite(r)||r===0)return;if(draft.kind==='arc-rif'){draft.radius=r;draft.buffer='';draft.stage='start';refresh();return}draft.radius=r;if(makeArcRadius(draft.a,draft.b,r))clearDraft();else{command.textContent='ARCO I-F-R · raggio non valido';preview()}return}
-    if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer&&draft.buffer!=='-'){const r=Number(draft.buffer.replace(',','.'));if(Number.isFinite(r)&&r!==0)draft.radius=r}preview();refresh();return}
-    if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))||(e.key==='-'&&!draft.buffer)){e.preventDefault();draft.buffer+=e.key;const r=Number(draft.buffer.replace(',','.'));if(Number.isFinite(r)&&r!==0)draft.radius=r;preview();refresh();return}
   }
   if(draft?.kind==='fillet'){
     if(e.key==='Escape'){e.preventDefault();clearDraft();return}
@@ -3041,10 +1841,31 @@ document.addEventListener('keydown',e=>{
     if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer){const r=Number(draft.buffer.replace(',','.'));if(r>0)draft.radius=r}preview();refresh();return}
     if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))){e.preventDefault();draft.buffer+=e.key;const r=Number(draft.buffer.replace(',','.'));if(r>0)draft.radius=r;preview();refresh();return}
   }
+  /* Standard application shortcuts. */
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='s'){e.preventDefault();keyCommandBuffer='';run('save','action');return}
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='o'){e.preventDefault();keyCommandBuffer='';run('open','action');return}
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='p'){e.preventDefault();keyCommandBuffer='';window.print();return}
+
+  /* AutoCAD-style command entry is available only between point stages.
+     Active geometry/edit operations keep ownership of the keyboard. */
+  if(!draft&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+    if(e.key==='Escape'){if(keyCommandBuffer){e.preventDefault();keyCommandBuffer='';updateCommand();return}}
+    if(e.key==='Enter'||e.key===' '){
+      if(keyCommandBuffer){e.preventDefault();executeKeyCommand();return}
+    }
+    if(e.key==='Backspace'&&keyCommandBuffer){e.preventDefault();keyCommandBuffer=keyCommandBuffer.slice(0,-1);showKeyCommand();return}
+    if(/^[a-zA-Z]$/.test(e.key)){
+      e.preventDefault();
+      keyCommandBuffer+=e.key.toUpperCase();
+      showKeyCommand();
+      return
+    }
+  }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
-  if(e.key==='Escape'){selectionDrag=null;drawSelectionBox();clearDraft()}
+  if(e.key==='Escape'){keyCommandBuffer='';cadValueBuffer='';cadValueMode='';cadAngleLock=null;selectionDrag=null;drawSelectionBox();clearDraft()}
   if((e.key==='Delete'||e.key==='Backspace')&&selectedEntities().length){e.preventDefault();deleteSelection()}
 });
+/* ==================== COMMAND DISPATCH ===================== */
 function fit(){const es=entities();if(!es.length){set('VIEW_X',0);set('VIEW_Y',0);set('VIEW_SCALE',1);view();return}const b=scene.getBBox(),r=svg.getBoundingClientRect(),v=CV(['FIT_CX','FIT_CY','FIT_SCALE'],{BOX_X:b.x,BOX_Y:b.y,BOX_W:b.width,BOX_H:b.height,SCREEN_W:r.width,SCREEN_H:r.height});set('VIEW_X',v.FIT_CX);set('VIEW_Y',v.FIT_CY);set('VIEW_SCALE',v.FIT_SCALE);view()}
 function commitPendingText(){
   if(draft?.kind!=='text')return;
@@ -3064,13 +1885,13 @@ function commitPendingText(){
   draft=null;
   overlay.querySelectorAll('.draft').forEach(e=>e.remove());
 }
+/* --- Command Lifecycle / Dispatch ------------------------- */
 function run(name,kind){
-  if(kind==='tool'){
+  if(kind==='tool'){clearGuideLocks();guideState={x:null,y:null,point:null,tech:null};drawGuides();commandState(name,'active',false);
     if(draft?.kind==='text'&&name!==get('TOOL'))commitPendingText();
     else clearDraft();
     set('TOOL',name);
-    if(name==='arc-rif')draft={kind:'arc-rif',a:null,b:null,stage:'radius',radius:Number(get('ARC_RADIUS'))||50,buffer:''};
-    else if(name==='move'||name==='copy'){
+    if(name==='move'||name==='copy'){
       const es=selectedEntities();draft=es.length?{kind:name,entities:[...es],stage:'base',base:null,to:null}:{kind:name,entities:[],stage:'select',base:null,to:null};
     }else if(name==='mirror'){
       if(selectedEntities().length)beginTransform('mirror');else draft={kind:'mirror',entities:[],stage:'select',a:null,b:null};
@@ -3085,13 +1906,15 @@ function run(name,kind){
     if(selectedEntities().length)deleteSelection();
     else{set('TOOL','delete');clearDraft();draft={kind:'delete',entities:[],stage:'select'};refresh()}
   }
-  else if(name==='fit')fit();else if(name==='save')save();else if(name==='open')openProject?.click();else if(name==='text-down')set('TEXT_SIZE',C('TEXT_DOWN',{TEXT_SIZE:num('TEXT_SIZE')}));else if(name==='text-up')set('TEXT_SIZE',C('TEXT_UP',{TEXT_SIZE:num('TEXT_SIZE')}))
+  else if(name==='fit'){fit();commandState('fit','closed',true)}else if(name==='save')save();else if(name==='open'){commandState('open','active',false);openProject?.click();}else if(name==='text-down')set('TEXT_SIZE',C('TEXT_DOWN',{TEXT_SIZE:num('TEXT_SIZE')}));else if(name==='text-up')set('TEXT_SIZE',C('TEXT_UP',{TEXT_SIZE:num('TEXT_SIZE')}))
 }
+/* ==================== UI BINDINGS ========================== */
 document.querySelectorAll('[data-cad-name]').forEach(b=>b.addEventListener('click',()=>run(b.dataset.cadName,b.dataset.cadKind)));
 document.getElementById('cad-print')?.addEventListener('click',()=>window.print());
 lineColorInput?.addEventListener('input',e=>setLineProperty('color',e.currentTarget.value));
 lineWidthInput?.addEventListener('change',e=>setLineProperty('width',C('STYLE_WIDTH',{WIDTH:Number(e.currentTarget.value)||.55})));
 document.getElementById('cad-snap')?.addEventListener('change',e=>{set('SNAP',e.currentTarget.value);refresh()});
+for(const [id,name] of [['cad-snap-midpoint','SNAP_MIDPOINT'],['cad-snap-quadrant','SNAP_QUADRANT'],['cad-snap-intersection','SNAP_INTERSECTION'],['cad-snap-perpendicular','SNAP_PERPENDICULAR'],['cad-snap-tangent','SNAP_TANGENT']])document.getElementById(id)?.addEventListener('change',e=>{set(name,e.currentTarget.checked?1:0);setBit(name,true);refresh()});
 document.getElementById('cad-text-size')?.addEventListener('change',e=>{
   const v=C('STYLE_TEXT_SIZE',{SIZE:Number(e.currentTarget.value)||16}),ts=selectedEntities().filter(x=>x.dataset.kind==='text');
   if(ts.length){
@@ -3100,22 +1923,35 @@ document.getElementById('cad-text-size')?.addEventListener('change',e=>{
   }else set('TEXT_SIZE',v);
   syncScreenStyles();refresh()
 });
-window.addEventListener('resize',view);view();refresh();
-window.RIKI_CAD=Object.freeze({resize:view,fit,undo,tool:n=>{set('TOOL',n);refresh()},count:()=>entities().length,chains:RIKI.names,chain:(n,c)=>C(n,c),audit:()=>Object.freeze({...RIKI.audit(),entities:entityIndex.size,dimensionCreates:PERF.dimensionCreates,dimensionUpdates:PERF.dimensionUpdates,selectionTouches:PERF.selectionTouches})});
+document.getElementById('cad-dim-decimals')?.addEventListener('change',e=>{
+  const d=Math.max(0,Math.min(12,Math.trunc(Number(e.currentTarget.value)||0)));
+  e.currentTarget.value=String(d);
+  set('DIM_DECIMALS',d);
+  for(const x of entities()){
+    if(x.dataset.kind==='dim')updateDim(x);
+    else if(x.dataset.kind==='angdim')updateAngDim(x);
+    else if(x.dataset.kind==='aligndim')updateAlignDim(x);
+  }
+  refresh()
+});
+/* ==================== INTEGRITY TESTS / PUBLIC API ========= */
+/* --- Runtime Integrity Contract --------------------------- */
+function runSelfTests(){
+  const tests=[];const T=(name,fn)=>{try{const ok=!!fn();tests.push({name,ok});return ok}catch(e){tests.push({name,ok:false,error:String(e)});return false}};
+  T('DIST_3_4_5',()=>C('DIST',{X1:0,Y1:0,X2:3,Y2:4})===5);
+  T('POINT_DELTA0',()=>CV(['POINT_DELTA_NORM','POINT_VALID'],{TARGET_X:7,TARGET_Y:-2,CURRENT_X:7,CURRENT_Y:-2}).POINT_VALID===1);
+  T('GUIDE_DELTA0',()=>CV(['GUIDE_DELTA_NORM','GUIDE_VALID'],{TARGET_X:9,TARGET_Y:11,CURRENT_X:9,CURRENT_Y:11}).GUIDE_VALID===1);
+  T('ANGLE_90',()=>Math.abs(C('ANG_DEG',{VX:0,VY:0,AX:1,AY:0,BX:0,BY:1})-90)<1e-12);
+  T('RESULT_DELTA0',()=>CV(['RESULT_DELTA','RESULT_VALID'],{TARGET:123.456,CURRENT:123.456}).RESULT_VALID===1);
+  T('BYTE_STATE_ROUNDTRIP',()=>{const bs=globalBytes(),p=bs.POINT;return !!p&&typeof p==='object'&&Object.prototype.hasOwnProperty.call(p,'value')&&(p.bit===0||p.bit===1)});
+  T('ENTITY_STATE_BIT',()=>{const ds=entityStates();return Object.values(ds).every(d=>d&&Object.prototype.hasOwnProperty.call(d,'__bit'))});
+  const ok=tests.every(t=>t.ok);set('SELF_TEST',JSON.stringify(tests));setBit('SELF_TEST',ok);return Object.freeze({ok,tests:Object.freeze(tests)})
+}
+const SELF_TEST=runSelfTests();
+window.addEventListener('resize',()=>requestAnimationFrame(view));if(window.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(view)).observe(svg);POINT.close({x:Number(get('POINT_X'))||0,y:Number(get('POINT_Y'))||0},'POINT.INIT');view();refresh();
+/* --- Minimal Public Framework API ------------------------- */
+window.RIKI_CAD=Object.freeze({resize:view,fit,undo,tool:n=>{set('TOOL',n);refresh()},count:()=>entities().length,chains:RIKI.names,chain:(n,c)=>C(n,c),audit:()=>Object.freeze({...RIKI.audit(),point:POINT.audit(),guide:GUIDE.audit(),dimensions:{linear:{value:get('DIM_VALUE'),delta:get('DIM_DELTA'),bit:bit('DIMENSION')?.textContent},angular:{value:get('ANGDIM_VALUE'),delta:get('ANGDIM_DELTA'),bit:bit('ANGDIMENSION')?.textContent},aligned:{value:get('ALIGNDIM_VALUE'),delta:get('ALIGNDIM_DELTA'),bit:bit('ALIGNDIMENSION')?.textContent}},cadBit:bit('CAD')?.textContent,selfTest:SELF_TEST,entityBytes:Object.keys(entityStates()).length,entities:entityIndex.size,dimensionCreates:PERF.dimensionCreates,dimensionUpdates:PERF.dimensionUpdates,selectionTouches:PERF.selectionTouches}),state});
 })();
 </script>
-
-
-<script id="unisefe-white-ui-guard">
-(()=>{
-  document.getElementById('cad-editor')?.classList.remove('hidden');
-  document.getElementById('panel-cad')?.classList.remove('hidden');
-  document.getElementById('document-editor')?.classList.add('hidden');
-  document.getElementById('sheet-editor')?.classList.add('hidden');
-  document.getElementById('panel-document')?.classList.add('hidden');
-  document.getElementById('panel-sheet')?.classList.add('hidden');
-})();
-</script>
-
 </body>
 </html>
