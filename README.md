@@ -1,130 +1,340 @@
 # UNISEFE-WEB-CAD-2D
-UNISEFE WEB CAD 2D è un CAD 2D leggero, diretto e utilizzabile dal browser.
+A lightweight, direct 2D CAD application that runs entirely in the browser.
 
-L'obiettivo è offrire un ambiente di disegno tecnico semplice, senza installazioni e senza interfacce inutilmente complesse.
+UNISEFE WEB CAD 2D was created with a simple goal: provide a technical drawing environment that is immediate, precise, easy to understand, and free from unnecessary installation steps or overly complex interfaces.
 
-Demo online
 
-👉 Apri UNISEFE WEB CAD 2D
 
-Caratteristiche
 
-CAD 2D nel browser
 
-Interfaccia semplice e pulita
 
-Disegno tecnico diretto
+🚀 Online Demo
 
-Linee, rettangoli, cerchi e archi
+👉 Open UNISEFE WEB CAD 2D
 
-Selezione degli oggetti
+No installation is required.
 
-Snap e riferimenti geometrici
+Open the link and start drawing.
 
-Input da tastiera per misure e angoli
+What It Is
 
-Zoom e navigazione nell'area di disegno
+UNISEFE WEB CAD 2D is a technical 2D CAD application designed to run directly in the browser.
 
-Nessuna installazione necessaria
+The project focuses on:
 
-HTML autosufficiente
+fast interaction between command and result;
 
-Utilizzabile anche come base per ulteriori strumenti tecnici
+geometric precision;
 
-Utilizzo
+natural mouse-based drafting;
 
-Non è necessario installare nulla.
+clear snap and reference behavior;
 
-Puoi usare direttamente la versione online:
+keyboard-based numeric input;
+
+a minimal and readable interface;
+
+simple distribution;
+
+no unnecessary dependencies.
+
+The CAD application is contained mainly inside a single self-contained HTML file.
+
+✨ Features
+
+browser-based 2D CAD;
+
+clean and minimal interface;
+
+direct technical drawing workflow;
+
+lines;
+
+dashed lines;
+
+dash-dot lines;
+
+rectangles;
+
+circles;
+
+arcs;
+
+text;
+
+linear dimensions;
+
+aligned dimensions;
+
+angular dimensions;
+
+object selection;
+
+move;
+
+copy;
+
+rotate;
+
+mirror;
+
+fillet;
+
+trim;
+
+extend;
+
+erase;
+
+undo;
+
+geometric snaps;
+
+endpoints;
+
+midpoints;
+
+centers;
+
+quadrants;
+
+intersections;
+
+perpendicular references;
+
+tangent references;
+
+temporary geometric references;
+
+multi-reference tracking;
+
+magnetic guides;
+
+keyboard input for distances, coordinates and angles;
+
+zoom and viewport navigation;
+
+no installation required;
+
+self-contained HTML.
+
+⌨️ Keyboard Input
+
+UNISEFE WEB CAD 2D supports a keyboard-driven workflow inspired by traditional CAD systems.
+
+Examples:
+
+L
+
+starts the LINE command.
+
+100
+
+sets a distance.
+
+<45
+
+locks the direction to 45° while keeping the distance controlled by the mouse.
+
+100<45
+
+sets a distance of 100 at an angle of 45°.
+
+@100,50
+
+uses relative coordinates.
+
+@100<45
+
+uses relative distance and angle from the previous point.
+
+Command aliases are also available for tools such as LINE, CIRCLE, ARC, MOVE, COPY, TRIM, EXTEND, FILLET, MIRROR, ROTATE and ERASE.
+
+🧲 Snaps and Geometric References
+
+One of the main goals of the project is to make technical drawing feel natural even when using almost only the mouse.
+
+The reference system allows you to:
+
+approach a geometric snap;
+
+temporarily acquire a reference;
+
+move away while keeping its direction;
+
+acquire multiple references;
+
+combine those references to construct new points;
+
+keep real geometric snaps distinct from temporary guide lines.
+
+Tangent and perpendicular technical references are activated when a valid command base point already exists.
+
+🟢 Simplified Arc Workflow
+
+The ARC command uses a deliberately simple workflow.
+
+define the first point;
+
+create the chord using the same interaction model as a line;
+
+confirm the chord;
+
+enter the radius;
+
+use the mouse to choose the side of the arc.
+
+The chord can also be defined using keyboard-entered distances and angles.
+
+Usage
+
+Online Version
+
+Use the application directly here:
 
 https://riccardobasti.github.io/UNISEFE-WEB-CAD-2D/
 
-Oppure scaricare il repository e aprire:
+Local Version
+
+Download or clone the repository and open:
 
 index.html
 
-con un browser moderno.
+with a modern browser.
 
-Struttura del progetto
+No libraries, runtimes or local servers are required.
+
+📁 Project Structure
 
 UNISEFE-WEB-CAD-2D/
 ├── index.html
 └── README.md
 
-Il progetto è volutamente mantenuto semplice: il CAD è contenuto principalmente in un unico file HTML.
+The project is intentionally kept simple.
 
-Filosofia
+Most of the CAD application lives directly inside index.html.
 
-UNISEFE WEB CAD 2D nasce con alcuni principi semplici:
+🧠 Philosophy
 
-meno passaggi possibile tra comando e risultato;
+UNISEFE WEB CAD 2D is based on a few simple principles:
 
-interfaccia comprensibile durante l'uso;
+Fewer steps between command and result.
 
-niente dipendenze inutili;
+An interface that stays understandable while you work.
 
-niente installazioni obbligatorie;
+Precision without making the workflow heavy.
 
-codice e progetto facilmente distribuibili;
+No unnecessary dependencies.
 
-funzionamento direttamente nel browser.
+No mandatory installation.
 
-Contribuire
+Code that is easy to distribute.
 
-Contributi, test, segnalazioni di bug e proposte sono benvenuti.
+Direct browser execution.
 
-Puoi:
+The goal is not to fill the interface with features, but to build a small, coherent and enjoyable CAD environment.
 
-aprire una Issue;
+⚙️ Technical Structure
 
-proporre un miglioramento;
+The project is organized as a small CAD framework inside a single HTML document.
 
-fare un Fork del repository;
+Its main logical areas include:
 
-inviare una Pull Request.
+Canonical State
+Geometry
+Delta-Zero Point Closure
+Snap Engine
+Multi-Reference Tracking
+Technical Guides
+Entity Model
+SVG Projection
+CAD Commands
+Keyboard Input
+Pointer Input
+Persistence
+Integrity Tests
+Public API
 
-Sono particolarmente utili contributi relativi a:
+The interface remains static HTML, while JavaScript handles the CAD runtime, input, geometry, SVG projection and required operations.
 
-strumenti di disegno 2D;
+🧪 Project Status
 
-snap e precisione;
+Current version: v0.0.4 Alpha
 
-quote e misure;
+The project is under active development.
 
-selezione;
+The objective is to progressively improve:
+
+precision;
+
+ease of use;
+
+geometric reference quality;
+
+CAD tools;
+
+performance;
+
+browser compatibility;
+
+while keeping the application lightweight.
+
+🤝 Contributing
+
+Contributions, testing, bug reports and proposals are welcome.
+
+You can:
+
+open an Issue;
+
+suggest an improvement;
+
+Fork the repository;
+
+submit a Pull Request.
+
+Contributions are especially useful in areas such as:
+
+2D drawing tools;
+
+snapping and precision;
+
+geometric references;
+
+dimensions and measurements;
+
+selection;
 
 import/export;
 
-usabilità;
+usability;
 
-prestazioni;
+performance;
 
-compatibilità tra browser.
+browser compatibility.
 
-Segnalazione bug
+🐞 Bug Reports
 
-Quando segnali un problema, indica possibilmente:
+When reporting a problem, please include, when possible:
 
-browser utilizzato;
+Browser:
+Command used:
+Steps to reproduce:
+Expected result:
+Actual result:
 
-comando eseguito;
+Screenshots and small geometric examples are especially useful.
 
-risultato atteso;
-
-risultato ottenuto;
-
-eventuali passaggi per riprodurre il problema.
-
-Stato del progetto
-
-Il progetto è in sviluppo attivo.
-
-L'obiettivo è migliorare progressivamente precisione, semplicità d'uso e strumenti CAD mantenendo l'applicazione leggera.
-
-Autore
+Author
 
 ITALFABER / UNISEFE
 
 Repository:
 
 https://github.com/riccardobasti/UNISEFE-WEB-CAD-2D
+
+Demo:
+
+https://riccardobasti.github.io/UNISEFE-WEB-CAD-2D/
+
+UNISEFE WEB CAD 2D — Technical drawing, directly in the browser.
