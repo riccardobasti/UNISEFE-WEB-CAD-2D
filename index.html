@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <!--
-  UNISEFE CAD 2D · RIKI CAD Framework v0.0.4 Alpha
+  UNISEFE CAD 2D · RIKI CAD Framework v0.0.5 Alpha
 
   ARCHITECTURAL CONTRACT
   - Static HTML defines the user interface.
@@ -16,7 +16,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UNISEFE CAD 2D · v0.0.4 Alpha</title>
+<title>UNISEFE CAD 2D · v0.0.5 Alpha</title>
 <style>
 :root{--toolbar-h:66px;--panel-w:286px;--mobile-panel-h:300px;--border:#d7d7d7;--bg:#ececec;--surface:#fff;--text:#151515;--muted:#707070}
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);overflow:hidden}button,input,select{font:inherit;color:inherit}.app{width:100vw;height:100dvh;display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr);min-width:0;overflow:hidden}
@@ -122,7 +122,7 @@
 </main>
 </div>
 <!-- ===================== RIKI CANONICAL SPACE ================= -->
-<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.4-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
+<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.5-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
   <riki-byte name="CONSTITUTION"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SPACE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="CAD"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
@@ -1036,7 +1036,7 @@ function view(){
 /* ==================== PERSISTENCE AND HISTORY ============== */
 /* --- Canonical State Serialization ------------------------ */
 function globalBytes(){return Object.fromEntries([...space.querySelectorAll(':scope > riki-byte')].map(b=>[b.getAttribute('name'),Object.freeze({value:b.querySelector('riki-value')?.textContent??'',bit:Number(b.querySelector('riki-bit')?.textContent||0)})]))}
-function state(){syncAllEntityBytes();return{format:'UNISEFE-CAD-RIKI',version:'0.0.4-alpha',chains:'RIKI-BYTE-STRICT',bytes:globalBytes(),drawing:entityStates()}}
+function state(){syncAllEntityBytes();return{format:'UNISEFE-CAD-RIKI',version:'0.0.5-alpha',chains:'RIKI-BYTE-STRICT',bytes:globalBytes(),drawing:entityStates()}}
 function restoreGlobalBytes(bs){
   for(const [k,raw] of Object.entries(bs||{})){
     if(!byte(k))continue;
@@ -1061,7 +1061,7 @@ function applyDrawing(ds){
   paintedSelection.clear();clearSelection();draft=null;selectionDrag=null;syncScreenStyles();view();refresh()
 }
 function restore(d){if(!d||!d.drawing)throw Error();restoreGlobalBytes(d.bytes);applyDrawing(d.drawing);updateCadBit()}
-async function save(){syncAllEntityBytes();const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-2D-v0.0.4-Alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();commandState('save','closed',true);command.textContent='SAVE · UNISEFE CAD v0.0.4 Alpha saved'}catch(e){if(e.name!=='AbortError'){commandState('save','error',false);command.textContent='SAVE · failed'}}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-2D-v0.0.4-Alpha.riki';a.click();URL.revokeObjectURL(a.href);commandState('save','closed',true)}}
+async function save(){syncAllEntityBytes();const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-2D-v0.0.4-Alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();commandState('save','closed',true);command.textContent='SAVE · UNISEFE CAD v0.0.5 Alpha saved'}catch(e){if(e.name!=='AbortError'){commandState('save','error',false);command.textContent='SAVE · failed'}}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-2D-v0.0.4-Alpha.riki';a.click();URL.revokeObjectURL(a.href);commandState('save','closed',true)}}
 openProject?.addEventListener('change',()=>{const f=openProject.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=String(rd.result),j=JSON.parse(t);restore(j);commandState('open','closed',true)}catch{commandState('open','error',false);command.textContent='OPEN · invalid RIKI state'}};rd.readAsText(f);openProject.value=''});
 function snapshot(){syncAllEntityBytes();return Object.freeze({drawing:structuredClone(entityStates()),bytes:structuredClone(globalBytes())})}
 function restoreSnapshot(s){if(!s)return;restoreGlobalBytes(s.bytes);applyDrawing(s.drawing||{});updateCadBit()}
@@ -1634,7 +1634,7 @@ let cadValueBuffer='';
 let cadValueMode='';
 let cadAngleLock=null;
 let lastCadPointer=null;
-const CAD_POINT_TOOLS=new Set(['line','dashline','dashdotline','circle','arc']);
+const CAD_POINT_TOOLS=new Set(['line','dashline','dashdotline','circle','arc','move','copy','mirror']);
 function cadNumber(s){
   const v=Number(String(s).trim().replace(',','.'));
   return Number.isFinite(v)?v:null
@@ -1681,6 +1681,8 @@ function cadAngleLockBase(){
     if(draft.stage==='end')return draft.a||null;
     if(draft.stage==='curve')return draft.b||null;
   }
+  if((tool==='move'||tool==='copy')&&draft.stage==='to')return draft.base||null;
+  if(tool==='mirror'&&draft.stage==='axis2')return draft.a||null;
   return null
 }
 function applyCadAngleLock(p){
@@ -1720,6 +1722,22 @@ function beginCadPoint(p){
     if(draft.stage==='curve'){
       const r=arcRadiusFromPoint(draft.a,draft.b,q);if(r!=null&&makeArcRadius(draft.a,draft.b,r)){clearDraft();return true}
     }
+  }
+  if((tool==='move'||tool==='copy')&&draft?.kind===tool&&draft.stage==='to'&&draft.base){
+    draft.to=q;
+    const v=CV(['DX','DY'],{X1:draft.base.x,Y1:draft.base.y,X2:q.x,Y2:q.y});
+    if(tool==='move'){
+      translateMany(draft.entities,v.DX,v.DY);selectMany(draft.entities.map(e=>e.dataset.byte));clearDraft();
+    }else{
+      saveHistory();const clones=[];
+      for(const e of draft.entities){const n=e.cloneNode(true);n.dataset.byte=next();n.classList.remove('selected','draft');n.classList.add('entity');scene.append(n);indexEntity(n);translateEntity(n,v.DX,v.DY);clones.push(n)}
+      selectMany(clones.map(n=>n.dataset.byte));clearDraft();
+    }
+    return true
+  }
+  if(tool==='mirror'&&draft?.kind==='mirror'&&draft.stage==='axis2'&&draft.a){
+    if(C('DIST',{X1:draft.a.x,Y1:draft.a.y,X2:q.x,Y2:q.y})<=1e-9)return false;
+    draft.b=q;commitMirrorCopies(draft.entities,p=>mirrorPoint(p,draft.a,draft.b),true);return true
   }
   return false
 }
@@ -1809,6 +1827,8 @@ document.addEventListener('keydown',e=>{
      - <angle: lock direction only; mouse continues to control distance
      - CIRCLE: R / D select radius or diameter
      - ARC: after chord confirmation, numeric input is radius; cursor side selects arc side
+     - MOVE/COPY: distance, coordinates and polar input use the selected base point
+     - MIRROR: numeric/polar input can define the second point of the mirror axis
      All resolved points close through POINT/Delta-Zero. */
   const activeTool=get('TOOL');
   if(CAD_POINT_TOOLS.has(activeTool)){
