@@ -47,11 +47,7 @@ button{color:inherit}
   background:var(--surface);
   border-bottom:1px solid var(--border);
 }
-.brand{
-  font-weight:700;
-  letter-spacing:.02em;
-  white-space:nowrap;
-}
+
 .mode-tabs{
   display:flex;
   align-items:center;
@@ -150,7 +146,7 @@ button{color:inherit}
   place-items:start center;
   background:#e9e9e9;
 }
-.canvas-frame{
+.surface-frame{
   width:min(1200px,100%);
   min-height:calc(100vh - var(--topbar-h) - var(--toolbar-h) - 32px);
   background:#fff;
@@ -158,14 +154,6 @@ button{color:inherit}
   box-shadow:0 2px 8px rgba(0,0,0,.06);
   position:relative;
   overflow:hidden;
-}
-.canvas-placeholder{
-  min-height:700px;
-  display:grid;
-  place-items:center;
-  color:#999;
-  text-align:center;
-  padding:40px;
 }
 
 .rightpanel{
@@ -391,7 +379,7 @@ button{color:inherit}
 
 
 .cad-surface{position:absolute;inset:0;background:#fff;overflow:hidden}
-#cad-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;background:#fff}
+#cad-native{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;background:#fff;user-select:none}#cad-native .entity{fill:none;stroke:var(--entity-color,#444);stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .entity[data-kind="dashline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:4 3}#cad-native .entity[data-kind="dashdotline"]{stroke-width:var(--entity-width,.45);stroke-dasharray:6 2 .5 2;stroke-linecap:round}#cad-native .entity.selected{stroke:#000;stroke-width:1.15}#cad-native .entity[data-kind="dashline"].selected{stroke-dasharray:4 3}#cad-native .entity[data-kind="dashdotline"].selected{stroke-dasharray:6 2 .5 2;stroke-linecap:round}#cad-native text.entity{fill:var(--entity-color,#222);stroke:none;cursor:default}#cad-native .text-preview{fill:#555;pointer-events:none;user-select:none}#cad-native .dimension line,#cad-native .dimension path{vector-effect:non-scaling-stroke}#cad-native .dimension text{fill:var(--entity-color,#444);stroke:#fff;stroke-width:3px;paint-order:stroke fill;stroke-linejoin:round;vector-effect:non-scaling-stroke}#cad-native text.entity.selected{fill:var(--entity-color,#000);stroke:#fff;stroke-width:3px;paint-order:stroke fill;font-weight:650}#cad-native .dimension.selected line,#cad-native .dimension.selected path{stroke:#000;stroke-width:1.15}#cad-native .dimension.selected text{fill:#000}#cad-native .draft{fill:none;stroke:#777;stroke-width:.45;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}#cad-native .guide{stroke:#9aa3ad;stroke-width:.35;stroke-dasharray:4 5;vector-effect:non-scaling-stroke}#cad-native .dimension-tick{stroke-width:var(--entity-width,.55);vector-effect:non-scaling-stroke}#cad-native .selection-box{fill:rgba(80,120,180,.06);stroke:#5b6f86;stroke-width:.6;stroke-dasharray:4 3;vector-effect:non-scaling-stroke;pointer-events:none}
 .cad-hud{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;pointer-events:none;flex-wrap:wrap}
 .cad-chip{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:#555}
 #toolbar-cad{overflow-x:auto;min-width:0}
@@ -435,10 +423,6 @@ riki-space{display:none}
 }
 
 
-
-
-
-/* WordPress: right panel only — fixed header, scrollable body */
 .rightpanel{
   display:flex !important;
   flex-direction:column !important;
@@ -460,7 +444,6 @@ riki-space{display:none}
 .mode-tabs{display:none!important}
 
 
-/* Unisefe responsive layer 1.0.3 */
 html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hidden}
 .app{min-width:0}
 .toolbar{
@@ -490,7 +473,7 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
   .tool-separator{height:22px}
   .workspace{position:relative;grid-template-columns:minmax(0,1fr);min-width:0}
   .stage{padding:6px;min-width:0}
-  .canvas-frame{width:100%;min-height:calc(100dvh - var(--toolbar-h) - 12px)}
+  .surface-frame{width:100%;min-height:calc(100dvh - var(--toolbar-h) - 12px)}
   .document-surface{padding:10px}
   .document-page{
     width:100%;
@@ -541,6 +524,195 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
   .field{grid-template-columns:68px minmax(0,1fr)}
 }
 
+
+/* UNISEFE CAD 2D · 3D STRUCTURAL WHITE INTERFACE */
+:root{
+  --toolbar-h:66px;
+  --panel-w:286px;
+  --border:#d7d7d7;
+  --bg:#ededed;
+  --surface:#fff;
+  --text:#151515;
+  --muted:#707070;
+}
+.topbar,.mode-tabs,#toolbar-context,#toolbar-sheet{display:none!important}
+.app{grid-template-rows:var(--toolbar-h) 1fr!important}
+.cad-structural-toolbar{
+  height:var(--toolbar-h)!important;
+  min-height:var(--toolbar-h)!important;
+  display:flex!important;
+  align-items:stretch!important;
+  gap:0!important;
+  padding:0 8px!important;
+  background:#fff!important;
+  border-bottom:1px solid var(--border)!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+.cad-structural-toolbar .toolGroup{
+  position:relative;
+  display:flex!important;
+  align-items:center!important;
+  padding:17px 10px 4px!important;
+  border-right:1px solid #e4e4e4!important;
+  flex:0 0 auto!important;
+}
+.cad-structural-toolbar .toolGroup:last-child{border-right:0!important}
+.cad-structural-toolbar .toolLabel{
+  position:absolute;
+  left:10px;
+  top:4px;
+  font-size:8px;
+  line-height:1;
+  letter-spacing:.10em;
+  font-weight:650;
+  color:#818181;
+  user-select:none;
+}
+.cad-structural-toolbar .toolButtons{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+.cad-structural-toolbar .toolButton{
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid transparent!important;
+  border-radius:5px!important;
+  background:transparent!important;
+  color:#222!important;
+  cursor:pointer!important;
+}
+.cad-structural-toolbar .toolButton:hover{
+  background:#f2f2f2!important;
+  border-color:#ddd!important;
+}
+.cad-structural-toolbar .toolButton.active{
+  background:#111!important;
+  color:#fff!important;
+  border-color:#111!important;
+}
+.cad-structural-toolbar .toolButton svg{
+  width:17px!important;
+  height:17px!important;
+  stroke:currentColor!important;
+  fill:none!important;
+  stroke-width:1.65!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+.workspace{
+  grid-template-columns:minmax(0,1fr) var(--panel-w)!important;
+  background:#ececec!important;
+}
+.stage{
+  padding:10px!important;
+  background:#ececec!important;
+  overflow:hidden!important;
+  display:block!important;
+}
+.surface-frame{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  background:#fff!important;
+  border:1px solid #d4d4d4!important;
+  box-shadow:0 1px 5px rgba(0,0,0,.06)!important;
+}
+#document-editor,#sheet-editor{display:none!important}
+#cad-editor{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  background:#fff!important;
+}
+#cad-native{background:#fff!important}
+.rightpanel{
+  width:var(--panel-w)!important;
+  min-width:var(--panel-w)!important;
+  max-width:var(--panel-w)!important;
+  background:#fff!important;
+  border-left:1px solid var(--border)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.panel-head{
+  justify-content:flex-start!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 10px 0 12px!important;
+  border-bottom:1px solid #dedede!important;
+}
+.panel-title{
+  font-size:12px!important;
+  font-weight:650!important;
+  letter-spacing:.02em!important;
+}
+.panel-body{
+  padding:10px 12px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+#panel-document,#panel-sheet{display:none!important}
+#panel-cad{display:block!important}
+.panel-section{
+  padding:0 0 12px!important;
+  margin:0 0 12px!important;
+  border-bottom:1px solid #ededed!important;
+}
+.panel-section h3{
+  margin:0 0 7px!important;
+  font-size:9px!important;
+  color:#777!important;
+  letter-spacing:.10em!important;
+  font-weight:650!important;
+}
+.field{
+  grid-template-columns:76px minmax(0,1fr)!important;
+  gap:7px!important;
+  min-height:30px!important;
+  font-size:11px!important;
+}
+.field input,.field select{
+  height:27px!important;
+  border:1px solid #d5d5d5!important;
+  border-radius:4px!important;
+  padding:0 6px!important;
+  font-size:11px!important;
+}
+.cad-hud{
+  left:8px!important;
+  bottom:8px!important;
+  gap:4px!important;
+}
+.cad-chip{
+  padding:4px 7px!important;
+  border-radius:4px!important;
+  font-size:10px!important;
+  color:#555!important;
+  background:rgba(255,255,255,.94)!important;
+  border:1px solid #d9d9d9!important;
+}
+#panel-close{width:28px!important;height:28px!important}
+@media(max-width:720px){
+  :root{--toolbar-h:64px;--panel-w:100%}
+  .workspace{grid-template-columns:1fr!important}
+  .rightpanel{
+    position:absolute!important;
+    left:0!important;right:0!important;bottom:0!important;top:auto!important;
+    width:100%!important;min-width:0!important;max-width:none!important;
+    height:min(42dvh,350px)!important;
+    border-left:0!important;border-top:1px solid var(--border)!important;
+  }
+  .cad-structural-toolbar .toolGroup{padding-inline:6px!important}
+  .stage{padding:5px!important}
+}
+
 </style>
 </head>
 <body>
@@ -563,113 +735,59 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     <div class="top-actions"></div>
   </header>
 
-  <div class="toolbar">
-    <div class="tool-group">
-      <button class="icon-btn" title="Undo" aria-label="Undo">
-        <svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7"/></svg>
-      </button>
-      <button class="icon-btn" title="Redo" aria-label="Redo">
-        <svg viewBox="0 0 24 24"><path d="m15 7 5 5-5 5"/><path d="M20 12h-9a7 7 0 0 0-7 7"/></svg>
-      </button>
-    </div>
-    <div class="tool-separator"></div>
-<div class="tool-group" id="toolbar-context">
-      <button class="icon-btn doc-tool" data-cmd="bold" title="Bold" aria-label="Bold">
-        <svg viewBox="0 0 24 24"><path d="M8 5h5a4 4 0 0 1 0 8H8z"/><path d="M8 13h6a3 3 0 0 1 0 6H8z"/></svg>
-      </button>
-      <button class="icon-btn doc-tool" data-cmd="italic" title="Italic" aria-label="Italic">
-        <svg viewBox="0 0 24 24"><path d="M10 5h7M7 19h7M14 5 10 19"/></svg>
-      </button>
-      <button class="icon-btn doc-tool" data-cmd="underline" title="Underline" aria-label="Underline">
-        <svg viewBox="0 0 24 24"><path d="M8 5v6a4 4 0 0 0 8 0V5M6 20h12"/></svg>
-      </button>
-      <div class="tool-separator"></div>
-      <button class="icon-btn doc-tool" data-cmd="justifyLeft" title="Align left" aria-label="Align left">
-        <svg viewBox="0 0 24 24"><path d="M5 6h14M5 10h10M5 14h14M5 18h9"/></svg>
-      </button>
-      <button class="icon-btn doc-tool" data-cmd="justifyCenter" title="Align center" aria-label="Align center">
-        <svg viewBox="0 0 24 24"><path d="M5 6h14M7 10h10M5 14h14M8 18h8"/></svg>
-      </button>
-      <button class="icon-btn doc-tool" data-cmd="justifyRight" title="Align right" aria-label="Align right">
-        <svg viewBox="0 0 24 24"><path d="M5 6h14M9 10h10M5 14h14M10 18h9"/></svg>
-      </button>
-      <div class="tool-separator"></div>
-      <button class="icon-btn doc-tool" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list">
-        <svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="17" r="1"/><path d="M9 7h10M9 12h10M9 17h10"/></svg>
-      </button>
-      <button class="icon-btn doc-tool" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">
-        <svg viewBox="0 0 24 24"><path d="M4 6h2v3M4 9h3M4 13h3l-3 4h3"/><path d="M10 7h10M10 12h10M10 17h10"/></svg>
-      </button>
-      <div class="tool-separator"></div>
-      <button class="icon-btn doc-print" id="doc-print" title="Print / Save PDF" aria-label="Print / Save PDF">
-        <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="5" y="14" width="14" height="6"/><path d="M5 16H3v-6h18v6h-2"/><path d="M17 12h.01"/></svg>
-      </button>
-    </div>
-    <div class="tool-group hidden" id="toolbar-sheet">
-      <button class="icon-btn sheet-tool" data-action="bold" title="Bold cell" aria-label="Bold cell">
-        <svg viewBox="0 0 24 24"><path d="M8 5h5a4 4 0 0 1 0 8H8z"/><path d="M8 13h6a3 3 0 0 1 0 6H8z"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="italic" title="Italic" aria-label="Italic">
-        <svg viewBox="0 0 24 24"><path d="M10 5h7M7 19h7M14 5 10 19"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="underline" title="Underline" aria-label="Underline">
-        <svg viewBox="0 0 24 24"><path d="M8 5v6a4 4 0 0 0 8 0V5M6 20h12"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="sum" title="Auto sum" aria-label="Auto sum">
-        <svg viewBox="0 0 24 24"><path d="M17 5H8l6 7-6 7h9"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="clear" title="Clear cell" aria-label="Clear cell">
-        <svg viewBox="0 0 24 24"><path d="m5 16 8-8 6 6-5 5H8z"/><path d="M13 8 9 4"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="merge" title="Merge cells" aria-label="Merge cells">
-        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M9 5v14M15 5v14"/><path d="m7 12 3-3M7 12l3 3M17 12l-3-3M17 12l-3 3"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="split" title="Split cells" aria-label="Split cells">
-        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M12 5v14"/><path d="m10 9-3 3 3 3M14 9l3 3-3 3"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="border-all" title="All borders" aria-label="All borders">
-        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><path d="M12 4v16M4 12h16"/></svg>
-      </button>
-      <button class="icon-btn sheet-tool" data-action="border-none" title="No borders" aria-label="No borders">
-        <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/><path d="m4 20 16-16"/></svg>
-      </button>
-      <div class="tool-separator"></div>
-      <button class="icon-btn sheet-print" id="sheet-print" title="Print / Save PDF" aria-label="Print / Save PDF">
-        <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="5" y="14" width="14" height="6"/><path d="M5 16H3v-6h18v6h-2"/><path d="M17 12h.01"/></svg>
-      </button>
-    </div>
-    <div class="tool-group hidden" id="toolbar-cad">
-      <button class="icon-btn" data-cad-name="select" data-cad-kind="tool" title="Select" aria-label="Select">
+  
+<div class="toolbar cad-structural-toolbar" id="toolbar-cad-white">
+  <div class="toolGroup">
+    <div class="toolLabel">DRAW</div>
+    <div class="toolButtons"><button class="toolButton" data-cad-name="select" data-cad-kind="tool" title="Select" aria-label="Select">
         <svg viewBox="0 0 24 24"><path d="M6 4l9 8-5 1 3 6-2 1-3-6-4 4z"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="line" data-cad-kind="tool" title="Line" aria-label="Line">
+      </button><button class="toolButton" data-cad-name="line" data-cad-kind="tool" title="Line" aria-label="Line">
         <svg viewBox="0 0 24 24"><path d="M5 19 19 5"/><circle cx="5" cy="19" r="1.5"/><circle cx="19" cy="5" r="1.5"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="rect" data-cad-kind="tool" title="Rectangle" aria-label="Rectangle">
-        <svg viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="12"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="circle" data-cad-kind="tool" title="Circle" aria-label="Circle">
+      </button><button class="toolButton" data-cad-name="dashline" data-cad-kind="tool" title="Dashed line" aria-label="Dashed line">
+        <svg viewBox="0 0 24 24"><path d="M5 19 8 16M10 14l3-3M15 9l4-4"/><circle cx="5" cy="19" r="1.25"/><circle cx="19" cy="5" r="1.25"/></svg>
+      </button><button class="toolButton" data-cad-name="dashdotline" data-cad-kind="tool" title="Dash-dot line" aria-label="Dash-dot line">
+        <svg viewBox="0 0 24 24"><path d="M5 19 9 15M13 11l6-6"/><circle cx="11" cy="13" r=".8"/><circle cx="5" cy="19" r="1.25"/><circle cx="19" cy="5" r="1.25"/></svg>
+      </button><button class="toolButton" data-cad-name="circle" data-cad-kind="tool" title="Circle" aria-label="Circle">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="arc" data-cad-kind="tool" title="Arc" aria-label="Arc">
-        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="dim" data-cad-kind="tool" title="Dimension" aria-label="Dimension">
-        <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m8 9-3 3 3 3M16 9l3 3-3 3"/><path d="M5 7v10M19 7v10"/></svg>
-      </button>
-      <button class="icon-btn" data-cad-name="text" data-cad-kind="tool" title="Text" aria-label="Text">
+      </button><button class="toolButton" data-cad-name="arc-rif" data-cad-kind="tool" title="Arco Raggio-Inizio-Fine" aria-label="Arco Raggio-Inizio-Fine">
+        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/><path d="M12 12V7"/></svg>
+      </button><button class="toolButton" data-cad-name="arc-ifr" data-cad-kind="tool" title="Arco Inizio-Fine-Raggio" aria-label="Arco Inizio-Fine-Raggio">
+        <svg viewBox="0 0 24 24"><path d="M5 16a8 8 0 0 1 14 0"/><circle cx="5" cy="16" r="1.25"/><circle cx="19" cy="16" r="1.25"/><path d="M12 12h5"/></svg>
+      </button><button class="toolButton" data-cad-name="text" data-cad-kind="tool" title="Text" aria-label="Text">
         <svg viewBox="0 0 24 24"><path d="M7 19 12 5l5 14M9 14h6"/></svg>
-      </button>
-      <div class="tool-separator"></div>
-      <button class="icon-btn cad-print" id="cad-print" title="Print / Save PDF" aria-label="Print / Save PDF">
-        <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="5" y="14" width="14" height="6"/><path d="M5 16H3v-6h18v6h-2"/><path d="M17 12h.01"/></svg>
-      </button>
-    </div>
+      </button></div>
   </div>
+  <div class="toolGroup">
+    <div class="toolLabel">DIMENSION</div>
+    <div class="toolButtons"><button class="toolButton" data-cad-name="dim" data-cad-kind="tool" title="Dimension" aria-label="Dimension">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m8 9-3 3 3 3M16 9l3 3-3 3"/><path d="M5 7v10M19 7v10"/></svg>
+      </button><button class="toolButton" data-cad-name="angdim" data-cad-kind="tool" title="Quota angolare" aria-label="Quota angolare">
+        <svg viewBox="0 0 24 24"><path d="M5 19 12 6M5 19h14"/><path d="M9 17a5 5 0 0 1 2-4"/><path d="m9 14 2-1-1-2"/></svg>
+      </button><button class="toolButton" data-cad-name="aligndim" data-cad-kind="tool" title="Quota allineata progressiva" aria-label="Quota allineata progressiva">
+        <svg viewBox="0 0 24 24"><path d="M5 18 18 5"/><path d="M7 19 4 16M20 8l-3-3"/><path d="M10 15 7 12M15 10l-3-3"/><path d="M12 18v-4"/></svg>
+      </button></div>
+  </div>
+  <div class="toolGroup">
+    <div class="toolLabel">EDIT</div>
+    <div class="toolButtons"><button class="toolButton" data-cad-name="move" data-cad-kind="tool" title="Move" aria-label="Move"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="m12 3-2 3M12 3l2 3M12 21l-2-3M12 21l2-3M3 12l3-2M3 12l3 2M21 12l-3-2M21 12l-3 2"/></svg></button><button class="toolButton" data-cad-name="copy" data-cad-kind="tool" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="1"/><path d="M5 16H4V5h11v1"/></svg></button><button class="toolButton" data-cad-name="trim" data-cad-kind="tool" title="Trim" aria-label="Trim"><svg viewBox="0 0 24 24"><path d="M5 5 19 19M5 19 19 5"/><path d="M9 9 5 5M15 15l4 4"/></svg></button><button class="toolButton" data-cad-name="extend" data-cad-kind="tool" title="Extend" aria-label="Extend"><svg viewBox="0 0 24 24"><path d="M5 19 13 11"/><path d="M13 11 20 4" stroke-dasharray="3 3"/><path d="M16 4h4v4"/></svg></button><button class="toolButton" data-cad-name="fillet" data-cad-kind="tool" title="Raccorda" aria-label="Raccorda">
+        <svg viewBox="0 0 24 24"><path d="M5 19h4a10 10 0 0 0 10-10V5"/><path d="M5 15v4h4"/></svg>
+      </button><button class="toolButton" data-cad-name="mirror" data-cad-kind="tool" title="Specchia" aria-label="Specchia"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2"/><path d="M4 18 9 6v12zM20 18 15 6v12z"/></svg></button><button class="toolButton" data-cad-name="rotate" data-cad-kind="tool" title="Ruota" aria-label="Ruota"><svg viewBox="0 0 24 24"><path d="M19 8a7 7 0 1 0 1 6"/><path d="M19 3v5h-5"/></svg></button><button class="toolButton" data-cad-name="delete" data-cad-kind="action" title="Delete" aria-label="Delete"><svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M8 10v8M12 10v8M16 10v8M7 7l1 14h8l1-14"/></svg></button></div>
+  </div>
+  <div class="toolGroup">
+    <div class="toolLabel">VIEW</div>
+    <div class="toolButtons"><button class="toolButton" data-cad-name="fit" data-cad-kind="action" title="Fit" aria-label="Fit"><svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4"/></svg></button></div>
+  </div>
+  <div class="toolGroup">
+    <div class="toolLabel">PROJECT</div>
+    <div class="toolButtons"><button class="toolButton" data-cad-name="open" data-cad-kind="action" title="Open" aria-label="Open"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg></button><button class="toolButton" data-cad-name="save" data-cad-kind="action" title="Save" aria-label="Save"><svg viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg></button><button class="toolButton" id="cad-print" title="Print / Save PDF" aria-label="Print / Save PDF">
+        <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5"/><rect x="5" y="14" width="14" height="6"/><path d="M5 16H3v-6h18v6h-2"/><path d="M17 12h.01"/></svg>
+      </button></div>
+  </div>
+</div>
 
-  <main class="workspace">
+<main class="workspace">
     <section class="stage">
-      <div class="canvas-frame document-surface" id="app-surface">
+      <div class="surface-frame document-surface" id="app-surface">
         <article id="document-editor" class="document-page" contenteditable="true" spellcheck="true" aria-label="Document editor">
           <h1>Untitled document</h1>
           <p>Start writing here...</p>
@@ -709,8 +827,8 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
           </div>
         </div>
 
-        <div id="cad-editor" class="cad-surface hidden" aria-label="CAD editor">
-          <canvas id="cad-canvas" tabindex="0"></canvas>
+        <div id="cad-editor" class="cad-surface" aria-label="CAD editor">
+          <svg id="cad-native" tabindex="0" xmlns="http://www.w3.org/2000/svg" aria-label="CAD native surface"><g id="cad-native-scene"></g><g id="cad-native-overlay"></g></svg>
           <div class="cad-hud">
             <div class="cad-chip" id="cad-coords">x 0 · y 0</div>
             <div class="cad-chip" id="cad-command">LINE · pick first point</div>
@@ -723,10 +841,7 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
 
     <aside class="rightpanel" id="rightpanel">
       <div class="panel-head">
-        <div class="panel-title">Document</div>
-        <button class="icon-btn" title="Close panel" aria-label="Close panel" id="panel-close">
-          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
-        </button>
+        <div class="panel-title">UNISEFE CAD 2D</div>
       </div>
       <div class="panel-body">
         <div id="panel-document">
@@ -774,66 +889,268 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
             <label class="field"><span>Row height</span><input id="sheet-row-height" type="number" min="20" max="200" step="2" value="32"></label>
           </section>
         </div>
-        <div id="panel-cad" class="hidden">
+        <div id="panel-cad">
+          
           <section class="panel-section">
-            <h3>Modify</h3>
-            <div class="cad-panel-actions">
-              <button type="button" data-cad-name="copy" data-cad-kind="tool">Copy</button>
-              <button type="button" data-cad-name="move" data-cad-kind="tool">Move</button>
-              <button type="button" data-cad-name="offset" data-cad-kind="tool">Offset</button>
-              <button type="button" data-cad-name="mirror" data-cad-kind="tool">Mirror</button>
-              <button type="button" data-cad-name="delete" data-cad-kind="action">Delete</button>
-              <button type="button" data-cad-name="fit" data-cad-kind="action">Fit</button>
-            </div>
+            <h3>Line</h3>
+            <label class="field"><span>Color</span><input id="cad-line-color" type="color" value="#444444"></label>
+            <label class="field"><span>Width</span><input id="cad-line-width" type="number" min="0.1" max="20" step="0.05" value="0.55"></label>
           </section>
           <section class="panel-section">
             <h3>View</h3>
             <label class="field"><span>Snap</span><input id="cad-snap" value="1"></label>
             <label class="field"><span>Text</span><input id="cad-text-size" value="16"></label>
           </section>
-          <section class="panel-section">
-            <h3>Print / PDF</h3>
-            <label class="field"><span>Area</span><select id="cad-print-area"><option value="selection">Selection</option><option value="window">Window</option><option value="all">Whole drawing</option></select></label>
-          </section>
-          <section class="panel-section">
-            <h3>Project</h3>
-            <div class="cad-panel-actions">
-              <button data-cad-name="open" data-cad-kind="action">Open</button>
-              <button data-cad-name="save" data-cad-kind="action">Save</button>
-            </div>
-          </section>
+          
         </div>
       </div>
     </aside>
   </main>
 </div>
 <div id="print-layer" aria-hidden="true"></div>
-<riki-space id="cad-riki-space" name="RIKI_CAD" version="cad2d-v1-stable" canonical="true" continuity="same-space" state="total" relation="simultaneous">
+<riki-space id="cad-riki-space" name="RIKI_CAD" version="0.0.2-alpha" canonical="true" continuity="same-space" state="total" relation="simultaneous" byte-input="strict" chain-input="byte-only">
   <riki-byte name="CONSTITUTION"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SPACE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="CAD"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="TOOL"><riki-value>line</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="SNAP"><riki-value>10</riki-value><riki-bit>1</riki-bit></riki-byte>
-  <riki-byte name="GRID"><riki-value>10</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_X"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_Y"><riki-value>0</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="VIEW_SCALE"><riki-value>1</riki-value><riki-bit>1</riki-bit></riki-byte>
   <riki-byte name="TEXT_SIZE"><riki-value>16</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="LINE_COLOR"><riki-value>#444444</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="LINE_WIDTH"><riki-value>0.55</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="FILLET_RADIUS"><riki-value>10</riki-value><riki-bit>1</riki-bit></riki-byte>
+  <riki-byte name="ARC_RADIUS"><riki-value>50</riki-value><riki-bit>1</riki-bit></riki-byte>
 
   <riki-region name="DRAWING" permanent="true"></riki-region>
+
+  <riki-region name="CHAINS" permanent="true">
+    <riki-chain name="DIST" expression="SQRT((X2-X1)^2+(Y2-Y1)^2)"></riki-chain>
+    <riki-chain name="DX" expression="X2-X1"></riki-chain>
+    <riki-chain name="DY" expression="Y2-Y1"></riki-chain>
+    <riki-chain name="MID_X" expression="(X1+X2)/2"></riki-chain>
+    <riki-chain name="MID_Y" expression="(Y1+Y2)/2"></riki-chain>
+    <riki-chain name="ARC_A0" expression="ATAN2(Y2-Y1,X2-X1)"></riki-chain>
+    <riki-chain name="ARC_A1" expression="ATAN2(Y3-Y1,X3-X1)"></riki-chain>
+    <riki-chain name="ARC_SWEEP" expression="MOD(ARC_A1-ARC_A0,TAU)"></riki-chain>
+    <riki-chain name="ARC_LARGE" expression="IF(ARC_SWEEP>PI,1,0)"></riki-chain>
+    <riki-chain name="ARCR_CHORD" expression="MAX(EPS,DIST)"></riki-chain>
+    <riki-chain name="ARCR_R" expression="ABS(RADIUS)"></riki-chain>
+    <riki-chain name="ARCR_VALID" expression="IF(ARCR_R+EPS>=ARCR_CHORD/2,1,0)"></riki-chain>
+    <riki-chain name="ARCR_UX" expression="DX/ARCR_CHORD"></riki-chain>
+    <riki-chain name="ARCR_UY" expression="DY/ARCR_CHORD"></riki-chain>
+    <riki-chain name="ARCR_SIDE" expression="IF(RADIUS<0,-1,1)"></riki-chain>
+    <riki-chain name="ARCR_NX" expression="-ARCR_UY*ARCR_SIDE"></riki-chain>
+    <riki-chain name="ARCR_NY" expression="ARCR_UX*ARCR_SIDE"></riki-chain>
+    <riki-chain name="ARCR_H" expression="SQRT(MAX(0,ARCR_R^2-(ARCR_CHORD/2)^2))"></riki-chain>
+    <riki-chain name="ARCR_CX" expression="MID_X+ARCR_NX*ARCR_H"></riki-chain>
+    <riki-chain name="ARCR_CY" expression="MID_Y+ARCR_NY*ARCR_H"></riki-chain>
+    <riki-chain name="ARCR_SWEEP" expression="IF(RADIUS<0,1,0)"></riki-chain>
+    <riki-chain name="ARCS_L" expression="MAX(EPS,DIST)"></riki-chain>
+    <riki-chain name="ARCS_UX" expression="DX/ARCS_L"></riki-chain>
+    <riki-chain name="ARCS_UY" expression="DY/ARCS_L"></riki-chain>
+    <riki-chain name="ARCS_NX" expression="-ARCS_UY"></riki-chain>
+    <riki-chain name="ARCS_NY" expression="ARCS_UX"></riki-chain>
+    <riki-chain name="ARCS_S" expression="(X3-MID_X)*ARCS_NX+(Y3-MID_Y)*ARCS_NY"></riki-chain>
+    <riki-chain name="ARCS_AS" expression="ABS(ARCS_S)"></riki-chain>
+    <riki-chain name="ARCS_VALID" expression="IF(ARCS_AS>EPS,1,0)"></riki-chain>
+    <riki-chain name="ARCS_R" expression="IF(ARCS_VALID,(ARCS_L^2)/(8*ARCS_AS)+ARCS_AS/2,0)"></riki-chain>
+    <riki-chain name="ARCS_SIGNED_R" expression="ARCS_R*IF(ARCS_S<0,-1,1)"></riki-chain>
+    <riki-chain name="DIM_L" expression="MAX(EPS,DIST)"></riki-chain>
+    <riki-chain name="DIM_UX" expression="DX/DIM_L"></riki-chain>
+    <riki-chain name="DIM_UY" expression="DY/DIM_L"></riki-chain>
+    <riki-chain name="DIM_NX" expression="-DIM_UY"></riki-chain>
+    <riki-chain name="DIM_NY" expression="DIM_UX"></riki-chain>
+    <riki-chain name="DIM_OFF" expression="(X3-MID_X)*DIM_NX+(Y3-MID_Y)*DIM_NY"></riki-chain>
+    <riki-chain name="DIM_QAX" expression="X1+DIM_NX*DIM_OFF"></riki-chain>
+    <riki-chain name="DIM_QAY" expression="Y1+DIM_NY*DIM_OFF"></riki-chain>
+    <riki-chain name="DIM_QBX" expression="X2+DIM_NX*DIM_OFF"></riki-chain>
+    <riki-chain name="DIM_QBY" expression="Y2+DIM_NY*DIM_OFF"></riki-chain>
+    <riki-chain name="ANG_L1" expression="MAX(EPS,SQRT((AX-VX)^2+(AY-VY)^2))"></riki-chain>
+    <riki-chain name="ANG_L2" expression="MAX(EPS,SQRT((BX-VX)^2+(BY-VY)^2))"></riki-chain>
+    <riki-chain name="ANG_U1X" expression="(AX-VX)/ANG_L1"></riki-chain>
+    <riki-chain name="ANG_U1Y" expression="(AY-VY)/ANG_L1"></riki-chain>
+    <riki-chain name="ANG_U2X" expression="(BX-VX)/ANG_L2"></riki-chain>
+    <riki-chain name="ANG_U2Y" expression="(BY-VY)/ANG_L2"></riki-chain>
+    <riki-chain name="ANG_CROSS" expression="ANG_U1X*ANG_U2Y-ANG_U1Y*ANG_U2X"></riki-chain>
+    <riki-chain name="ANG_DOT" expression="CLAMP(ANG_U1X*ANG_U2X+ANG_U1Y*ANG_U2Y,-1,1)"></riki-chain>
+    <riki-chain name="ANG_RAD" expression="ACOS(ANG_DOT)"></riki-chain>
+    <riki-chain name="ANG_DEG" expression="ANG_RAD*180/PI"></riki-chain>
+    <riki-chain name="ANG_RADIUS" expression="MAX(EPS,SQRT((CX-VX)^2+(CY-VY)^2))"></riki-chain>
+    <riki-chain name="ANG_SWEEP" expression="IF(ANG_CROSS>=0,1,0)"></riki-chain>
+    <riki-chain name="SNAP_D" expression="DIST"></riki-chain>
+    <riki-chain name="SNAP_DX" expression="ABS(X2-X1)"></riki-chain>
+    <riki-chain name="SNAP_DY" expression="ABS(Y2-Y1)"></riki-chain>
+    <riki-chain name="HIT_L2" expression="MAX(EPS,(X2-X1)^2+(Y2-Y1)^2)"></riki-chain>
+    <riki-chain name="HIT_T" expression="CLAMP(((PX-X1)*(X2-X1)+(PY-Y1)*(Y2-Y1))/HIT_L2,0,1)"></riki-chain>
+    <riki-chain name="HIT_QX" expression="X1+HIT_T*(X2-X1)"></riki-chain>
+    <riki-chain name="HIT_QY" expression="Y1+HIT_T*(Y2-Y1)"></riki-chain>
+    <riki-chain name="HIT_D" expression="SQRT((PX-HIT_QX)^2+(PY-HIT_QY)^2)"></riki-chain>
+    <riki-chain name="HIT_TOL" expression="8/VIEW_SCALE"></riki-chain>
+    <riki-chain name="VIEW_W" expression="MAX(1,SCREEN_W/VIEW_SCALE)"></riki-chain>
+    <riki-chain name="VIEW_H" expression="MAX(1,SCREEN_H/VIEW_SCALE)"></riki-chain>
+    <riki-chain name="VIEW_X0" expression="VIEW_X-VIEW_W/2"></riki-chain>
+    <riki-chain name="VIEW_Y0" expression="VIEW_Y-VIEW_H/2"></riki-chain>
+    <riki-chain name="ZOOM_STEP" expression="CLAMP(DELTA,-120,120)"></riki-chain>
+    <riki-chain name="ZOOM_SCALE" expression="CLAMP(OLD_SCALE*EXP(-ZOOM_STEP*0.0015),0.02,100)"></riki-chain>
+    <riki-chain name="ZOOM_UX" expression="CLAMP((CLIENT_X-LEFT)/MAX(1,SCREEN_W),0,1)"></riki-chain>
+    <riki-chain name="ZOOM_UY" expression="CLAMP((CLIENT_Y-TOP)/MAX(1,SCREEN_H),0,1)"></riki-chain>
+    <riki-chain name="ZOOM_OLD_W" expression="SCREEN_W/OLD_SCALE"></riki-chain>
+    <riki-chain name="ZOOM_OLD_H" expression="SCREEN_H/OLD_SCALE"></riki-chain>
+    <riki-chain name="ZOOM_NEW_W" expression="SCREEN_W/NEW_SCALE"></riki-chain>
+    <riki-chain name="ZOOM_NEW_H" expression="SCREEN_H/NEW_SCALE"></riki-chain>
+    <riki-chain name="ZOOM_ANCHOR_X" expression="VIEW_X+(ZOOM_UX-0.5)*ZOOM_OLD_W"></riki-chain>
+    <riki-chain name="ZOOM_ANCHOR_Y" expression="VIEW_Y+(ZOOM_UY-0.5)*ZOOM_OLD_H"></riki-chain>
+    <riki-chain name="ZOOM_CENTER_X" expression="ZOOM_ANCHOR_X-(ZOOM_UX-0.5)*ZOOM_NEW_W"></riki-chain>
+    <riki-chain name="ZOOM_CENTER_Y" expression="ZOOM_ANCHOR_Y-(ZOOM_UY-0.5)*ZOOM_NEW_H"></riki-chain>
+    <riki-chain name="MOVE_X" expression="X1+TX"></riki-chain>
+    <riki-chain name="MOVE_Y" expression="Y1+TY"></riki-chain>
+    <riki-chain name="FIT_CX" expression="BOX_X+BOX_W/2"></riki-chain>
+    <riki-chain name="FIT_CY" expression="BOX_Y+BOX_H/2"></riki-chain>
+    <riki-chain name="FIT_SCALE" expression="CLAMP(0.8*MIN(SCREEN_W/MAX(1,BOX_W),SCREEN_H/MAX(1,BOX_H)),0.02,100)"></riki-chain>
+    <riki-chain name="TEXT_DOWN" expression="MAX(8,TEXT_SIZE-2)"></riki-chain>
+    <riki-chain name="TEXT_UP" expression="MIN(72,TEXT_SIZE+2)"></riki-chain>
+    <riki-chain name="INT_DEN" expression="(X1-X2)*(Y3-Y4)-(Y1-Y2)*(X3-X4)"></riki-chain>
+    <riki-chain name="INT_VALID" expression="IF(ABS(INT_DEN)>EPS,1,0)"></riki-chain>
+    <riki-chain name="INT_X" expression="((X1*Y2-Y1*X2)*(X3-X4)-(X1-X2)*(X3*Y4-Y3*X4))/INT_DEN"></riki-chain>
+    <riki-chain name="INT_Y" expression="((X1*Y2-Y1*X2)*(Y3-Y4)-(Y1-Y2)*(X3*Y4-Y3*X4))/INT_DEN"></riki-chain>
+    <riki-chain name="SEG_T" expression="((PX-X1)*(X2-X1)+(PY-Y1)*(Y2-Y1))/MAX(EPS,(X2-X1)^2+(Y2-Y1)^2)"></riki-chain>
+    <riki-chain name="MIR_DX" expression="X2-X1"></riki-chain>
+    <riki-chain name="MIR_DY" expression="Y2-Y1"></riki-chain>
+    <riki-chain name="MIR_L2" expression="MAX(EPS,MIR_DX^2+MIR_DY^2)"></riki-chain>
+    <riki-chain name="MIR_T" expression="((PX-X1)*MIR_DX+(PY-Y1)*MIR_DY)/MIR_L2"></riki-chain>
+    <riki-chain name="MIR_QX" expression="X1+MIR_T*MIR_DX"></riki-chain>
+    <riki-chain name="MIR_QY" expression="Y1+MIR_T*MIR_DY"></riki-chain>
+    <riki-chain name="MIR_X" expression="2*MIR_QX-PX"></riki-chain>
+    <riki-chain name="MIR_Y" expression="2*MIR_QY-PY"></riki-chain>
+    <riki-chain name="ROT_CROSS" expression="(X1-CX)*(Y2-CY)-(Y1-CY)*(X2-CX)"></riki-chain>
+    <riki-chain name="ROT_DOT" expression="(X1-CX)*(X2-CX)+(Y1-CY)*(Y2-CY)"></riki-chain>
+    <riki-chain name="ROT_ANGLE" expression="ATAN2(ROT_CROSS,ROT_DOT)"></riki-chain>
+    <riki-chain name="ROT_X" expression="CX+(PX-CX)*COS(ANGLE)-(PY-CY)*SIN(ANGLE)"></riki-chain>
+    <riki-chain name="ROT_Y" expression="CY+(PX-CX)*SIN(ANGLE)+(PY-CY)*COS(ANGLE)"></riki-chain>
+    <riki-chain name="DEG_RAD" expression="DEG*PI/180"></riki-chain>
+    <riki-chain name="FILLET_L1" expression="SQRT((AX-VX)^2+(AY-VY)^2)"></riki-chain>
+    <riki-chain name="FILLET_L2" expression="SQRT((BX-VX)^2+(BY-VY)^2)"></riki-chain>
+    <riki-chain name="FILLET_U1X" expression="(AX-VX)/MAX(EPS,FILLET_L1)"></riki-chain>
+    <riki-chain name="FILLET_U1Y" expression="(AY-VY)/MAX(EPS,FILLET_L1)"></riki-chain>
+    <riki-chain name="FILLET_U2X" expression="(BX-VX)/MAX(EPS,FILLET_L2)"></riki-chain>
+    <riki-chain name="FILLET_U2Y" expression="(BY-VY)/MAX(EPS,FILLET_L2)"></riki-chain>
+    <riki-chain name="FILLET_DOT" expression="CLAMP(FILLET_U1X*FILLET_U2X+FILLET_U1Y*FILLET_U2Y,-1,1)"></riki-chain>
+    <riki-chain name="FILLET_ANGLE" expression="ACOS(FILLET_DOT)"></riki-chain>
+    <riki-chain name="FILLET_HALF" expression="FILLET_ANGLE/2"></riki-chain>
+    <riki-chain name="FILLET_T" expression="RADIUS/MAX(EPS,TAN(FILLET_HALF))"></riki-chain>
+    <riki-chain name="FILLET_T1X" expression="VX+FILLET_U1X*FILLET_T"></riki-chain>
+    <riki-chain name="FILLET_T1Y" expression="VY+FILLET_U1Y*FILLET_T"></riki-chain>
+    <riki-chain name="FILLET_T2X" expression="VX+FILLET_U2X*FILLET_T"></riki-chain>
+    <riki-chain name="FILLET_T2Y" expression="VY+FILLET_U2Y*FILLET_T"></riki-chain>
+    <riki-chain name="FILLET_BX" expression="FILLET_U1X+FILLET_U2X"></riki-chain>
+    <riki-chain name="FILLET_BY" expression="FILLET_U1Y+FILLET_U2Y"></riki-chain>
+    <riki-chain name="FILLET_BL" expression="SQRT(FILLET_BX^2+FILLET_BY^2)"></riki-chain>
+    <riki-chain name="FILLET_CD" expression="RADIUS/MAX(EPS,SIN(FILLET_HALF))"></riki-chain>
+    <riki-chain name="FILLET_CX" expression="VX+(FILLET_BX/MAX(EPS,FILLET_BL))*FILLET_CD"></riki-chain>
+    <riki-chain name="FILLET_CY" expression="VY+(FILLET_BY/MAX(EPS,FILLET_BL))*FILLET_CD"></riki-chain>
+    <riki-chain name="FILLET_CROSS" expression="(FILLET_T1X-FILLET_CX)*(FILLET_T2Y-FILLET_CY)-(FILLET_T1Y-FILLET_CY)*(FILLET_T2X-FILLET_CX)"></riki-chain>
+    <riki-chain name="FILLET_SWEEP" expression="IF(FILLET_CROSS>=0,1,0)"></riki-chain>
+    <riki-chain name="FILLET_VALID" expression="IF(RADIUS>0,IF(FILLET_ANGLE>0.000001,IF(FILLET_ANGLE<PI-0.000001,IF(FILLET_T<FILLET_L1,IF(FILLET_T<FILLET_L2,1,0),0),0),0),0)"></riki-chain>
+    <riki-chain name="SNAP_TOL" expression="10/VIEW_SCALE"></riki-chain>
+    <riki-chain name="GUIDE_R" expression="5/VIEW_SCALE"></riki-chain>
+    <riki-chain name="PAN_VIEW_X" expression="START_VIEW_X-(CLIENT_X-START_CLIENT_X)/START_SCALE"></riki-chain>
+    <riki-chain name="PAN_VIEW_Y" expression="START_VIEW_Y-(CLIENT_Y-START_CLIENT_Y)/START_SCALE"></riki-chain>
+    <riki-chain name="RAD_DEG" expression="RAD*180/PI"></riki-chain>
+    <riki-chain name="VECTOR_ANGLE" expression="ATAN2(Y2-Y1,X2-X1)"></riki-chain>
+    <riki-chain name="VECTOR_ANGLE_DEG" expression="VECTOR_ANGLE*180/PI"></riki-chain>
+    <riki-chain name="TEXT_DIR_X" expression="X1+COS(DEG*PI/180)"></riki-chain>
+    <riki-chain name="TEXT_DIR_Y" expression="Y1+SIN(DEG*PI/180)"></riki-chain>
+
+    <riki-chain name="ARCR_MAX_R" expression="MAX(ARCR_CHORD*1000,1000/VIEW_SCALE)"></riki-chain>
+    <riki-chain name="ARCR_SAFE" expression="IF(ARCR_VALID,IF(ARCR_R<=ARCR_MAX_R,1,0),0)"></riki-chain>
+    <riki-chain name="ARCS_MIN_SAG" expression="3/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ARCS_MAX_R" expression="MAX(ARCS_L*1000,1000/VIEW_SCALE)"></riki-chain>
+    <riki-chain name="ARCS_SAFE" expression="IF(ARCS_VALID,IF(ARCS_AS>=ARCS_MIN_SAG,IF(ABS(ARCS_SIGNED_R)<=ARCS_MAX_R,1,0),0),0)"></riki-chain>
+
+    <riki-chain name="DIM_SIDE" expression="IF(DIM_OFF>=0,1,-1)"></riki-chain>
+    <riki-chain name="DIM_GAP" expression="2/VIEW_SCALE"></riki-chain>
+    <riki-chain name="DIM_OVER" expression="3/VIEW_SCALE"></riki-chain>
+    <riki-chain name="DIM_ARROW" expression="5/VIEW_SCALE"></riki-chain>
+    <riki-chain name="DIM_ANGLE_DEG" expression="ATAN2(DIM_UY,DIM_UX)*180/PI"></riki-chain>
+    <riki-chain name="DIM_READABLE_ANGLE" expression="IF(DIM_ANGLE_DEG>90,DIM_ANGLE_DEG-180,IF(DIM_ANGLE_DEG<-90,DIM_ANGLE_DEG+180,DIM_ANGLE_DEG))"></riki-chain>
+    <riki-chain name="DIM_EXT_AX" expression="X1+DIM_NX*DIM_SIDE*DIM_GAP"></riki-chain>
+    <riki-chain name="DIM_EXT_AY" expression="Y1+DIM_NY*DIM_SIDE*DIM_GAP"></riki-chain>
+    <riki-chain name="DIM_EXT_BX" expression="X2+DIM_NX*DIM_SIDE*DIM_GAP"></riki-chain>
+    <riki-chain name="DIM_EXT_BY" expression="Y2+DIM_NY*DIM_SIDE*DIM_GAP"></riki-chain>
+    <riki-chain name="DIM_EXT_QAX" expression="DIM_QAX+DIM_NX*DIM_SIDE*DIM_OVER"></riki-chain>
+    <riki-chain name="DIM_EXT_QAY" expression="DIM_QAY+DIM_NY*DIM_SIDE*DIM_OVER"></riki-chain>
+    <riki-chain name="DIM_EXT_QBX" expression="DIM_QBX+DIM_NX*DIM_SIDE*DIM_OVER"></riki-chain>
+    <riki-chain name="DIM_EXT_QBY" expression="DIM_QBY+DIM_NY*DIM_SIDE*DIM_OVER"></riki-chain>
+    <riki-chain name="DIM_TEXT_X" expression="(DIM_QAX+DIM_QBX)/2"></riki-chain>
+    <riki-chain name="DIM_TEXT_Y" expression="(DIM_QAY+DIM_QBY)/2"></riki-chain>
+
+    <riki-chain name="ANG_VALID" expression="IF(ANG_RAD>0.000001,IF(ANG_RAD<PI-0.000001,1,0),0)"></riki-chain>
+    <riki-chain name="ANG_SIGN" expression="IF(ANG_CROSS>=0,1,-1)"></riki-chain>
+    <riki-chain name="ANG_OVER" expression="4/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ANG_ARROW" expression="5/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ANG_START_X" expression="VX+ANG_U1X*ANG_RADIUS"></riki-chain>
+    <riki-chain name="ANG_START_Y" expression="VY+ANG_U1Y*ANG_RADIUS"></riki-chain>
+    <riki-chain name="ANG_END_X" expression="VX+ANG_U2X*ANG_RADIUS"></riki-chain>
+    <riki-chain name="ANG_END_Y" expression="VY+ANG_U2Y*ANG_RADIUS"></riki-chain>
+    <riki-chain name="ANG_T1X" expression="-ANG_U1Y*ANG_SIGN"></riki-chain>
+    <riki-chain name="ANG_T1Y" expression="ANG_U1X*ANG_SIGN"></riki-chain>
+    <riki-chain name="ANG_T2X" expression="ANG_U2Y*ANG_SIGN"></riki-chain>
+    <riki-chain name="ANG_T2Y" expression="-ANG_U2X*ANG_SIGN"></riki-chain>
+    <riki-chain name="ANG_A1" expression="ATAN2(ANG_U1Y,ANG_U1X)"></riki-chain>
+    <riki-chain name="ANG_MID" expression="ANG_A1+ANG_SIGN*ANG_RAD/2"></riki-chain>
+    <riki-chain name="ANG_TEXT_R" expression="ANG_RADIUS+8/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ANG_TEXT_X" expression="VX+COS(ANG_MID)*ANG_TEXT_R"></riki-chain>
+    <riki-chain name="ANG_TEXT_Y" expression="VY+SIN(ANG_MID)*ANG_TEXT_R"></riki-chain>
+
+    <riki-chain name="ALIGN_L" expression="MAX(EPS,DIST)"></riki-chain>
+    <riki-chain name="ALIGN_UX" expression="DX/ALIGN_L"></riki-chain>
+    <riki-chain name="ALIGN_UY" expression="DY/ALIGN_L"></riki-chain>
+    <riki-chain name="ALIGN_NX" expression="-ALIGN_UY"></riki-chain>
+    <riki-chain name="ALIGN_NY" expression="ALIGN_UX"></riki-chain>
+    <riki-chain name="ALIGN_QAX" expression="X1+ALIGN_NX*OFFSET"></riki-chain>
+    <riki-chain name="ALIGN_QAY" expression="Y1+ALIGN_NY*OFFSET"></riki-chain>
+    <riki-chain name="ALIGN_QBX" expression="X2+ALIGN_NX*OFFSET"></riki-chain>
+    <riki-chain name="ALIGN_QBY" expression="Y2+ALIGN_NY*OFFSET"></riki-chain>
+    <riki-chain name="ALIGN_OVER" expression="4/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ALIGN_ARROW" expression="5/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ALIGN_TEXT_GAP" expression="9/VIEW_SCALE"></riki-chain>
+    <riki-chain name="ALIGN_EXT_AX" expression="ALIGN_QAX+ALIGN_NX*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_EXT_AY" expression="ALIGN_QAY+ALIGN_NY*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_EXT_BX" expression="ALIGN_QBX+ALIGN_NX*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_EXT_BY" expression="ALIGN_QBY+ALIGN_NY*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_LINE_X2" expression="ALIGN_QBX+ALIGN_UX*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_LINE_Y2" expression="ALIGN_QBY+ALIGN_UY*ALIGN_OVER"></riki-chain>
+    <riki-chain name="ALIGN_TEXT_X" expression="ALIGN_QBX+ALIGN_NX*ALIGN_TEXT_GAP"></riki-chain>
+    <riki-chain name="ALIGN_TEXT_Y" expression="ALIGN_QBY+ALIGN_NY*ALIGN_TEXT_GAP"></riki-chain>
+    <riki-chain name="ALIGN_ANGLE_DEG" expression="ATAN2(ALIGN_UY,ALIGN_UX)*180/PI+90"></riki-chain>
+    <riki-chain name="ALIGN_READABLE_ANGLE" expression="IF(ALIGN_ANGLE_DEG>90,ALIGN_ANGLE_DEG-180,IF(ALIGN_ANGLE_DEG<=-90,ALIGN_ANGLE_DEG+180,ALIGN_ANGLE_DEG))"></riki-chain>
+
+    <riki-chain name="SIGNED_DIST_Y" expression="DIST*IF(Y2<Y1,-1,1)"></riki-chain>
+
+    <riki-chain name="CIRCLE_HIT" expression="ABS(DIST-RADIUS)"></riki-chain>
+    <riki-chain name="STYLE_WIDTH" expression="MAX(0.1,WIDTH)"></riki-chain>
+    <riki-chain name="STYLE_TEXT_SIZE" expression="MAX(1,SIZE)"></riki-chain>
+  </riki-region>
 
   <riki-region name="INTERFACE" permanent="true">
     <riki-relation kind="tool" name="select" label="Select"></riki-relation>
     <riki-relation kind="tool" name="line" label="Line"></riki-relation>
-    <riki-relation kind="tool" name="rect" label="Rect"></riki-relation>
+    <riki-relation kind="tool" name="dashline" label="Dashed line"></riki-relation>
+    <riki-relation kind="tool" name="dashdotline" label="Dash-dot line"></riki-relation>
+    <riki-relation kind="tool" name="fillet" label="Raccorda"></riki-relation>
     <riki-relation kind="tool" name="circle" label="Circle"></riki-relation>
-    <riki-relation kind="tool" name="arc" label="Arc"></riki-relation>
+    <riki-relation kind="tool" name="arc-rif" label="Arc R-I-F"></riki-relation>
+    <riki-relation kind="tool" name="arc-ifr" label="Arc I-F-R"></riki-relation>
     <riki-relation kind="tool" name="dim" label="Dim"></riki-relation>
+    <riki-relation kind="tool" name="angdim" label="Angular Dim"></riki-relation>
+    <riki-relation kind="tool" name="aligndim" label="Aligned Progressive Dim"></riki-relation>
     <riki-relation kind="tool" name="text" label="Text"></riki-relation>
     <riki-relation kind="tool" name="copy" label="Copy"></riki-relation>
     <riki-relation kind="tool" name="move" label="Move"></riki-relation>
-    <riki-relation kind="tool" name="offset" label="Offset"></riki-relation>
-    <riki-relation kind="tool" name="mirror" label="Mirror"></riki-relation>
+    <riki-relation kind="tool" name="trim" label="Trim"></riki-relation>
+    <riki-relation kind="tool" name="extend" label="Extend"></riki-relation>
     <riki-relation kind="action" name="undo" label="Undo"></riki-relation>
     <riki-relation kind="action" name="delete" label="Delete"></riki-relation>
     <riki-relation kind="action" name="fit" label="Fit"></riki-relation>
@@ -1062,7 +1379,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
       let expr = source.slice(1).toUpperCase();
       if (!expr.trim()) return "=";
 
-      // Basic range functions: SUM / AVERAGE / MIN / MAX.
       expr = expr.replace(/\b(SUM|AVERAGE|MIN|MAX)\(([A-H][1-5]):([A-H][1-5])\)/g,
         (_, fn, a1, a2) => {
           const p1 = addrParts(a1), p2 = addrParts(a2);
@@ -1122,10 +1438,8 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
       const raw = rawValue(addr);
       const s = String(raw ?? "");
 
-      // While a formula is being edited, keep the raw expression visible.
       if (state.FORMULA_CELL === addr) return s;
 
-      // A bare "=" is incomplete, not an error.
       if (s === "=") return s;
 
       const shown = s.startsWith("=")
@@ -1149,7 +1463,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
       const grid = document.getElementById("sheet-grid");
       if (!grid) return;
 
-      // Corner + column headers.
       const allHeads = [...grid.querySelectorAll(".sheet-head")];
       if (allHeads[0]) {
         allHeads[0].style.gridColumn = "1";
@@ -1161,13 +1474,11 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         head.style.gridRow = "1";
       });
 
-      // Row headers.
       rowHeads.forEach((head, i) => {
         head.style.gridColumn = "1";
         head.style.gridRow = String(i + 2);
       });
 
-      // Cells.
       cells.forEach(cell => {
         const p = addrParts(cell.dataset.cell);
         if (!p) return;
@@ -1311,7 +1622,7 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
     }
 
     function applyColumnWidth(col, width) {
-      const index = col.charCodeAt(0) - 64; // A=1
+      const index = col.charCodeAt(0) - 64;
       const grid = document.getElementById("sheet-grid");
       if (!grid) return;
 
@@ -1440,11 +1751,9 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
 
         masterCell.classList.add("is-merged-master");
 
-        // +1 because grid column 1 is the row-header column.
         masterCell.style.gridColumn =
           String(range.c1 + 1) + " / " + String(range.c2 + 2);
 
-        // +1 because grid row 1 is the column-header row.
         masterCell.style.gridRow =
           String(range.r1 + 1) + " / " + String(range.r2 + 2);
 
@@ -1465,8 +1774,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         cell.classList.toggle("format-border-all", cellBorderMode[addr] === "all");
         cell.classList.toggle("format-border-none", cellBorderMode[addr] === "none");
 
-        // Never rewrite the cell currently being edited:
-        // doing so resets the caret to the beginning and reverses typed text.
         if (document.activeElement === cell) return;
 
         cell.textContent = displayValue(addr);
@@ -1488,7 +1795,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         const addr = cell.dataset.cell;
         headerSelectionActive = false;
 
-        // Formula reference pick has priority.
         if (
           state.FORMULA_CELL &&
           state.FORMULA_CELL !== addr &&
@@ -1525,7 +1831,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         selectedColumns.clear();
         selectedRows.clear();
 
-        // Shift extends from the existing anchor.
         if (e.shiftKey) {
           e.preventDefault();
           selectCellRange(anchorCell || state.SELECTION, addr);
@@ -1534,7 +1839,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
           return;
         }
 
-        // Ctrl/Cmd toggles one cell without losing the others.
         if (e.ctrlKey || e.metaKey) {
           e.preventDefault();
           if (selectedCells.has(addr)) selectedCells.delete(addr);
@@ -1548,7 +1852,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
           return;
         }
 
-        // Normal click starts a spreadsheet-style drag selection.
         selectedCells.clear();
         selectedCells.add(addr);
         state.SELECTION = addr;
@@ -1583,7 +1886,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
         if (CORE.SPACE.ACTIVE_APP !== "sheet") return;
         cell.textContent = displayValue(cell.dataset.cell);
       });
-
 
 
       cell.addEventListener("input", () => {
@@ -2010,7 +2312,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
       NOME: "CAD",
       BYTE: "CAD",
       BIT: root && space ? 1 : 0,
-      CATENE: ["CAD_DRAWING", "CAD_TOOL", "CAD_VIEW"]
     };
 
     function activate(on) {
@@ -2020,7 +2321,6 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
 
       if (on) {
         UI.title("CAD · BIT " + state.BIT);
-        // CAD engine is kept completely separate and receives only a resize wake-up.
         requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
       }
     }
@@ -2045,848 +2345,775 @@ html,body,.app{width:100%;height:100vh;height:100dvh;max-width:100%;overflow:hid
 </script><script>
 (()=>{
 'use strict';
-const space=document.querySelector('#cad-riki-space');
-const drawing=space.querySelector('riki-region[name="DRAWING"]');
-const ui=space.querySelector('riki-region[name="INTERFACE"]');
-const canvas=document.querySelector('#cad-canvas'),ctx=canvas.getContext('2d');
+const NS='http://www.w3.org/2000/svg',space=document.querySelector('#cad-riki-space');
+const svg=document.querySelector('#cad-native'),scene=document.querySelector('#cad-native-scene'),overlay=document.querySelector('#cad-native-overlay');
 const toolbar=document.querySelector('#toolbar-cad'),coords=document.querySelector('#cad-coords'),command=document.querySelector('#cad-command'),selectionText=document.querySelector('#cad-selection'),count=document.querySelector('#cad-count');
 const openProject=document.querySelector('#cad-openProject');
-const printArea=document.querySelector('#cad-print-area');
+const byte=n=>space.querySelector(`riki-byte[name="${n}"] riki-value`),get=n=>byte(n)?.textContent??'',set=(n,v)=>{const e=byte(n);if(e)e.textContent=String(v)};
 
-const dpr=()=>Math.max(1,window.devicePixelRatio||1);
-const byte=n=>space.querySelector(`riki-byte[name="${n}"] riki-value`);
-const get=n=>byte(n)?.textContent??'';
-const set=(n,v)=>{const e=byte(n);if(e)e.textContent=String(v)};
-const num=n=>Number(get(n))||0;
-let seq=0, selected=null, draft=null, modify=null, pan=null, history=[],cmdInput={stage:'idle',buffer:'',v1:null},lastPointerWorld=null;
+const BYTE=(()=>{
+  const is=v=>!!v&&v.__rikiByte===1;
+  const read=v=>{
+    if(!is(v))throw Error('RIKI strict BYTE violation: raw value reached interpreter');
+    return v.read();
+  };
+  const ref=(read,write=null,label='BYTE')=>Object.freeze({
+    __rikiByte:1,label,read,write,
+    valueOf(){const v=Number(read());return Number.isFinite(v)?v:0},
+    toString(){return String(read()??'')}
+  });
+  const literal=(value,label='INPUT')=>ref(()=>value,null,label);
+  const spaceRef=name=>ref(()=>get(name),v=>set(name,v),name);
+  const attr=(el,name)=>ref(()=>el?.getAttribute(name)??0,v=>el?.setAttribute(name,String(v)),`${el?.dataset?.byte||el?.tagName||'DOM'}.${name}`);
+  const data=(el,name)=>ref(()=>el?.dataset?.[name]??0,v=>{if(el)el.dataset[name]=String(v)},`${el?.dataset?.byte||el?.tagName||'DOM'}.data.${name}`);
+  const input=(obj,key,label=key)=>ref(()=>obj?.[key]??0,v=>{if(obj)obj[key]=v},label);
+  const context=(ctx={},scope='CHAIN')=>{
+    const out=Object.create(null);
+    for(const [name,value] of Object.entries(ctx)){
+      out[name]=is(value)?value:literal(value,`${scope}.${name}`);
+    }
+    return out
+  };
+  const assertContext=ctx=>{
+    for(const [name,value] of Object.entries(ctx||{})){
+      if(!is(value))throw Error(`RIKI strict BYTE violation at ${name}`);
+    }
+    return ctx
+  };
+  return Object.freeze({is,read,ref,literal,space:spaceRef,attr,data,input,context,assertContext});
+})();
+const num=n=>BYTE.space(n);
 
-
-function projectState(){
-  const bytes={};
-  for(const b of space.querySelectorAll(':scope > riki-byte')){
-    const n=b.getAttribute('name'),v=b.querySelector(':scope > riki-value');
-    if(n&&v)bytes[n]=v.textContent;
-  }
-  return {format:'RIKI-CAD-2D',version:1,bytes,drawing:drawing.innerHTML};
-}
-function buildSelfHtml(){
-  const clone=document.documentElement.cloneNode(true);
-  clone.querySelectorAll('#toolbar-cad button').forEach(b=>b.remove());
-  const cc=clone.querySelector('#cad-canvas');
-  if(cc){cc.removeAttribute('width');cc.removeAttribute('height')}
-  const sd=clone.querySelector('#saveDialog');
-  if(sd)sd.style.display='none';
-  const sn=clone.querySelector('#saveName');
-  if(sn)sn.value='RIKI-CAD-2D.html';
-  return '<!doctype html>\n'+clone.outerHTML;
-}
-
-async function saveProject(){
-  const now=new Date(),pad=n=>String(n).padStart(2,'0');
-  const name=`RIKI-CAD-2D-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.html`;
-
-  if(typeof window.showSaveFilePicker!=='function'){
-    command.textContent='SAVE · open this HTML directly in Chrome/Edge on Desktop';
-    return;
-  }
-
-  try{
-    const handle=await window.showSaveFilePicker({
-      suggestedName:name,
-      types:[{
-        description:'RIKI CAD 2D HTML',
-        accept:{'text/html':['.html']}
-      }]
+const RIKI=(()=>{
+  const region=space.querySelector('riki-region[name="CHAINS"]');
+  const source=new Map([...region.querySelectorAll(':scope > riki-chain')].map(e=>[e.getAttribute('name'),e.getAttribute('expression')||'0']));
+  const compiled=new Map(),active=new Set();
+  const fn={
+    SQRT:Math.sqrt,ABS:Math.abs,MIN:Math.min,MAX:Math.max,ATAN2:Math.atan2,ACOS:Math.acos,TAN:Math.tan,SIN:Math.sin,COS:Math.cos,EXP:Math.exp,
+    MOD:(a,b)=>((a%b)+b)%b,CLAMP:(v,a,b)=>Math.max(a,Math.min(b,v)),IF:(c,a,b)=>c?a:b,
+    PI:Math.PI,TAU:Math.PI*2,EPS:1e-12
+  };
+  const builtins=new Set(Object.keys(fn));
+  function compile(name){
+    if(compiled.has(name))return compiled.get(name);
+    let x=source.get(name);if(x==null)throw Error('Unknown RIKI chain '+name);
+    x=x.replace(/\^/g,'**').replace(/\b[A-Z_][A-Z0-9_]*\b/g,t=>{
+      if(builtins.has(t))return `F["${t}"]`;
+      if(source.has(t))return `V("${t}")`;
+      return `R(C["${t}"])`;
     });
+    const f=new Function('C','F','V','R',`return (${x});`);compiled.set(name,f);return f;
+  }
+  function value(name,ctx={},cache=new Map()){
+    BYTE.assertContext(ctx);
+    if(cache.has(name))return cache.get(name);
+    if(active.has(name))throw Error('RIKI chain cycle: '+name);
+    active.add(name);
+    try{
+      const v=compile(name)(ctx,fn,n=>value(n,ctx,cache),BYTE.read);
+      const out=typeof v==='number'&&Number.isFinite(v)?v:v;
+      cache.set(name,out);return out;
+    }finally{active.delete(name)}
+  }
+  function values(names,ctx={}){BYTE.assertContext(ctx);const c=new Map(),o={};for(const n of names)o[n]=value(n,ctx,c);return o}
+  return Object.freeze({
+    value,values,names:Object.freeze([...source.keys()]),
+    audit:()=>Object.freeze({strictByte:true,chains:source.size,compiled:compiled.size})
+  });
+})();
+const C=(name,ctx={})=>RIKI.value(name,BYTE.context(ctx,name)),
+      CV=(names,ctx={})=>RIKI.values(names,BYTE.context(ctx,names.join('+')));
 
-    const html=buildSelfHtml();
-    const writable=await handle.createWritable();
-    await writable.write(new Blob([html],{type:'text/html;charset=utf-8'}));
-    await writable.close();
-
-    command.textContent='SAVE · new RIKI HTML saved on PC';
-  }catch(err){
-    if(err && err.name==='AbortError'){
-      command.textContent='SAVE · cancelled';
-    }else{
-      command.textContent='SAVE · browser blocked native Save As';
-      console.error(err);
-    }
-  }
-}
-function restoreProject(data){
-  if(!data||data.format!=='RIKI-CAD-2D'||typeof data.drawing!=='string')throw new Error('Invalid RIKI project');
-  if(data.bytes&&typeof data.bytes==='object')for(const [n,v] of Object.entries(data.bytes))if(byte(n))set(n,v);
-  drawing.innerHTML=data.drawing;selected=null;draft=null;modify=null;history=[];resetCommandInput();
-  let m=0;for(const e of drawing.querySelectorAll('[name]')){const q=(e.getAttribute('name')||'').match(/^[PR](\d+)$/);if(q)m=Math.max(m,Number(q[1]))}seq=m;
-  syncToolbar();render();command.textContent='OPEN · project loaded';
-}
-function openProjectFile(file){
-  if(!file)return;const reader=new FileReader();reader.onload=()=>{try{restoreProject(JSON.parse(String(reader.result)))}catch(err){command.textContent='OPEN · invalid project'}};reader.readAsText(file);
-}
-openProject.addEventListener('change',()=>{openProjectFile(openProject.files?.[0]);openProject.value=''});
-
-function resetCommandInput(){cmdInput={stage:'idle',buffer:'',v1:null};updateCommand()}
-function updateCommand(){
-  const tool=get('TOOL');
-  if(tool==='line'){
-    if(!draft){command.textContent='LINE · pick first point';return}
-    command.textContent=`LINE · length ${cmdInput.buffer||'…'} · Enter · or length<angle`;
-    return
-  }
-  if(tool==='rect'){
-    if(!draft){command.textContent='RECT · pick first corner';return}
-    if(cmdInput.stage==='height'){command.textContent=`RECT · height ${cmdInput.buffer||'…'} · Enter`;return}
-    command.textContent=`RECT · opposite corner or width${cmdInput.buffer?' '+cmdInput.buffer:''}`;return
-  }
-  if(tool==='circle'){
-    if(!draft){command.textContent='CIRCLE · pick center';return}
-    command.textContent=`CIRCLE · point on circumference or radius${cmdInput.buffer?' '+cmdInput.buffer:''}`;return
-  }
-  if(tool==='arc'){
-    if(!draft){command.textContent='ARC · pick center';return}
-    if(cmdInput.stage==='radius'){command.textContent=`ARC · radius or start point${cmdInput.buffer?' '+cmdInput.buffer:''}`;return}
-    if(cmdInput.stage==='startAngle'){command.textContent=`ARC · start angle ${cmdInput.buffer||'…'}° · Enter`;return}
-    if(cmdInput.stage==='endAngle'){command.textContent=`ARC · end angle ${cmdInput.buffer||'…'}° · Enter`;return}
-    command.textContent='ARC · pick end point on arc';return
-  }
-  if(tool==='dim'){
-    if(!draft){command.textContent='DIM · pick first point';return}
-    if(draft.stage===1){command.textContent='DIM · pick second point';return}
-    command.textContent='DIM · choose distance with mouse · click';return
-  }
-  if(tool==='text'){
-    if(!draft){command.textContent='TEXT · pick insertion point';return}
-    command.textContent=`TEXT · ${cmdInput.buffer||'type text'} · Enter`;return
-  }
-  if(['copy','move','offset','mirror'].includes(tool)){
-    const T=tool.toUpperCase();
-    if(!selected){command.textContent=`${T} · select entity`;return}
-    if(tool==='mirror'){
-      if(!modify||!modify.axisA){command.textContent='MIRROR · pick first point of axis';return}
-      command.textContent=`MIRROR · second axis point or angle${cmdInput.buffer?' '+cmdInput.buffer+'°':''} · Enter`;return
-    }
-    command.textContent=(tool==='move'||tool==='copy')?`${T} · click destination`:tool==='offset'?`${T} · click offset side/distance`:`${T}`;return
-  }
-  command.textContent=tool.toUpperCase();
-}
-
-function lineAngle(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
-function endpointFromPolar(a,len,deg){const r=deg*Math.PI/180;return{x:a.x+len*Math.cos(r),y:a.y+len*Math.sin(r)}}
-function commitDraft(d){
-  if(!d){draft=null;resetCommandInput();render();return}
-  if(d.kind==='arc'){
-    if(!d.b||!d.c||Math.hypot(d.b.x-d.a.x,d.b.y-d.a.y)<1e-9){draft=null;resetCommandInput();render();return}
-    saveHistory();const a=createPoint(d.a),b=createPoint(d.b),c=createPoint(d.c);const rel=createRelation('arc',a,b,c);selected=rel.getAttribute('name');draft=null;resetCommandInput();render();return
-  }
-  if(Math.hypot(d.b.x-d.a.x,d.b.y-d.a.y)<1e-9){draft=null;resetCommandInput();render();return}
-  saveHistory();const a=createPoint(d.a),b=createPoint(d.b);const rel=createRelation(d.kind,a,b);selected=rel.getAttribute('name');draft=null;resetCommandInput();render();
-}
-function parseLinePair(text){
-  const t=text.trim().replace(',', '.');
-  let m=t.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(?:<|@|\s)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/);
-  return m?{length:+m[1],angle:+m[2]}:null;
-}
-
-function point(name){return drawing.querySelector(`:scope > riki-point[name="${name}"]`)}
-function pxy(name){const p=point(name);return p?{x:+p.getAttribute('x'),y:+p.getAttribute('y')}:null}
-function relations(){return [...drawing.querySelectorAll(':scope > riki-relation')]}
-function points(){return [...drawing.querySelectorAll(':scope > riki-point')]}
-function worldToScreen(p){const s=num('VIEW_SCALE')||1;return{x:(p.x-num('VIEW_X'))*s+canvas.clientWidth/2,y:canvas.clientHeight/2-(p.y-num('VIEW_Y'))*s}}
-function screenToWorld(p){const s=num('VIEW_SCALE')||1;return{x:(p.x-canvas.clientWidth/2)/s+num('VIEW_X'),y:(canvas.clientHeight/2-p.y)/s+num('VIEW_Y')}}
+let seq=0,selected=null,selectedSet=new Set(),selectionDrag=null,draft=null,pan=null,history=[];
+const lineColorInput=document.getElementById('cad-line-color'),lineWidthInput=document.getElementById('cad-line-width');
 let guideState={x:null,y:null,point:null};
+const entityIndex=new Map(),paintedSelection=new Set(),PERF={dimensionCreates:0,dimensionUpdates:0,selectionTouches:0};
+const rebuildEntityIndex=()=>{entityIndex.clear();for(const e of scene.children)if(e.dataset?.byte)entityIndex.set(e.dataset.byte,e)};
+const indexEntity=e=>{if(e?.dataset?.byte)entityIndex.set(e.dataset.byte,e);return e};
+const unindexEntity=e=>{if(e?.dataset?.byte)entityIndex.delete(e.dataset.byte);return e};
+const entityByByte=id=>id?entityIndex.get(id)||null:null;
+const entities=()=>[...entityIndex.values()];
+const next=()=>`B${++seq}`;
+rebuildEntityIndex();
+const selectedIds=()=>selectedSet.size?[...selectedSet]:(selected?[selected]:[]);
+const selectedEntities=()=>selectedIds().map(entityByByte).filter(Boolean);
+function clearSelection(){selected=null;selectedSet.clear()}
+function setSingleSelection(id){selected=id||null;selectedSet.clear();if(id)selectedSet.add(id)}
+function toggleSelection(id){if(!id)return;if(selectedSet.has(id))selectedSet.delete(id);else selectedSet.add(id);selected=selectedSet.size?[...selectedSet].at(-1):null}
+function selectMany(ids,add=false){if(!add)selectedSet.clear();for(const id of ids)selectedSet.add(id);selected=selectedSet.size?[...selectedSet].at(-1):null}
+function syncSelectionClasses(){
+  for(const id of paintedSelection)if(!selectedSet.has(id)){const e=entityByByte(id);if(e){e.classList.remove('selected');PERF.selectionTouches++}}
+  for(const id of selectedSet)if(!paintedSelection.has(id)){const e=entityByByte(id);if(e){e.classList.add('selected');PERF.selectionTouches++}}
+  paintedSelection.clear();for(const id of selectedSet)paintedSelection.add(id)
+}
 
+function S(tag,a={}){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))if(v!=null)e.setAttribute(k,v);return e}
+function pt(e){const m=svg.getScreenCTM();if(m){const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return{x:p.x,y:p.y}}const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return{x:vb.x+(e.clientX-r.left)*vb.width/Math.max(1,r.width),y:vb.y+(e.clientY-r.top)*vb.height/Math.max(1,r.height)}}
+function movePoint(x,y,tx,ty){return{x:C('MOVE_X',{X1:x,TX:tx}),y:C('MOVE_Y',{Y1:y,TY:ty})}}
+function midpoint(a,b){const q={X1:a.x,Y1:a.y,X2:b.x,Y2:b.y};return{x:C('MID_X',q),y:C('MID_Y',q)}}
 function magneticCandidates(){
-  const out=[];
-
-  for(const p of points()){
-    out.push({
-      x:+p.getAttribute('x'),
-      y:+p.getAttribute('y'),
-      kind:'point'
-    });
+  const out=[],push=(x,y,kind)=>{if(Number.isFinite(x)&&Number.isFinite(y))out.push({x,y,kind})};
+  for(const e of entities()){
+    const k=e.dataset.kind;
+    if(k==='line'||k==='dashline'||k==='dashdotline'){const a={x:+e.getAttribute('x1'),y:+e.getAttribute('y1')},b={x:+e.getAttribute('x2'),y:+e.getAttribute('y2')},m=midpoint(a,b);push(a.x,a.y,'point');push(b.x,b.y,'point');push(m.x,m.y,'mid')}
+    else if(k==='circle')push(+e.getAttribute('cx'),+e.getAttribute('cy'),'center');
+    else if(k==='arc'){push(+e.dataset.cx,+e.dataset.cy,'center');push(+e.dataset.sx,+e.dataset.sy,'point');push(+e.dataset.ex,+e.dataset.ey,'point')}
+    else if(k==='text')push(+e.getAttribute('x'),+e.getAttribute('y'),'point');
+    else if(k==='dim'){push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point');push(+e.dataset.cx,+e.dataset.cy,'point')}
+    else if(k==='angdim'){push(+e.dataset.vx,+e.dataset.vy,'point');push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point');push(+e.dataset.cx,+e.dataset.cy,'point')}
+    else if(k==='aligndim'){push(+e.dataset.ax,+e.dataset.ay,'point');push(+e.dataset.bx,+e.dataset.by,'point')}
   }
-
-  for(const r of relations()){
-    const d=relData(r);
-    if(!d)continue;
-
-    if(d.kind==='line'||d.kind==='rect'){
-      out.push({
-        x:(d.a.x+d.b.x)/2,
-        y:(d.a.y+d.b.y)/2,
-        kind:'mid'
-      });
-    }
-
-    if(d.kind==='circle'||d.kind==='arc'){
-      out.push({
-        x:d.a.x,
-        y:d.a.y,
-        kind:'center'
-      });
-    }
-  }
-
   return out;
 }
-
+function drawGuides(){
+  overlay.querySelectorAll('.guide-live,.guide-point').forEach(e=>e.remove());
+  const vb=svg.viewBox.baseVal,sc=num('VIEW_SCALE')||1;
+  if(guideState.x!==null)overlay.append(S('line',{x1:guideState.x,y1:vb.y,x2:guideState.x,y2:C('MOVE_Y',{Y1:vb.y,TY:vb.height}),class:'guide guide-live'}));
+  if(guideState.y!==null)overlay.append(S('line',{x1:vb.x,y1:guideState.y,x2:C('MOVE_X',{X1:vb.x,TX:vb.width}),y2:guideState.y,class:'guide guide-live'}));
+  if(guideState.point)overlay.append(S('circle',{cx:guideState.point.x,cy:guideState.point.y,r:C('GUIDE_R',{VIEW_SCALE:sc}),class:'guide-point',fill:'none',stroke:'#111','stroke-width':.6,'vector-effect':'non-scaling-stroke'}));
+}
 function snap(p){
-  if(num('SNAP')===0){
-    guideState={x:null,y:null,point:null};
-    return p;
-  }
-
-  const scale=num('VIEW_SCALE')||1;
-  const tol=10/scale;
-  let out={x:p.x,y:p.y};
-
-  guideState={x:null,y:null,point:null};
-
-  let best=null,bestD=Infinity;
-  for(const c of magneticCandidates()){
-    const d=Math.hypot(p.x-c.x,p.y-c.y);
-    if(d<bestD&&d<=tol){
-      best=c;
-      bestD=d;
-    }
-  }
-
-  if(best){
-    out={x:best.x,y:best.y};
-    guideState.point=best;
-    guideState.x=best.x;
-    guideState.y=best.y;
-    return out;
-  }
-
-  // Dynamic orthogonal guides from the active construction anchor.
-  let anchor=null;
-  if(draft&&draft.a)anchor=draft.a;
-  else if(modify&&modify.axisA)anchor=modify.axisA;
-
-  if(anchor){
-    if(Math.abs(p.x-anchor.x)<=tol){
-      out.x=anchor.x;
-      guideState.x=anchor.x;
-    }
-    if(Math.abs(p.y-anchor.y)<=tol){
-      out.y=anchor.y;
-      guideState.y=anchor.y;
-    }
-  }
-
-  // Magnetic alignment with existing points even without landing directly on them.
-  for(const c of magneticCandidates()){
-    if(guideState.x===null&&Math.abs(p.x-c.x)<=tol){
-      out.x=c.x;
-      guideState.x=c.x;
-      break;
-    }
-  }
-  for(const c of magneticCandidates()){
-    if(guideState.y===null&&Math.abs(p.y-c.y)<=tol){
-      out.y=c.y;
-      guideState.y=c.y;
-      break;
-    }
-  }
-
-  return out;
+  if(num('SNAP')===0){guideState={x:null,y:null,point:null};drawGuides();return p}
+  const scale=num('VIEW_SCALE')||1,tol=C('SNAP_TOL',{VIEW_SCALE:scale}),cands=magneticCandidates();
+  let out={x:p.x,y:p.y},best=null,bestD=Infinity;guideState={x:null,y:null,point:null};
+  for(const c of cands){const d=C('SNAP_D',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y});if(d<bestD&&d<=tol){best=c;bestD=d}}
+  if(best){out={x:best.x,y:best.y};guideState={x:best.x,y:best.y,point:best};drawGuides();return out}
+  const anchor=draft&&draft.a?draft.a:null;
+  if(anchor){if(C('SNAP_DX',{X1:p.x,X2:anchor.x})<=tol){out.x=anchor.x;guideState.x=anchor.x}if(C('SNAP_DY',{Y1:p.y,Y2:anchor.y})<=tol){out.y=anchor.y;guideState.y=anchor.y}}
+  if(guideState.x===null){for(const c of cands)if(C('SNAP_DX',{X1:p.x,X2:c.x})<=tol){out.x=c.x;guideState.x=c.x;break}}
+  if(guideState.y===null){for(const c of cands)if(C('SNAP_DY',{Y1:p.y,Y2:c.y})<=tol){out.y=c.y;guideState.y=c.y;break}}
+  drawGuides();return out;
 }
-function next(prefix){seq++;return prefix+seq}
-function createPoint(p){const e=document.createElement('riki-point');e.setAttribute('name',next('P'));e.setAttribute('x',p.x);e.setAttribute('y',p.y);e.setAttribute('permanent','true');drawing.append(e);return e.getAttribute('name')}
-function createRelation(kind,a,b,c=null){const e=document.createElement('riki-relation');e.setAttribute('name',next('R'));e.setAttribute('kind',kind);e.setAttribute('a',a);e.setAttribute('b',b);if(c)e.setAttribute('c',c);e.setAttribute('permanent','true');drawing.append(e);return e}
-function createTextRelation(a,text){const e=document.createElement('riki-relation');e.setAttribute('name',next('R'));e.setAttribute('kind','text');e.setAttribute('a',a);e.setAttribute('text',text);e.setAttribute('permanent','true');drawing.append(e);return e}
-function relData(r){
-  if(!r)return null;const k=r.getAttribute('kind'),a=pxy(r.getAttribute('a')),b=pxy(r.getAttribute('b')),c=pxy(r.getAttribute('c'));
-  return a&&b?{kind:k,a,b,c}:null
-}
-function relCenter(r){
-  const d=relData(r);if(!d)return{x:0,y:0};
-  if(d.kind==='circle'||d.kind==='arc')return d.a;
-  return{x:(d.a.x+d.b.x)/2,y:(d.a.y+d.b.y)/2}
-}
-function makeEntity(d){
-  const a=createPoint(d.a),b=createPoint(d.b),c=d.c?createPoint(d.c):null;
-  return createRelation(d.kind,a,b,c)
-}
-function cloneShift(r,dx,dy){
-  const d=relData(r);if(!d)return null;
-  return makeEntity({kind:d.kind,a:{x:d.a.x+dx,y:d.a.y+dy},b:{x:d.b.x+dx,y:d.b.y+dy},c:d.c?{x:d.c.x+dx,y:d.c.y+dy}:null})
-}
-function moveRelation(r,dx,dy){
-  if(!r)return;for(const key of ['a','b','c']){const n=r.getAttribute(key),p=n&&point(n);if(p){p.setAttribute('x',+p.getAttribute('x')+dx);p.setAttribute('y',+p.getAttribute('y')+dy)}}
-}
-function sideVector(r,w){const c=relCenter(r),dx=w.x-c.x,dy=w.y-c.y,l=Math.hypot(dx,dy)||1;return{x:dx/l,y:dy/l}}
-function offsetEntity(r,w,distance){
-  const d=relData(r);if(!d||!(distance>0))return null;
-  if(d.kind==='line'){
-    const vx=d.b.x-d.a.x,vy=d.b.y-d.a.y,L=Math.hypot(vx,vy);if(!L)return null;
-    let nx=-vy/L,ny=vx/L;const mx=(d.a.x+d.b.x)/2,my=(d.a.y+d.b.y)/2;if((w.x-mx)*nx+(w.y-my)*ny<0){nx=-nx;ny=-ny}
-    return makeEntity({kind:'line',a:{x:d.a.x+nx*distance,y:d.a.y+ny*distance},b:{x:d.b.x+nx*distance,y:d.b.y+ny*distance}})
+function syncScreenStyles(){
+  const sc=num('VIEW_SCALE')||1;
+  for(const e of entityIndex.values()){
+    const k=e.dataset.kind;
+    if(k==='text'){
+      const size=Number(e.dataset.textSize)||num('TEXT_SIZE')||16;
+      e.setAttribute('font-size',String(size/sc))
+    }else if(k==='dim')updateDim(e);
+    else if(k==='angdim')updateAngDim(e);
+    else if(k==='aligndim')updateAlignDim(e)
   }
-  if(d.kind==='rect'){
-    const minx=Math.min(d.a.x,d.b.x),maxx=Math.max(d.a.x,d.b.x),miny=Math.min(d.a.y,d.b.y),maxy=Math.max(d.a.y,d.b.y);
-    const outside=w.x<minx||w.x>maxx||w.y<miny||w.y>maxy,sgn=outside?1:-1;
-    const nminx=minx-sgn*distance,nmaxx=maxx+sgn*distance,nminy=miny-sgn*distance,nmaxy=maxy+sgn*distance;
-    if(nmaxx<=nminx||nmaxy<=nminy)return null;
-    return makeEntity({kind:'rect',a:{x:nminx,y:nminy},b:{x:nmaxx,y:nmaxy}})
+}
+function view(){const r=svg.getBoundingClientRect(),q={SCREEN_W:r.width,SCREEN_H:r.height,VIEW_SCALE:num('VIEW_SCALE')||1,VIEW_X:num('VIEW_X'),VIEW_Y:num('VIEW_Y')},v=CV(['VIEW_W','VIEW_H','VIEW_X0','VIEW_Y0'],q);svg.setAttribute('viewBox',`${v.VIEW_X0} ${v.VIEW_Y0} ${v.VIEW_W} ${v.VIEW_H}`);syncScreenStyles()}
+function state(){return{format:'UNISEFE-CAD',version:'0.0.2-alpha',chains:'RIKI-BYTE-STRICT',bytes:Object.fromEntries([...space.querySelectorAll(':scope > riki-byte')].map(b=>[b.getAttribute('name'),b.querySelector('riki-value')?.textContent??''])),drawing:scene.innerHTML}}
+function restore(d){if(!d||!d.drawing)throw Error();scene.innerHTML=d.drawing;rebuildEntityIndex();paintedSelection.clear();if(d.bytes)for(const[k,v]of Object.entries(d.bytes))if(byte(k))set(k,v);seq=0;for(const e of entities()){const n=+(e.dataset.byte||'').slice(1)||0;if(n>seq)seq=n}clearSelection();draft=null;view();refresh()}
+async function save(){const html='<!doctype html>\n'+document.documentElement.outerHTML;if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'UNISEFE-CAD-v0.0.2-alpha.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]});const w=await h.createWritable();await w.write(new Blob([html],{type:'text/html'}));await w.close();command.textContent='SAVE · UNISEFE CAD v0.0.2 alpha saved'}catch(e){if(e.name!=='AbortError')command.textContent='SAVE · failed'}}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state())],{type:'application/json'}));a.download='UNISEFE-CAD-v0.0.2-alpha.riki';a.click();URL.revokeObjectURL(a.href)}}
+openProject?.addEventListener('change',()=>{const f=openProject.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const t=String(rd.result),m=t.match(/<svg id="cad-native"[\s\S]*?<g id="cad-native-scene">([\s\S]*?)<\/g>/);if(m){scene.innerHTML=m[1];rebuildEntityIndex();paintedSelection.clear();syncScreenStyles();refresh()}else restore(JSON.parse(t))}catch{command.textContent='OPEN · invalid file'}};rd.readAsText(f);openProject.value=''});
+function saveHistory(){history.push(scene.innerHTML);if(history.length>100)history.shift()}
+function undo(){if(!history.length)return;scene.innerHTML=history.pop();rebuildEntityIndex();paintedSelection.clear();clearSelection();syncScreenStyles();refresh()}
+function colorable(e){return !!e}
+function widthable(e){return !!e&&e.dataset?.kind!=='text'}
+function styleOf(e){return{color:e?.style?.getPropertyValue('--entity-color')||get('LINE_COLOR')||'#444444',width:Number(e?.style?.getPropertyValue('--entity-width'))||Number(get('LINE_WIDTH'))||.55}}
+function applyLineStyle(e,color=get('LINE_COLOR')||'#444444',width=Number(get('LINE_WIDTH'))||.55){if(!e)return e;e.style.setProperty('--entity-color',String(color));if(widthable(e))e.style.setProperty('--entity-width',String(C('STYLE_WIDTH',{WIDTH:Number(width)||.55})));return e}
+function syncLineControls(){
+  const es=selectedEntities(),e=es[0],v=e?styleOf(e):{color:get('LINE_COLOR')||'#444444',width:Number(get('LINE_WIDTH'))||.55};
+  if(lineColorInput)lineColorInput.value=/^#[0-9a-f]{6}$/i.test(v.color)?v.color:'#444444';
+  if(lineWidthInput){lineWidthInput.disabled=!!(e&&e.dataset.kind==='text');lineWidthInput.value=String(v.width)}
+  const ti=document.getElementById('cad-text-size');
+  if(ti){
+    const te=es.find(x=>x.dataset.kind==='text');
+    ti.value=String(te?(Number(te.dataset.textSize)||16):(num('TEXT_SIZE')||16));
   }
-  if(d.kind==='circle'||d.kind==='arc'){
-    const r0=Math.hypot(d.b.x-d.a.x,d.b.y-d.a.y),rw=Math.hypot(w.x-d.a.x,w.y-d.a.y),sgn=rw>=r0?1:-1,r1=r0+sgn*distance;if(r1<=1e-9)return null;
-    const scale=r1/r0,b={x:d.a.x+(d.b.x-d.a.x)*scale,y:d.a.y+(d.b.y-d.a.y)*scale};
-    const c=d.c?{x:d.a.x+(d.c.x-d.a.x)*scale,y:d.a.y+(d.c.y-d.a.y)*scale}:null;
-    return makeEntity({kind:d.kind,a:d.a,b,c})
+}
+function setLineProperty(prop,value){
+  const es=selectedEntities().filter(prop==='color'?colorable:widthable);
+  if(es.length){
+    saveHistory();
+    for(const e of es){const v=styleOf(e);applyLineStyle(e,prop==='color'?value:v.color,prop==='width'?value:v.width)}
+  }else{
+    if(prop==='color')set('LINE_COLOR',value);else set('LINE_WIDTH',value)
+  }
+  refresh()
+}
+function add(tag,a){saveHistory();const e=S(tag,{...a,'data-byte':next(),class:'entity'});applyLineStyle(e);scene.append(e);indexEntity(e);setSingleSelection(e.dataset.byte);refresh();return e}
+function geom(a,b,c){return{X1:a?.x??0,Y1:a?.y??0,X2:b?.x??0,Y2:b?.y??0,X3:c?.x??0,Y3:c?.y??0}}
+function setTextPose(e,x,y,angle=Number(e?.dataset?.angle)||0){
+  if(!e)return e;
+  e.setAttribute('x',x);e.setAttribute('y',y);
+  e.dataset.angle=String(angle);
+  e.setAttribute('transform',angle?`rotate(${angle} ${x} ${y})`:'');
+  return e
+}
+function textAngleAfter(src,fn){
+  const x=+src.getAttribute('x'),y=+src.getAttribute('y'),deg=Number(src.dataset.angle)||0;
+  const d=CV(['TEXT_DIR_X','TEXT_DIR_Y'],{X1:x,Y1:y,DEG:deg});
+  const p=fn({x,y}),q=fn({x:d.TEXT_DIR_X,y:d.TEXT_DIR_Y});
+  return{p,angle:C('VECTOR_ANGLE_DEG',{X1:p.x,Y1:p.y,X2:q.x,Y2:q.y})}
+}
+function arcPath(a,b,c){const q=geom(a,b,c),v=CV(['DIST','ARC_LARGE'],q);return`M ${b.x} ${b.y} A ${v.DIST} ${v.DIST} 0 ${v.ARC_LARGE} 1 ${c.x} ${c.y}`}
+function arcRadiusCalc(a,b,r){
+  if(!a||!b||!Number.isFinite(Number(r))||Number(r)===0)return null;
+  const q={X1:a.x,Y1:a.y,X2:b.x,Y2:b.y,RADIUS:Number(r),VIEW_SCALE:num('VIEW_SCALE')||1},
+        v=CV(['ARCR_SAFE','ARCR_R','ARCR_CX','ARCR_CY','ARCR_SWEEP'],q);
+  if(v.ARCR_SAFE!==1||!Number.isFinite(v.ARCR_R)||!Number.isFinite(v.ARCR_CX)||!Number.isFinite(v.ARCR_CY))return null;
+  return{r:v.ARCR_R,c:{x:v.ARCR_CX,y:v.ARCR_CY},sweep:v.ARCR_SWEEP,path:`M ${a.x} ${a.y} A ${v.ARCR_R} ${v.ARCR_R} 0 0 ${v.ARCR_SWEEP} ${b.x} ${b.y}`};
+}
+function arcRadiusFromPoint(a,b,p){
+  if(!a||!b||!p)return null;
+  const q={X1:a.x,Y1:a.y,X2:b.x,Y2:b.y,X3:p.x,Y3:p.y,VIEW_SCALE:num('VIEW_SCALE')||1},
+        v=CV(['ARCS_SAFE','ARCS_SIGNED_R'],q);
+  return v.ARCS_SAFE===1&&Number.isFinite(v.ARCS_SIGNED_R)?v.ARCS_SIGNED_R:null;
+}
+function makeArcRadius(a,b,r){
+  const f=arcRadiusCalc(a,b,r);if(!f)return null;
+  set('ARC_RADIUS',r);
+  return add('path',{d:f.path,'data-kind':'arc','data-cx':f.c.x,'data-cy':f.c.y,'data-sx':a.x,'data-sy':a.y,'data-ex':b.x,'data-ey':b.y});
+}
+function make(kind,a,b,c,text=''){
+  const q=geom(a,b,c);
+  if(kind==='line'||kind==='dashline'||kind==='dashdotline')return add('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,'data-kind':kind});
+  if(kind==='circle')return add('circle',{cx:a.x,cy:a.y,r:C('DIST',q),'data-kind':kind});
+  if(kind==='arc')return add('path',{d:arcPath(a,b,c),'data-kind':kind,'data-cx':a.x,'data-cy':a.y,'data-sx':b.x,'data-sy':b.y,'data-ex':c.x,'data-ey':c.y});
+  if(kind==='text'){const size=num('TEXT_SIZE')||16,e=add('text',{x:a.x,y:a.y,'data-kind':kind,'data-text-size':size,'data-angle':0,'font-size':size/(num('VIEW_SCALE')||1)});setTextPose(e,a.x,a.y,0);e.textContent=text;return e}
+  if(kind==='dim'){saveHistory();const g=S('g',{'data-byte':next(),'data-kind':'dim',class:'entity dimension','data-ax':a.x,'data-ay':a.y,'data-bx':b.x,'data-by':b.y,'data-cx':c.x,'data-cy':c.y});applyLineStyle(g);scene.append(g);indexEntity(g);updateDim(g);setSingleSelection(g.dataset.byte);refresh();return g}
+  if(kind==='angdim'){saveHistory();const g=S('g',{'data-byte':next(),'data-kind':'angdim',class:'entity dimension','data-vx':a.x,'data-vy':a.y,'data-ax':b.x,'data-ay':b.y,'data-bx':c.x,'data-by':c.y,'data-cx':text.x,'data-cy':text.y});applyLineStyle(g);scene.append(g);indexEntity(g);updateAngDim(g);setSingleSelection(g.dataset.byte);refresh();return g}
+  if(kind==='aligndim'){saveHistory();const g=S('g',{'data-byte':next(),'data-kind':'aligndim',class:'entity dimension','data-ax':a.x,'data-ay':a.y,'data-bx':b.x,'data-by':b.y,'data-offset':text?.offset||0});applyLineStyle(g);scene.append(g);indexEntity(g);updateAlignDim(g);setSingleSelection(g.dataset.byte);refresh();return g}
+}
+function attrs(e,a){for(const[k,v]of Object.entries(a))if(v!=null)e.setAttribute(k,String(v));return e}
+function part(g,tag,name,a={}){
+  let e=g.querySelector(`:scope > [data-part="${name}"]`);
+  if(!e){e=S(tag,{'data-part':name});g.append(e);PERF.dimensionCreates++}else PERF.dimensionUpdates++;
+  return attrs(e,a)
+}
+function dimArrowPath(x,y,ux,uy,size){const nx=-uy,ny=ux,back=size,half=size*.42;return`M ${x} ${y} L ${x+ux*back+nx*half} ${y+uy*back+ny*half} M ${x} ${y} L ${x+ux*back-nx*half} ${y+uy*back-ny*half}`}
+function dimArrow(x,y,ux,uy,size,e=null){return attrs(e||S('path'),{d:dimArrowPath(x,y,ux,uy,size)})}
+function updateDim(g){
+  const q={X1:+g.dataset.ax,Y1:+g.dataset.ay,X2:+g.dataset.bx,Y2:+g.dataset.by,X3:+g.dataset.cx,Y3:+g.dataset.cy,VIEW_SCALE:num('VIEW_SCALE')||1},
+        v=CV(['DIM_L','DIM_UX','DIM_UY','DIM_NX','DIM_NY','DIM_QAX','DIM_QAY','DIM_QBX','DIM_QBY','DIM_ARROW','DIM_EXT_AX','DIM_EXT_AY','DIM_EXT_BX','DIM_EXT_BY','DIM_EXT_QAX','DIM_EXT_QAY','DIM_EXT_QBX','DIM_EXT_QBY','DIM_TEXT_X','DIM_TEXT_Y','DIM_READABLE_ANGLE'],q);
+  part(g,'line','ext-a',{x1:v.DIM_EXT_AX,y1:v.DIM_EXT_AY,x2:v.DIM_EXT_QAX,y2:v.DIM_EXT_QAY});
+  part(g,'line','ext-b',{x1:v.DIM_EXT_BX,y1:v.DIM_EXT_BY,x2:v.DIM_EXT_QBX,y2:v.DIM_EXT_QBY});
+  part(g,'line','dim-line',{x1:v.DIM_QAX,y1:v.DIM_QAY,x2:v.DIM_QBX,y2:v.DIM_QBY});
+  dimArrow(v.DIM_QAX,v.DIM_QAY,v.DIM_UX,v.DIM_UY,v.DIM_ARROW,part(g,'path','arrow-a'));
+  dimArrow(v.DIM_QBX,v.DIM_QBY,-v.DIM_UX,-v.DIM_UY,v.DIM_ARROW,part(g,'path','arrow-b'));
+  const t=part(g,'text','text',{x:v.DIM_TEXT_X,y:v.DIM_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),transform:`rotate(${v.DIM_READABLE_ANGLE} ${v.DIM_TEXT_X} ${v.DIM_TEXT_Y})`,class:'dimension-text'});
+  t.textContent=String(Number(v.DIM_L.toFixed(2)))
+}
+function updateAngDim(g){
+  const q={VX:+g.dataset.vx,VY:+g.dataset.vy,AX:+g.dataset.ax,AY:+g.dataset.ay,BX:+g.dataset.bx,BY:+g.dataset.by,CX:+g.dataset.cx,CY:+g.dataset.cy,VIEW_SCALE:num('VIEW_SCALE')||1},
+        v=CV(['ANG_VALID','ANG_DEG','ANG_RADIUS','ANG_SWEEP','ANG_OVER','ANG_ARROW','ANG_U1X','ANG_U1Y','ANG_U2X','ANG_U2Y','ANG_START_X','ANG_START_Y','ANG_END_X','ANG_END_Y','ANG_T1X','ANG_T1Y','ANG_T2X','ANG_T2Y','ANG_TEXT_X','ANG_TEXT_Y'],q);
+  if(v.ANG_VALID!==1){g.hidden=true;return}g.hidden=false;
+  part(g,'line','ray-a',{x1:q.VX+v.ANG_U1X*(2/q.VIEW_SCALE),y1:q.VY+v.ANG_U1Y*(2/q.VIEW_SCALE),x2:q.VX+v.ANG_U1X*(v.ANG_RADIUS+v.ANG_OVER),y2:q.VY+v.ANG_U1Y*(v.ANG_RADIUS+v.ANG_OVER)});
+  part(g,'line','ray-b',{x1:q.VX+v.ANG_U2X*(2/q.VIEW_SCALE),y1:q.VY+v.ANG_U2Y*(2/q.VIEW_SCALE),x2:q.VX+v.ANG_U2X*(v.ANG_RADIUS+v.ANG_OVER),y2:q.VY+v.ANG_U2Y*(v.ANG_RADIUS+v.ANG_OVER)});
+  part(g,'path','arc',{d:`M ${v.ANG_START_X} ${v.ANG_START_Y} A ${v.ANG_RADIUS} ${v.ANG_RADIUS} 0 0 ${v.ANG_SWEEP} ${v.ANG_END_X} ${v.ANG_END_Y}`});
+  dimArrow(v.ANG_START_X,v.ANG_START_Y,v.ANG_T1X,v.ANG_T1Y,v.ANG_ARROW,part(g,'path','arrow-a'));
+  dimArrow(v.ANG_END_X,v.ANG_END_Y,v.ANG_T2X,v.ANG_T2Y,v.ANG_ARROW,part(g,'path','arrow-b'));
+  const t=part(g,'text','text',{x:v.ANG_TEXT_X,y:v.ANG_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),class:'dimension-text'});
+  t.textContent=`${Number(v.ANG_DEG.toFixed(2))}°`
+}
+
+function updateAlignDim(g){
+  const q={X1:+g.dataset.ax,Y1:+g.dataset.ay,X2:+g.dataset.bx,Y2:+g.dataset.by,OFFSET:Number(g.dataset.offset)||0,VIEW_SCALE:num('VIEW_SCALE')||1},
+        v=CV(['ALIGN_L','ALIGN_UX','ALIGN_UY','ALIGN_NX','ALIGN_NY','ALIGN_QAX','ALIGN_QAY','ALIGN_QBX','ALIGN_QBY','ALIGN_ARROW','ALIGN_EXT_AX','ALIGN_EXT_AY','ALIGN_EXT_BX','ALIGN_EXT_BY','ALIGN_LINE_X2','ALIGN_LINE_Y2','ALIGN_TEXT_X','ALIGN_TEXT_Y','ALIGN_READABLE_ANGLE'],q);
+  if(!(v.ALIGN_L>1e-9)){g.hidden=true;return}g.hidden=false;
+  part(g,'line','ext-a',{x1:q.X1,y1:q.Y1,x2:v.ALIGN_EXT_AX,y2:v.ALIGN_EXT_AY,class:'dimension-extension'});
+  part(g,'line','ext-b',{x1:q.X2,y1:q.Y2,x2:v.ALIGN_EXT_BX,y2:v.ALIGN_EXT_BY,class:'dimension-extension'});
+  part(g,'line','dim-line',{x1:v.ALIGN_QAX,y1:v.ALIGN_QAY,x2:v.ALIGN_LINE_X2,y2:v.ALIGN_LINE_Y2});
+  dimArrow(v.ALIGN_QAX,v.ALIGN_QAY,v.ALIGN_UX,v.ALIGN_UY,v.ALIGN_ARROW,part(g,'path','arrow-a'));
+  dimArrow(v.ALIGN_QBX,v.ALIGN_QBY,-v.ALIGN_UX,-v.ALIGN_UY,v.ALIGN_ARROW,part(g,'path','arrow-b'));
+  const t=part(g,'text','text',{x:v.ALIGN_TEXT_X,y:v.ALIGN_TEXT_Y,'text-anchor':'middle','dominant-baseline':'middle','font-size':(num('TEXT_SIZE')||16)/(num('VIEW_SCALE')||1),transform:`rotate(${v.ALIGN_READABLE_ANGLE} ${v.ALIGN_TEXT_X} ${v.ALIGN_TEXT_Y})`,class:'dimension-text'});
+  t.textContent=String(Number(v.ALIGN_L.toFixed(2)))
+}
+function refresh(){
+  syncSelectionClasses();
+  const n=entityIndex.size,ns=selectedSet.size;
+  count.textContent=`${n} ${n===1?'entity':'entities'}`;
+  selectionText.textContent=ns?`${ns} selected`:'no selection';
+  syncLineControls();updateCommand()
+}
+function updateCommand(){
+  const t=get('TOOL');
+  if(t==='trim'||t==='extend'){
+    if(!draft){command.textContent=`${t.toUpperCase()} · seleziona linea limite`;return}
+    if(draft.stage==='target'){command.textContent=`${t.toUpperCase()} · clicca la linea da ${t==='trim'?'tagliare':'estendere'} vicino all'estremo`;return}
+  }
+  if(t==='mirror'){
+    if(draft?.stage==='select'){command.textContent='SPECCHIA · seleziona oggetto/i · Ctrl aggiunge/toglie · trascina riquadro · Enter conferma';return}
+    if(!draft){command.textContent='SPECCHIA · seleziona oggetto/i';return}
+    if(draft.stage==='axis1'){command.textContent='SPECCHIA · primo punto asse';return}
+    command.textContent='SPECCHIA · secondo punto asse · anteprima';return
+  }
+  if(t==='rotate'){
+    if(draft?.stage==='select'){command.textContent='RUOTA · seleziona oggetto/i · Ctrl aggiunge/toglie · trascina riquadro · Enter conferma';return}
+    if(!draft){command.textContent='RUOTA · seleziona oggetto/i';return}
+    if(draft.stage==='center'){command.textContent='RUOTA · centro di rotazione';return}
+    if(draft.stage==='ref'){command.textContent='RUOTA · punto di riferimento';return}
+    const a=draft.angle!=null?C('RAD_DEG',{RAD:draft.angle}):0;
+    command.textContent=`RUOTA · ${draft.buffer||a.toFixed(2)}° · muovi / digita angolo · Enter o click`;return
+  }
+  if(t==='delete'&&draft?.stage==='select'){command.textContent='DELETE · seleziona oggetto/i · Ctrl aggiunge/toglie · trascina riquadro · Enter elimina';return}
+  if((t==='move'||t==='copy')&&draft){
+    if(draft.stage==='select'){command.textContent=`${t.toUpperCase()} · seleziona oggetto/i · Ctrl aggiunge/toglie · trascina riquadro · Enter conferma`;return}
+    if(draft.stage==='base'){command.textContent=`${t.toUpperCase()} · punto base`;return}
+    if(draft.stage==='to'){command.textContent=`${t.toUpperCase()} · punto destinazione · anteprima`;return}
+  }
+  if(t==='dim'&&draft){command.textContent=draft.stage===1?'QUOTA · secondo punto':'QUOTA · posizione linea di quota';return}
+  if(t==='angdim'&&draft){command.textContent=draft.stage===1?'QUOTA ANGOLARE · punto prima direzione':draft.stage===2?'QUOTA ANGOLARE · punto seconda direzione':'QUOTA ANGOLARE · posizione arco';return}
+  if(t==='aligndim'&&draft){command.textContent=draft.stage==='offset'?'QUOTA ALLINEATA · allontana linea di quota':draft.stage==='points'?'QUOTA ALLINEATA · clicca punti successivi · Esc termina':'QUOTA ALLINEATA · scegli origine';return}
+  if(t==='text'&&draft){command.textContent=`TESTO${draft.edit?' MODIFICA':''} · ${draft.buffer||'scrivi...'} · Enter conferma`;return}
+  if(t==='fillet'){if(draft?.kind==='fillet'){const b=draft.buffer?` · ${draft.buffer}`:'';command.textContent=`RACCORDA · R ${Number(draft.radius).toFixed(2)}${b} · muovi / digita raggio · Enter o click`;return}command.textContent='RACCORDA · seleziona vertice comune';return}
+  if(t==='arc-rif'){if(!draft){command.textContent='ARCO R-I-F · digita raggio';return}if(draft.stage==='radius'){command.textContent=`ARCO R-I-F · raggio ${draft.buffer||draft.radius} · Enter`;return}if(draft.stage==='start'){command.textContent=`ARCO R-I-F · R ${draft.radius} · scegli inizio`;return}command.textContent=`ARCO R-I-F · R ${Number(draft.radius).toFixed(2)} · scegli fine · arco visibile entro 2R`;return}
+  if(t==='arc-ifr'){if(!draft){command.textContent='ARCO I-F-R · scegli inizio';return}if(draft.stage==='end'){command.textContent='ARCO I-F-R · scegli fine';return}if(draft.stage==='radius'){command.textContent=`ARCO I-F-R · R ${Number(draft.radius||0).toFixed(2)}${draft.buffer?` · ${draft.buffer}`:''} · muovi / digita · Enter o click`;return}}
+  command.textContent=draft?`${t.toUpperCase()} · continue`:`${t.toUpperCase()} · ${t==='select'?'click oppure trascina riquadro · Ctrl aggiunge/toglie':'pick first point'}`
+}
+function segmentHit(p,a,b){return C('HIT_D',{PX:p.x,PY:p.y,X1:a.x,Y1:a.y,X2:b.x,Y2:b.y})}
+function entityHit(e,p){
+  const k=e.dataset.kind,tol=C('HIT_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1});
+  if(k==='line'||k==='dashline'||k==='dashdotline')return segmentHit(p,{x:+e.getAttribute('x1'),y:+e.getAttribute('y1')},{x:+e.getAttribute('x2'),y:+e.getAttribute('y2')});
+  if(k==='circle'){
+    const c={x:+e.getAttribute('cx'),y:+e.getAttribute('cy')},r=+e.getAttribute('r');
+    return C('CIRCLE_HIT',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y,RADIUS:r});
+  }
+  if(k==='arc'){
+    const c={x:+e.dataset.cx,y:+e.dataset.cy},r=C('DIST',{X1:c.x,Y1:c.y,X2:+e.dataset.sx,Y2:+e.dataset.sy});
+    return C('CIRCLE_HIT',{X1:p.x,Y1:p.y,X2:c.x,Y2:c.y,RADIUS:r});
+  }
+  if(k==='dim'||k==='angdim'||k==='aligndim'){
+    let best=Infinity;
+    for(const q of e.querySelectorAll('line'))best=Math.min(best,segmentHit(p,{x:+q.getAttribute('x1'),y:+q.getAttribute('y1')},{x:+q.getAttribute('x2'),y:+q.getAttribute('y2')}));
+    const b=e.getBBox(),x=Math.max(b.x,Math.min(p.x,b.x+b.width)),y=Math.max(b.y,Math.min(p.y,b.y+b.height));
+    return Math.min(best,C('DIST',{X1:p.x,Y1:p.y,X2:x,Y2:y}));
+  }
+  if(k==='text'){
+    const b=e.getBBox(),x=Math.max(b.x,Math.min(p.x,b.x+b.width)),y=Math.max(b.y,Math.min(p.y,b.y+b.height));
+    return C('DIST',{X1:p.x,Y1:p.y,X2:x,Y2:y});
+  }
+  return tol+1;
+}
+function pickTarget(ev,p){
+  const direct=ev.target.closest?.('[data-byte]');if(direct)return direct;
+  const tol=C('HIT_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1});let best=null,bd=tol;
+  for(const e of entities()){const d=entityHit(e,p);if(d<=bd){best=e;bd=d}}
+  return best;
+}
+function drawSelectionBox(){overlay.querySelectorAll('.selection-box').forEach(e=>e.remove());if(!selectionDrag)return;const a=selectionDrag.start,b=selectionDrag.current,x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y);overlay.append(S('rect',{x,y,width:w,height:h,class:'selection-box'}))}
+function boxIntersects(a,b){return a.x<=b.x+b.width&&a.x+a.width>=b.x&&a.y<=b.y+b.height&&a.y+a.height>=b.y}
+function selectionPhaseActive(){return !!(draft&&draft.stage==='select'&&['move','copy','mirror','rotate','delete'].includes(draft.kind))}
+function confirmEditorSelection(firstPoint=null){
+  if(!selectionPhaseActive())return false;
+  const es=selectedEntities();
+  if(!es.length)return false;
+  const kind=draft.kind;
+  if(kind==='move'||kind==='copy'){
+    draft={kind,entities:[...es],stage:firstPoint?'to':'base',base:firstPoint||null,to:firstPoint||null};
+  }else if(kind==='mirror'){
+    draft={kind:'mirror',entities:[...es],stage:firstPoint?'axis2':'axis1',a:firstPoint||null,b:firstPoint||null};
+  }else if(kind==='rotate'){
+    draft={kind:'rotate',entities:[...es],stage:firstPoint?'ref':'center',c:firstPoint||null,a:null,b:null,angle:0,buffer:''};
+  }else if(kind==='delete'){
+    deleteSelection();
+    draft=null;
+    return true;
+  }
+  preview();refresh();
+  return true
+}
+function finishSelectionBox(){if(!selectionDrag)return;const a=selectionDrag.start,b=selectionDrag.current,box={x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(b.x-a.x),height:Math.abs(b.y-a.y)},cross=b.x<a.x,ids=[];for(const e of entities()){let q;try{q=e.getBBox()}catch{continue}const inside=q.x>=box.x&&q.y>=box.y&&q.x+q.width<=box.x+box.width&&q.y+q.height<=box.y+box.height;if(cross?boxIntersects(q,box):inside)ids.push(e.dataset.byte)}selectMany(ids,selectionDrag.add);selectionDrag=null;drawSelectionBox();if(!confirmEditorSelection())refresh()}
+function deleteSelection(){const es=selectedEntities();if(!es.length)return false;saveHistory();for(const e of es){unindexEntity(e);e.remove()}clearSelection();refresh();return true}
+function lineEnds(e){return[{x:+e.getAttribute('x1'),y:+e.getAttribute('y1'),slot:1},{x:+e.getAttribute('x2'),y:+e.getAttribute('y2'),slot:2}]}
+function lineIntersection(a,b){
+  const q={X1:BYTE.attr(a,'x1'),Y1:BYTE.attr(a,'y1'),X2:BYTE.attr(a,'x2'),Y2:BYTE.attr(a,'y2'),X3:BYTE.attr(b,'x1'),Y3:BYTE.attr(b,'y1'),X4:BYTE.attr(b,'x2'),Y4:BYTE.attr(b,'y2')};
+  const v=CV(['INT_VALID','INT_X','INT_Y'],q);return v.INT_VALID===1&&Number.isFinite(v.INT_X)&&Number.isFinite(v.INT_Y)?{x:v.INT_X,y:v.INT_Y}:null
+}
+function cadLine(e){return !!e&&['line','dashline','dashdotline'].includes(e.dataset.kind)}
+function segmentParameter(e,p){return C('SEG_T',{X1:BYTE.attr(e,'x1'),Y1:BYTE.attr(e,'y1'),X2:BYTE.attr(e,'x2'),Y2:BYTE.attr(e,'y2'),PX:BYTE.ref(()=>p.x,null,'SEG.PX'),PY:BYTE.ref(()=>p.y,null,'SEG.PY')})}
+function editLinePlan(mode,boundary,target,click){
+  if(!cadLine(boundary)||!cadLine(target)||boundary===target)return null;
+  const ip=lineIntersection(boundary,target);if(!ip)return null;
+  const tb=segmentParameter(boundary,ip),tt=segmentParameter(target,ip),eps=1e-8;
+  if(tb<-eps||tb>1+eps)return null;
+  const a={x:+target.getAttribute('x1'),y:+target.getAttribute('y1')},b={x:+target.getAttribute('x2'),y:+target.getAttribute('y2')};
+  const d1=C('DIST',{X1:click.x,Y1:click.y,X2:a.x,Y2:a.y}),d2=C('DIST',{X1:click.x,Y1:click.y,X2:b.x,Y2:b.y});
+  if(mode==='trim'){
+    if(tt<=eps||tt>=1-eps)return null;
+    const slot=d1<=d2?1:2;
+    return{mode,boundary,target,ip,slot,a:slot===1?ip:a,b:slot===2?ip:b};
+  }
+  if(mode==='extend'){
+    if(tt>1+eps){if(d2>d1*2.5)return null;return{mode,boundary,target,ip,slot:2,a,b:ip}}
+    if(tt<-eps){if(d1>d2*2.5)return null;return{mode,boundary,target,ip,slot:1,a:ip,b}}
+    return null;
   }
   return null
 }
-function reflectPoint(p,a,b){const vx=b.x-a.x,vy=b.y-a.y,L2=vx*vx+vy*vy;if(!L2)return p;const t=((p.x-a.x)*vx+(p.y-a.y)*vy)/L2,q={x:a.x+t*vx,y:a.y+t*vy};return{x:2*q.x-p.x,y:2*q.y-p.y}}
-function mirrorEntity(r,a,b){const d=relData(r);if(!d)return null;return makeEntity({kind:d.kind,a:reflectPoint(d.a,a,b),b:reflectPoint(d.b,a,b),c:d.c?reflectPoint(d.c,a,b):null})}
-function beginModify(tool){
-  draft=null;cmdInput={stage:'distance',buffer:'',v1:null};
-  modify={tool,hover:null,axisA:null,axisB:null};
-  if(tool==='mirror')cmdInput.stage='axis';
-  updateCommand();render()
+function commitLineEdit(plan){if(!plan)return false;saveHistory();const e=plan.target;e.setAttribute('x1',plan.a.x);e.setAttribute('y1',plan.a.y);e.setAttribute('x2',plan.b.x);e.setAttribute('y2',plan.b.y);setSingleSelection(e.dataset.byte);draft=null;overlay.querySelectorAll('.draft').forEach(x=>x.remove());refresh();return true}
+function filletVertex(p){
+  const ls=entities().filter(e=>['line','dashline','dashdotline'].includes(e.dataset.kind));
+  const tol=C('HIT_TOL',{VIEW_SCALE:num('VIEW_SCALE')||1})*1.75;let best=null,score=Infinity;
+  for(let i=0;i<ls.length;i++)for(let j=i+1;j<ls.length;j++){
+    const a=ls[i],b=ls[j],v=lineIntersection(a,b);if(!v)continue;
+    const dv=C('DIST',{X1:p.x,Y1:p.y,X2:v.x,Y2:v.y});if(dv>tol)continue;
+    const ea=lineEnds(a),eb=lineEnds(b);
+    const da0=C('DIST',{X1:v.x,Y1:v.y,X2:ea[0].x,Y2:ea[0].y}),da1=C('DIST',{X1:v.x,Y1:v.y,X2:ea[1].x,Y2:ea[1].y});
+    const db0=C('DIST',{X1:v.x,Y1:v.y,X2:eb[0].x,Y2:eb[0].y}),db1=C('DIST',{X1:v.x,Y1:v.y,X2:eb[1].x,Y2:eb[1].y});
+    const ia={e:a,slot:da0<=da1?1:2},ib={e:b,slot:db0<=db1?1:2};
+    const oa=ea[ia.slot===1?1:0],ob=eb[ib.slot===1?1:0];
+    const la=C('DIST',{X1:v.x,Y1:v.y,X2:oa.x,Y2:oa.y}),lb=C('DIST',{X1:v.x,Y1:v.y,X2:ob.x,Y2:ob.y});
+    if(la<=1e-9||lb<=1e-9)continue;
+    const s=dv+(Math.min(da0,da1)+Math.min(db0,db1))*.02;if(s<score){score=s;best={v,items:[ia,ib]}}
+  }
+  return best
 }
-function finishModify(){modify=null;cmdInput={stage:'idle',buffer:'',v1:null};updateCommand();render()}
-function applyLinearModify(tool,w,dist){
-  const r=selected&&drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);if(!r||!(dist>0))return;
-  saveHistory();let out=null;
-  if(tool==='offset')out=offsetEntity(r,w,dist);
-  else{const v=sideVector(r,w),dx=v.x*dist,dy=v.y*dist;if(tool==='copy')out=cloneShift(r,dx,dy);else if(tool==='move'){moveRelation(r,dx,dy);out=r}}
-  if(out)selected=out.getAttribute('name');finishModify()
+function filletCalc(g,r){
+  if(!g||!(r>0))return null;
+  const [i1,i2]=g.items,v=g.v;
+  const otherRefs=i=>i.slot===1?{x:BYTE.attr(i.e,'x2'),y:BYTE.attr(i.e,'y2')}:{x:BYTE.attr(i.e,'x1'),y:BYTE.attr(i.e,'y1')};
+  const ar=otherRefs(i1),br=otherRefs(i2),a={x:+ar.x,y:+ar.y},b={x:+br.x,y:+br.y};
+  const ctx={VX:BYTE.ref(()=>v.x,null,'FILLET.VX'),VY:BYTE.ref(()=>v.y,null,'FILLET.VY'),AX:ar.x,AY:ar.y,BX:br.x,BY:br.y,RADIUS:BYTE.ref(()=>r,null,'FILLET.RADIUS')};
+  const z=CV(['FILLET_VALID','FILLET_T1X','FILLET_T1Y','FILLET_T2X','FILLET_T2Y','FILLET_CX','FILLET_CY','FILLET_SWEEP'],ctx);
+  if(z.FILLET_VALID!==1)return null;
+  return{i1,i2,a,b,r,t1:{x:z.FILLET_T1X,y:z.FILLET_T1Y},t2:{x:z.FILLET_T2X,y:z.FILLET_T2Y},c:{x:z.FILLET_CX,y:z.FILLET_CY},sweep:z.FILLET_SWEEP}
 }
-function saveHistory(){history.push(drawing.innerHTML);if(history.length>100)history.shift()}
-function undo(){if(!history.length)return;drawing.innerHTML=history.pop();selected=null;render()}
-function del(){if(!selected)return;saveHistory();const rel=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);if(rel){const used=[rel.getAttribute('a'),rel.getAttribute('b'),rel.getAttribute('c')];rel.remove();for(const n of used){if(n&&!relations().some(r=>r.getAttribute('a')===n||r.getAttribute('b')===n||r.getAttribute('c')===n))point(n)?.remove()}}selected=null;render()}
-
-function activateCadControl(name,kind){
-  if(kind==='tool'){
-    set('TOOL',name);draft=null;modify=null;
-    if(!['copy','move','offset','mirror'].includes(name))selected=null;
-    resetCommandInput();
-    if(['copy','move','offset','mirror'].includes(name)&&selected)beginModify(name);
-    syncToolbar();render();return;
-  }
-  if(name==='undo')undo();
-  else if(name==='delete')del();
-  else if(name==='fit')fit();
-  else if(name==='save')saveProject();
-  else if(name==='open')openProject.click();
-  else if(name==='text-down'){set('TEXT_SIZE',Math.max(8,num('TEXT_SIZE')-2));render();}
-  else if(name==='text-up'){set('TEXT_SIZE',Math.min(72,num('TEXT_SIZE')+2));render();}
+function startFillet(p){
+  const g=filletVertex(p);if(!g){command.textContent='RACCORDA · clicca vicino al vertice/intersezione di due linee';return}
+  const r=Number(String(get('FILLET_RADIUS')||'10').replace(',','.'))||10;
+  draft={kind:'fillet',g,radius:r,buffer:''};preview();refresh()
 }
-function runCadControl(b){
-  const name=b.dataset.cadName||b.dataset.name;
-  const kind=b.dataset.cadKind||b.dataset.kind;
-  if(!name)return;
-  if(kind==='tool'){
-    set('TOOL',name);
-    draft=null;modify=null;
-    if(!['copy','move','offset','mirror'].includes(name))selected=null;
-    resetCommandInput();
-    if(['copy','move','offset','mirror'].includes(name)&&selected)beginModify(name);
-    syncToolbar();render();
-    return;
-  }
-  if(name==='undo')undo();
-  else if(name==='delete')del();
-  else if(name==='fit')fit();
-  else if(name==='save')saveProject();
-  else if(name==='open')openProject.click();
-  else if(name==='text-down'){set('TEXT_SIZE',Math.max(8,num('TEXT_SIZE')-2));render();}
-  else if(name==='text-up'){set('TEXT_SIZE',Math.min(72,num('TEXT_SIZE')+2));render();}
+function commitFillet(){
+  if(!draft||draft.kind!=='fillet')return;
+  const r=Number(draft.radius),f=filletCalc(draft.g,r);if(!f){command.textContent='RACCORDA · raggio troppo grande o angolo non valido';return}
+  set('FILLET_RADIUS',r);saveHistory();
+  const trim=(i,t)=>{if(i.slot===1){i.e.setAttribute('x1',t.x);i.e.setAttribute('y1',t.y)}else{i.e.setAttribute('x2',t.x);i.e.setAttribute('y2',t.y)}};trim(f.i1,f.t1);trim(f.i2,f.t2);
+  const arc=S('path',{d:`M ${f.t1.x} ${f.t1.y} A ${r} ${r} 0 0 ${f.sweep} ${f.t2.x} ${f.t2.y}`,'data-byte':next(),'data-kind':'arc',class:'entity','data-cx':f.c.x,'data-cy':f.c.y,'data-sx':f.t1.x,'data-sy':f.t1.y,'data-ex':f.t2.x,'data-ey':f.t2.y});applyLineStyle(arc);scene.append(arc);indexEntity(arc);setSingleSelection(arc.dataset.byte);draft=null;overlay.querySelectorAll('.draft').forEach(e=>e.remove());refresh();command.textContent=`RACCORDA · R ${r}`
 }
-function buildToolbar(){
-  document.querySelectorAll('[data-cad-name]').forEach(b=>{
-    b.addEventListener('click',()=>runCadControl(b));
-  });
-  syncToolbar();
+function clearDraft(){if(draft?.edit)draft.edit.style.visibility='';draft=null;overlay.querySelectorAll('.draft').forEach(e=>e.remove());refresh()}
+function preview(){
+  overlay.querySelectorAll('.draft').forEach(e=>e.remove());if(!draft)return;const{kind,a,b,c}=draft;let e,q=geom(a,b,c);
+  if((kind==='line'||kind==='dashline'||kind==='dashdotline')&&b)e=S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'draft', 'stroke-dasharray':kind==='dashline'?'4 3':kind==='dashdotline'?'6 2 .5 2':null,'stroke-linecap':kind==='dashdotline'?'round':null});
+  if(kind==='circle'&&b)e=S('circle',{cx:a.x,cy:a.y,r:C('DIST',q),class:'draft'});
+  if(kind==='arc'&&b&&c)e=S('path',{d:arcPath(a,b,c),class:'draft'});
+  if(kind==='arc-rif'&&a&&b){
+    const f=arcRadiusCalc(a,b,Number(draft.radius)),g=S('g',{class:'draft'});
+    g.append(S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,'stroke-dasharray':'2 3'}));
+    if(f)g.append(S('path',{d:f.path,'stroke-dasharray':null,'stroke-width':.65,'vector-effect':'non-scaling-stroke'}));
+    e=g;
+  }
+  if(kind==='arc-ifr'&&a&&b){
+    const f=arcRadiusCalc(a,b,Number(draft.radius)),g=S('g',{class:'draft'});
+    g.append(S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,'stroke-dasharray':'2 3'}));
+    if(f)g.append(S('path',{d:f.path,'stroke-dasharray':null,'stroke-width':.65,'vector-effect':'non-scaling-stroke'}));
+    e=g;
+  }
+  if(kind==='dim'&&a&&b){const g=S('g',{class:'draft dimension','data-ax':a.x,'data-ay':a.y,'data-bx':b.x,'data-by':b.y,'data-cx':(c||b).x,'data-cy':(c||b).y});updateDim(g);e=g}
+  if(kind==='angdim'&&a&&b&&c){const p=draft.d||c,g=S('g',{class:'draft dimension','data-vx':a.x,'data-vy':a.y,'data-ax':b.x,'data-ay':b.y,'data-bx':c.x,'data-by':c.y,'data-cx':p.x,'data-cy':p.y});updateAngDim(g);e=g}
+  if(kind==='aligndim'&&a&&b){const g=S('g',{class:'draft dimension','data-ax':a.x,'data-ay':a.y,'data-bx':b.x,'data-by':b.y,'data-offset':draft.offset||0});updateAlignDim(g);e=g}
+  if(kind==='text'&&a){const size=Number(draft.edit?.dataset?.textSize)||num('TEXT_SIZE')||16,t=S('text',{x:a.x,y:a.y,'font-size':size/(num('VIEW_SCALE')||1),class:'draft text-preview'});t.style.fill=draft.edit?styleOf(draft.edit).color:(get('LINE_COLOR')||'#444');t.textContent=draft.buffer||'|';e=t}
+  if((kind==='trim'||kind==='extend')&&draft.plan){const p=draft.plan,g=S('g',{class:'draft'});g.append(S('line',{x1:p.a.x,y1:p.a.y,x2:p.b.x,y2:p.b.y,'stroke-width':1.2,'vector-effect':'non-scaling-stroke'}),S('circle',{cx:p.ip.x,cy:p.ip.y,r:4/(num('VIEW_SCALE')||1),fill:'none','stroke-width':.7,'vector-effect':'non-scaling-stroke'}));e=g}
+  if(kind==='mirror'){
+    const g=S('g',{class:'draft'});
+    if(draft.a&&draft.b){g.append(S('line',{x1:draft.a.x,y1:draft.a.y,x2:draft.b.x,y2:draft.b.y,'stroke-dasharray':'6 3'}));for(const q of draft.entities)g.append(transformPreview(q,p=>mirrorPoint(p,draft.a,draft.b),true))}
+    else if(draft.a){const r=5/(num('VIEW_SCALE')||1);g.append(S('circle',{cx:draft.a.x,cy:draft.a.y,r,fill:'none'}))}
+    e=g
+  }
+  if(kind==='rotate'){
+    const g=S('g',{class:'draft'}),r=4/(num('VIEW_SCALE')||1);
+    if(draft.c)g.append(S('circle',{cx:draft.c.x,cy:draft.c.y,r,fill:'none'}));
+    if(draft.c&&draft.a)g.append(S('line',{x1:draft.c.x,y1:draft.c.y,x2:draft.a.x,y2:draft.a.y,'stroke-dasharray':'3 3'}));
+    if(draft.c&&draft.a&&draft.b){g.append(S('line',{x1:draft.c.x,y1:draft.c.y,x2:draft.b.x,y2:draft.b.y,'stroke-dasharray':'3 3'}));for(const q of draft.entities)g.append(transformPreview(q,p=>rotatePoint(p,draft.c,draft.angle||0),false))}
+    e=g
+  }
+  if((kind==='move'||kind==='copy')&&draft.base&&draft.to){
+    const g=S('g',{class:'draft'}),v=CV(['DX','DY'],{X1:draft.base.x,Y1:draft.base.y,X2:draft.to.x,Y2:draft.to.y});
+    g.append(S('line',{x1:draft.base.x,y1:draft.base.y,x2:draft.to.x,y2:draft.to.y,'stroke-dasharray':'3 3','stroke-width':.45,'vector-effect':'non-scaling-stroke'}));
+    for(const q of draft.entities)g.append(transformPreview(q,p=>movePoint(p.x,p.y,v.DX,v.DY),false));
+    e=g
+  }
+  if(kind==='fillet'){
+    const f=filletCalc(draft.g,Number(draft.radius));
+    if(f){const g=S('g',{class:'draft'});g.append(S('line',{x1:f.a.x,y1:f.a.y,x2:f.t1.x,y2:f.t1.y}),S('line',{x1:f.b.x,y1:f.b.y,x2:f.t2.x,y2:f.t2.y}),S('path',{d:`M ${f.t1.x} ${f.t1.y} A ${f.r} ${f.r} 0 0 ${f.sweep} ${f.t2.x} ${f.t2.y}`}));e=g}
+  }
+  if(e)overlay.append(e)
 }
-function syncToolbar(){
-  document.querySelectorAll('[data-cad-kind="tool"]').forEach(b=>b.classList.toggle('active',b.dataset.cadName===get('TOOL')));
-  updateCommand();
+function translateEntity(e,tx,ty){
+  const k=e.dataset.kind,m=(x,y)=>movePoint(x,y,tx,ty);
+  if(k==='line'||k==='dashline'||k==='dashdotline'){let a=m(+e.getAttribute('x1'),+e.getAttribute('y1')),b=m(+e.getAttribute('x2'),+e.getAttribute('y2'));e.setAttribute('x1',a.x);e.setAttribute('y1',a.y);e.setAttribute('x2',b.x);e.setAttribute('y2',b.y)}
+  else if(k==='text'){const p=m(+e.getAttribute('x'),+e.getAttribute('y'));e.setAttribute('x',p.x);e.setAttribute('y',p.y)}
+  else if(k==='circle'){const p=m(+e.getAttribute('cx'),+e.getAttribute('cy'));e.setAttribute('cx',p.x);e.setAttribute('cy',p.y)}
+  else if(k==='arc'){const a=m(+e.dataset.cx,+e.dataset.cy),b=m(+e.dataset.sx,+e.dataset.sy),c=m(+e.dataset.ex,+e.dataset.ey);Object.assign(e.dataset,{cx:a.x,cy:a.y,sx:b.x,sy:b.y,ex:c.x,ey:c.y});e.setAttribute('d',arcPath(a,b,c))}
+  else if(k==='dim'){const a=m(+e.dataset.ax,+e.dataset.ay),b=m(+e.dataset.bx,+e.dataset.by),c=m(+e.dataset.cx,+e.dataset.cy);Object.assign(e.dataset,{ax:a.x,ay:a.y,bx:b.x,by:b.y,cx:c.x,cy:c.y});updateDim(e)}
+  else if(k==='angdim'){const v=m(+e.dataset.vx,+e.dataset.vy),a=m(+e.dataset.ax,+e.dataset.ay),b=m(+e.dataset.bx,+e.dataset.by),c=m(+e.dataset.cx,+e.dataset.cy);Object.assign(e.dataset,{vx:v.x,vy:v.y,ax:a.x,ay:a.y,bx:b.x,by:b.y,cx:c.x,cy:c.y});updateAngDim(e)}
+  else if(k==='aligndim'){const a=m(+e.dataset.ax,+e.dataset.ay),b=m(+e.dataset.bx,+e.dataset.by);Object.assign(e.dataset,{ax:a.x,ay:a.y,bx:b.x,by:b.y});updateAlignDim(e)}
+  return e
 }
-
-function resize(){const r=canvas.getBoundingClientRect(),q=dpr();canvas.width=Math.round(r.width*q);canvas.height=Math.round(r.height*q);ctx.setTransform(q,0,0,q,0,0);render()}
-function drawGuides(){
-  ctx.save();
-  ctx.lineWidth=1;
-  ctx.setLineDash([6,6]);
-  ctx.strokeStyle='#9aa3ad';
-
-  if(guideState.x!==null){
-    const p=worldToScreen({x:guideState.x,y:0});
-    ctx.beginPath();
-    ctx.moveTo(p.x,0);
-    ctx.lineTo(p.x,canvas.clientHeight);
-    ctx.stroke();
+function translateMany(es,tx,ty){if(!es.length)return false;saveHistory();for(const e of es)translateEntity(e,tx,ty);refresh();return true}
+function mirrorPoint(p,a,b){const v=CV(['MIR_X','MIR_Y'],{PX:p.x,PY:p.y,X1:a.x,Y1:a.y,X2:b.x,Y2:b.y});return{x:v.MIR_X,y:v.MIR_Y}}
+function rotationAngle(c,a,b){return C('ROT_ANGLE',{CX:c.x,CY:c.y,X1:a.x,Y1:a.y,X2:b.x,Y2:b.y})}
+function rotatePoint(p,c,angle){const v=CV(['ROT_X','ROT_Y'],{PX:p.x,PY:p.y,CX:c.x,CY:c.y,ANGLE:angle});return{x:v.ROT_X,y:v.ROT_Y}}
+function arcFlags(e){const m=String(e.getAttribute('d')||'').match(/\bA\s+[^\s]+\s+[^\s]+\s+0\s+([01])\s+([01])\s+/);return{large:m?Number(m[1]):0,sweep:m?Number(m[2]):1}}
+function transformEntity(src,fn,flipArc=false,dst=src){
+  const k=src.dataset.kind;
+  if(k==='line'||k==='dashline'||k==='dashdotline'){
+    const a=fn({x:+src.getAttribute('x1'),y:+src.getAttribute('y1')}),b=fn({x:+src.getAttribute('x2'),y:+src.getAttribute('y2')});
+    for(const[n,v]of Object.entries({x1:a.x,y1:a.y,x2:b.x,y2:b.y}))dst.setAttribute(n,v)
+  }else if(k==='circle'){
+    const c=fn({x:+src.getAttribute('cx'),y:+src.getAttribute('cy')});dst.setAttribute('cx',c.x);dst.setAttribute('cy',c.y)
+  }else if(k==='arc'){
+    const c=fn({x:+src.dataset.cx,y:+src.dataset.cy}),a=fn({x:+src.dataset.sx,y:+src.dataset.sy}),b=fn({x:+src.dataset.ex,y:+src.dataset.ey}),f=arcFlags(src),r=C('DIST',{X1:c.x,Y1:c.y,X2:a.x,Y2:a.y}),sw=flipArc?1-f.sweep:f.sweep;
+    Object.assign(dst.dataset,{cx:c.x,cy:c.y,sx:a.x,sy:a.y,ex:b.x,ey:b.y});dst.setAttribute('d',`M ${a.x} ${a.y} A ${r} ${r} 0 ${f.large} ${sw} ${b.x} ${b.y}`)
+  }else if(k==='text'){
+    const z=textAngleAfter(src,fn);
+    dst.dataset.textSize=src.dataset.textSize||String(num('TEXT_SIZE')||16);
+    applyLineStyle(dst,styleOf(src).color,styleOf(src).width);
+    setTextPose(dst,z.p.x,z.p.y,z.angle);
+    dst.setAttribute('font-size',String((Number(dst.dataset.textSize)||16)/(num('VIEW_SCALE')||1)))
+  }else if(k==='dim'){
+    const a=fn({x:+src.dataset.ax,y:+src.dataset.ay}),b=fn({x:+src.dataset.bx,y:+src.dataset.by}),c=fn({x:+src.dataset.cx,y:+src.dataset.cy});Object.assign(dst.dataset,{ax:a.x,ay:a.y,bx:b.x,by:b.y,cx:c.x,cy:c.y});updateDim(dst)
+  }else if(k==='angdim'){
+    const v=fn({x:+src.dataset.vx,y:+src.dataset.vy}),a=fn({x:+src.dataset.ax,y:+src.dataset.ay}),b=fn({x:+src.dataset.bx,y:+src.dataset.by}),c=fn({x:+src.dataset.cx,y:+src.dataset.cy});Object.assign(dst.dataset,{vx:v.x,vy:v.y,ax:a.x,ay:a.y,bx:b.x,by:b.y,cx:c.x,cy:c.y});updateAngDim(dst)
+  }else if(k==='aligndim'){
+    const a=fn({x:+src.dataset.ax,y:+src.dataset.ay}),b=fn({x:+src.dataset.bx,y:+src.dataset.by});Object.assign(dst.dataset,{ax:a.x,ay:a.y,bx:b.x,by:b.y,offset:src.dataset.offset||0});updateAlignDim(dst)
   }
-
-  if(guideState.y!==null){
-    const p=worldToScreen({x:0,y:guideState.y});
-    ctx.beginPath();
-    ctx.moveTo(0,p.y);
-    ctx.lineTo(canvas.clientWidth,p.y);
-    ctx.stroke();
-  }
-
-  ctx.setLineDash([]);
-
-  if(guideState.point){
-    const p=worldToScreen(guideState.point);
-    ctx.strokeStyle='#111';
-    ctx.lineWidth=1.5;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,5,0,Math.PI*2);
-    ctx.stroke();
-  }
-
-  ctx.restore();
+  return dst
 }
-
-function arcWorldPoints(center,start,end){
-  if(!center||!start||!end)return [];
-  const r=Math.hypot(start.x-center.x,start.y-center.y);
-  if(!Number.isFinite(r)||r<=1e-9)return [];
-  let a0=Math.atan2(start.y-center.y,start.x-center.x);
-  let a1=Math.atan2(end.y-center.y,end.x-center.x);
-  let sweep=a1-a0;
-  const tau=Math.PI*2;
-  while(sweep<0)sweep+=tau;
-  while(sweep>=tau)sweep-=tau;
-  if(sweep<=1e-7)return [];
-  const steps=Math.max(24,Math.ceil(sweep*32));
-  const out=[];
-  for(let i=0;i<=steps;i++){
-    const a=a0+sweep*(i/steps);
-    out.push({x:center.x+r*Math.cos(a),y:center.y+r*Math.sin(a)});
-  }
-  return out;
-}
-function drawArcWorld(center,start,end){
-  const pts=arcWorldPoints(center,start,end);
-  if(!pts.length)return;
-  const p0=worldToScreen(pts[0]);
-  ctx.moveTo(p0.x,p0.y);
-  for(let i=1;i<pts.length;i++){
-    const p=worldToScreen(pts[i]);
-    ctx.lineTo(p.x,p.y);
-  }
-}
-function drawArrow(p,dir,size){const n={x:-dir.y,y:dir.x};ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-dir.x*size+n.x*size*.45,p.y-dir.y*size+n.y*size*.45);ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-dir.x*size-n.x*size*.45,p.y-dir.y*size-n.y*size*.45);ctx.stroke()}
-function dimGeometry(a,b,c){const vx=b.x-a.x,vy=b.y-a.y,L=Math.hypot(vx,vy);if(!L)return null;const u={x:vx/L,y:vy/L},n={x:-u.y,y:u.x};const mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};const off=(c.x-mid.x)*n.x+(c.y-mid.y)*n.y;return{L,u,n,off,qa:{x:a.x+n.x*off,y:a.y+n.y*off},qb:{x:b.x+n.x*off,y:b.y+n.y*off}}}
-function drawRel(r,highlight=false){const k=r.getAttribute('kind'),a=pxy(r.getAttribute('a'));if(!a)return;const size=num('TEXT_SIZE')||16;ctx.save();ctx.strokeStyle=highlight?'#111111':'#444444';ctx.fillStyle=highlight?'#111111':'#222222';ctx.lineWidth=highlight?2.6:1.6;
-  if(k==='text'){const A=worldToScreen(a);ctx.font=`${size}px system-ui,sans-serif`;ctx.textBaseline='alphabetic';ctx.fillText(r.getAttribute('text')||'',A.x,A.y);ctx.restore();return}
-  const b=pxy(r.getAttribute('b'));if(!b){ctx.restore();return}const A=worldToScreen(a),B=worldToScreen(b);ctx.beginPath();
-  if(k==='line'){ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y)}
-  else if(k==='rect'){ctx.rect(Math.min(A.x,B.x),Math.min(A.y,B.y),Math.abs(B.x-A.x),Math.abs(B.y-A.y))}
-  else if(k==='circle'){const rad=Math.hypot(B.x-A.x,B.y-A.y);ctx.arc(A.x,A.y,rad,0,Math.PI*2)}
-  else if(k==='arc'){drawArcWorld(a,b,pxy(r.getAttribute('c')))}
-  else if(k==='dim'){const c=pxy(r.getAttribute('c')),g=c&&dimGeometry(a,b,c);if(g){ctx.lineWidth=highlight?1.2:0.8;const QA=worldToScreen(g.qa),QB=worldToScreen(g.qb),sc=num('VIEW_SCALE')||1,ext=Math.max(5,6/sc),ea=worldToScreen({x:g.qa.x+g.n.x*Math.sign(g.off||1)*ext,y:g.qa.y+g.n.y*Math.sign(g.off||1)*ext}),eb=worldToScreen({x:g.qb.x+g.n.x*Math.sign(g.off||1)*ext,y:g.qb.y+g.n.y*Math.sign(g.off||1)*ext});ctx.moveTo(A.x,A.y);ctx.lineTo(ea.x,ea.y);ctx.moveTo(B.x,B.y);ctx.lineTo(eb.x,eb.y);ctx.moveTo(QA.x,QA.y);ctx.lineTo(QB.x,QB.y);ctx.stroke();const ds={x:(QB.x-QA.x),y:(QB.y-QA.y)},dl=Math.hypot(ds.x,ds.y)||1,du={x:ds.x/dl,y:ds.y/dl};drawArrow(QA,{x:-du.x,y:-du.y},8);drawArrow(QB,du,8);const M={x:(QA.x+QB.x)/2,y:(QA.y+QB.y)/2};ctx.font=`${size}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.save();ctx.translate(M.x,M.y-4);let ang=Math.atan2(QB.y-QA.y,QB.x-QA.x);if(ang>Math.PI/2||ang<-Math.PI/2)ang+=Math.PI;ctx.rotate(ang);ctx.fillText(formatMeasure(g.L),0,0);ctx.restore();ctx.restore();return}}
-  ctx.stroke();ctx.restore()}
-function formatMeasure(v){const s=Math.abs(v-Math.round(v))<1e-8?String(Math.round(v)):v.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');return s}
-
-function drawDraft(){if(!draft||!draft.a)return;const A=worldToScreen(draft.a);ctx.save();ctx.setLineDash([6,5]);ctx.strokeStyle='#777777';ctx.lineWidth=1.3;ctx.beginPath();if(draft.kind==='line'&&draft.b){const B=worldToScreen(draft.b);ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y)}else if(draft.kind==='rect'&&draft.b){const B=worldToScreen(draft.b);ctx.rect(Math.min(A.x,B.x),Math.min(A.y,B.y),Math.abs(B.x-A.x),Math.abs(B.y-A.y))}else if(draft.kind==='circle'&&draft.b){const B=worldToScreen(draft.b);ctx.arc(A.x,A.y,Math.hypot(B.x-A.x,B.y-A.y),0,Math.PI*2)}else if(draft.kind==='dim'){ctx.lineWidth=0.8;if(draft.b){const B=worldToScreen(draft.b);if(draft.c){const g=dimGeometry(draft.a,draft.b,draft.c);if(g){const QA=worldToScreen(g.qa),QB=worldToScreen(g.qb);ctx.moveTo(A.x,A.y);ctx.lineTo(QA.x,QA.y);ctx.moveTo(B.x,B.y);ctx.lineTo(QB.x,QB.y);ctx.moveTo(QA.x,QA.y);ctx.lineTo(QB.x,QB.y)}}else{ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y)}}}else if(draft.kind==='text'){ctx.font=`${num('TEXT_SIZE')||16}px system-ui,sans-serif`;ctx.fillStyle='#777777';ctx.setLineDash([]);ctx.fillText(cmdInput.buffer||'Text',A.x,A.y)}else if(draft.kind==='arc'){
-  ctx.moveTo(A.x-4,A.y);ctx.lineTo(A.x+4,A.y);ctx.moveTo(A.x,A.y-4);ctx.lineTo(A.x,A.y+4);
-  if(draft.b){
-    const B=worldToScreen(draft.b);
-    if(draft.c){drawArcWorld(draft.a,draft.b,draft.c)}
-    else{ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y)}
-  }
-}ctx.stroke();ctx.restore()}
-function drawModifyPreview(){
-  if(!modify||!selected)return;const r=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);if(!r)return;
-  ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle='#111111';ctx.lineWidth=1.4;
-  if(modify.tool==='mirror'&&modify.axisA){const a=worldToScreen(modify.axisA),b=worldToScreen(modify.axisB||modify.hover||modify.axisA);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
-  else if(modify.hover){const c=worldToScreen(relCenter(r)),h=worldToScreen(modify.hover);ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(h.x,h.y);ctx.stroke()}
-  ctx.restore()
-}
-function render(){ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);for(const r of relations())drawRel(r,r.getAttribute('name')===selected);drawGuides();drawDraft();drawModifyPreview();count.textContent=`${relations().length} ${relations().length===1?'entity':'entities'}`;selectionText.textContent=selected||'no selection'}
-
-function distSeg(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;if(!l)return Math.hypot(p.x-a.x,p.y-a.y);let t=((p.x-a.x)*dx+(p.y-a.y)*dy)/l;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-(a.x+t*dx),p.y-(a.y+t*dy))}
-function hit(w){const tol=8/(num('VIEW_SCALE')||1);let best=null,bd=Infinity;for(const r of relations()){const k=r.getAttribute('kind'),a=pxy(r.getAttribute('a'));if(!a)continue;let d=Infinity;if(k==='text'){d=Math.hypot(w.x-a.x,w.y-a.y)}else{const b=pxy(r.getAttribute('b'));if(!b)continue;if(k==='line')d=distSeg(w,a,b);if(k==='rect'){const x1=Math.min(a.x,b.x),x2=Math.max(a.x,b.x),y1=Math.min(a.y,b.y),y2=Math.max(a.y,b.y);d=Math.min(distSeg(w,{x:x1,y:y1},{x:x2,y:y1}),distSeg(w,{x:x2,y:y1},{x:x2,y:y2}),distSeg(w,{x:x2,y:y2},{x:x1,y:y2}),distSeg(w,{x:x1,y:y2},{x:x1,y:y1}))}if(k==='circle')d=Math.abs(Math.hypot(w.x-a.x,w.y-a.y)-Math.hypot(b.x-a.x,b.y-a.y));if(k==='arc'){const c=pxy(r.getAttribute('c'));if(c){const rad=Math.hypot(b.x-a.x,b.y-a.y),ang=Math.atan2(w.y-a.y,w.x-a.x),sa=Math.atan2(b.y-a.y,b.x-a.x),ea=Math.atan2(c.y-a.y,c.x-a.x),twopi=Math.PI*2,norm=x=>(x%twopi+twopi)%twopi,span=norm(ea-sa),pos=norm(ang-sa);d=pos<=span+0.02?Math.abs(Math.hypot(w.x-a.x,w.y-a.y)-rad):Infinity}}if(k==='dim'){const c=pxy(r.getAttribute('c')),g=c&&dimGeometry(a,b,c);if(g)d=Math.min(distSeg(w,g.qa,g.qb),distSeg(w,a,g.qa),distSeg(w,b,g.qb))}}
-if(d<bd){bd=d;best=r}}return bd<=tol?best:null}
-function eventPoint(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);const sp=eventPoint(e),w=snap(screenToWorld(sp));if(e.button===1||e.button===2||e.altKey||e.shiftKey){pan={sp,x:num('VIEW_X'),y:num('VIEW_Y')};return}const tool=get('TOOL');if(tool==='select'){const h=hit(w);selected=h?.getAttribute('name')||null;render();return}if(['copy','move','offset','mirror'].includes(tool)){
-  if(!selected){const h=hit(w);selected=h?.getAttribute('name')||null;if(selected)beginModify(tool);else render();return}
-  if(!modify)beginModify(tool);
-  if(tool==='mirror'){
-    if(!modify.axisA){modify.axisA=w;modify.axisB=w;cmdInput={stage:'mirrorAngle',buffer:'',v1:null};updateCommand();render();return}
-    if(Math.hypot(w.x-modify.axisA.x,w.y-modify.axisA.y)>1e-9){saveHistory();const r=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`),out=mirrorEntity(r,modify.axisA,w);if(out)selected=out.getAttribute('name');finishModify()}return
-  }
-  modify.hover=w;
-  const r=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);
-  if(!r){finishModify();return}
-  if(tool==='move'||tool==='copy'){
-    const c=relCenter(r),dx=w.x-c.x,dy=w.y-c.y;
-    if(Math.hypot(dx,dy)>1e-9){
-      saveHistory();
-      let out=null;
-      if(tool==='copy')out=cloneShift(r,dx,dy);
-      else{moveRelation(r,dx,dy);out=r}
-      if(out)selected=out.getAttribute('name');
-      finishModify();
-    }
-    return
-  }
-  if(tool==='offset'){
-    const d=relData(r);let dist=0;
-    if(d){
-      if(d.kind==='line')dist=distSeg(w,d.a,d.b);
-      else if(d.kind==='circle'||d.kind==='arc')dist=Math.abs(Math.hypot(w.x-d.a.x,w.y-d.a.y)-Math.hypot(d.b.x-d.a.x,d.b.y-d.a.y));
-      else if(d.kind==='rect'){
-        const x1=Math.min(d.a.x,d.b.x),x2=Math.max(d.a.x,d.b.x),y1=Math.min(d.a.y,d.b.y),y2=Math.max(d.a.y,d.b.y);
-        dist=Math.min(distSeg(w,{x:x1,y:y1},{x:x2,y:y1}),distSeg(w,{x:x2,y:y1},{x:x2,y:y2}),distSeg(w,{x:x2,y:y2},{x:x1,y:y2}),distSeg(w,{x:x1,y:y2},{x:x1,y:y1}));
-      }
-    }
-    if(dist>1e-9){saveHistory();const out=offsetEntity(r,w,dist);if(out)selected=out.getAttribute('name');finishModify()}
-    return
-  }
-  updateCommand();render();return
-}if(tool==='dim'){
-  if(!draft){draft={kind:'dim',a:w,b:null,c:null,stage:1};cmdInput={stage:'second',buffer:'',v1:null};updateCommand();render();return}
-  if(draft.stage===1){if(Math.hypot(w.x-draft.a.x,w.y-draft.a.y)>1e-9){draft.b=w;draft.stage=2;cmdInput.stage='offset';updateCommand();render()}return}
-  if(draft.stage===2){draft.c=w;saveHistory();const a=createPoint(draft.a),b=createPoint(draft.b),c=createPoint(draft.c);const rel=createRelation('dim',a,b,c);selected=rel.getAttribute('name');draft=null;resetCommandInput();render();return}
-}if(tool==='text'){
-  if(!draft){draft={kind:'text',a:w};cmdInput={stage:'text',buffer:'',v1:null};updateCommand();render()}return
-}if(tool==='line'){
-  if(!draft){
-    draft={kind:'line',a:w,b:w};
-    lastPointerWorld=w;
-    cmdInput={stage:'length',buffer:'',v1:null};
-    updateCommand();
-    render();
-  }else{
-    draft.b=w;
-    commitDraft(draft);
-  }
-  return
-}if(tool==='rect'){if(!draft){draft={kind:'rect',a:w,b:w};cmdInput={stage:'width',buffer:'',v1:null};updateCommand();render()}else{draft.b=w;commitDraft(draft)}return}if(tool==='circle'){if(!draft){draft={kind:'circle',a:w,b:w};cmdInput={stage:'radius',buffer:'',v1:null};updateCommand();render()}else{draft.b=w;commitDraft(draft)}return}if(tool==='arc'){
-  if(!draft){
-    draft={kind:'arc',a:w,b:null,c:null,stage:1};
-    cmdInput={stage:'radius',buffer:'',v1:null,v2:null};
-    updateCommand();render();return
-  }
-  if(draft.stage===1){
-    draft.b=w;
-    draft.stage=2;
-    cmdInput.stage='endPoint';
-    cmdInput.v1=Math.hypot(w.x-draft.a.x,w.y-draft.a.y);
-    cmdInput.v2=lineAngle(draft.a,w);
-    updateCommand();render();return
-  }
-  if(draft.stage===2){
-    draft.c=w;
-    commitDraft(draft);return
-  }
-}});
-canvas.addEventListener('pointermove',e=>{const sp=eventPoint(e),raw=screenToWorld(sp),w=snap(raw);lastPointerWorld=w;coords.textContent=`x ${w.x.toFixed(2)} · y ${w.y.toFixed(2)}`;if(pan){const s=num('VIEW_SCALE')||1;set('VIEW_X',pan.x-(sp.x-pan.sp.x)/s);set('VIEW_Y',pan.y+(sp.y-pan.sp.y)/s);render();return}if(modify&&selected){modify.hover=w;if(modify.tool==='mirror'&&modify.axisA)modify.axisB=w;render();return}if(draft){if(draft.kind==='dim'){if(draft.stage===1)draft.b=w;else if(draft.stage===2)draft.c=w;}else if(draft.kind==='text'){}else if(draft.kind==='arc'){
-  if(draft.stage===1)draft.b=w;
-  else if(draft.stage===2)draft.c=w;
-  if(cmdInput.stage==='startAngle'&&cmdInput.v1!=null&&cmdInput.buffer){const a=cadNumber(cmdInput.buffer);if(Number.isFinite(a))draft.b=endpointFromPolar(draft.a,cmdInput.v1,a)}
-  if(cmdInput.stage==='endAngle'&&cmdInput.v1!=null&&cmdInput.buffer){const a=cadNumber(cmdInput.buffer);if(Number.isFinite(a))draft.c=endpointFromPolar(draft.a,cmdInput.v1,a)}
-}else if(draft.kind==='line'){
-  const pair=parseLinePair(cmdInput.buffer);
-
-  if(pair&&pair.length>0&&Number.isFinite(pair.angle)){
-    draft.b=endpointFromPolar(draft.a,pair.length,pair.angle);
-  }else if(cmdInput.buffer){
-    const len=cadNumber(cmdInput.buffer);
-    const target=lastPointerWorld||w;
-    const deg=lineAngle(draft.a,target);
-
-    if(Number.isFinite(len)&&len>0){
-      draft.b=endpointFromPolar(draft.a,len,deg);
-    }else{
-      draft.b=w;
-    }
-  }else{
-    draft.b=w;
-  }
-}else if(draft.kind==='rect'&&cmdInput.v1!=null){const h=cmdInput.stage==='height'&&cmdInput.buffer?cadNumber(cmdInput.buffer):(w.y-draft.a.y);draft.b={x:draft.a.x+cmdInput.v1,y:draft.a.y+(Number.isFinite(h)?h:0)}}else if(draft.kind==='circle'&&cmdInput.buffer){const r=cadNumber(cmdInput.buffer);draft.b=Number.isFinite(r)&&r>0?{x:draft.a.x+r,y:draft.a.y}:w}else draft.b=w;render()}});
-canvas.addEventListener('pointerup',e=>{if(pan){pan=null;return}});
-canvas.addEventListener('wheel',e=>{e.preventDefault();const sp=eventPoint(e),before=screenToWorld(sp),old=num('VIEW_SCALE')||1,ns=Math.max(.02,Math.min(100,old*Math.exp(-e.deltaY*.001)));set('VIEW_SCALE',ns);const after=screenToWorld(sp);set('VIEW_X',num('VIEW_X')+(before.x-after.x));set('VIEW_Y',num('VIEW_Y')+(before.y-after.y));render()},{passive:false});
-canvas.addEventListener('pointerleave',()=>{guideState={x:null,y:null,point:null};render()});
-canvas.addEventListener('contextmenu',e=>e.preventDefault());
-function cadEventInEditable(e){
-  const t=e.target;
-  if(!t)return false;
-  return !!(
-    t.closest?.('input,textarea,select,[contenteditable="true"]') ||
-    t.isContentEditable
-  );
-}
-
-function appendCadNumericKey(key){
-  let k=key;
-  if(k===',')k='.';
-
-  if(/^[0-9]$/.test(k)){
-    cmdInput.buffer+=k;
-    return true;
-  }
-
-  if(k==='.'){
-    if(cmdInput.buffer.includes('.'))return false;
-    if(cmdInput.buffer===''||cmdInput.buffer==='+'||cmdInput.buffer==='-'){
-      cmdInput.buffer+='0.';
-    }else{
-      cmdInput.buffer+='.';
-    }
-    return true;
-  }
-
-  if(k==='+'||k==='-'){
-    if(cmdInput.buffer===''){
-      cmdInput.buffer=k;
-      return true;
-    }
-    return false;
-  }
-
-  return false;
-}
-
-function cadNumber(text){
-  const s=String(text??'').trim().replace(',','.');
-  if(!s||s==='+'||s==='-'||s==='.'||s==='+.'||s==='-.')return NaN;
-  const n=Number(s);
-  return Number.isFinite(n)?n:NaN;
-}
-
-window.addEventListener('keydown',e=>{if(document.body.dataset.mode!=='cad')return;
-  // Never let CAD shortcuts/command input steal keystrokes from real form fields.
-  if(cadEventInEditable(e))return;
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveProject();return}
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='o'){e.preventDefault();openProject.click();return}
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
+function transformPreview(entity,fn,flipArc=false){const n=entity.cloneNode(true);n.removeAttribute('data-byte');n.classList.remove('selected');n.classList.add('draft');transformEntity(entity,fn,flipArc,n);return n}
+function commitTransformMany(es,fn,flipArc=false){if(!es.length)return false;saveHistory();for(const e of es)transformEntity(e,fn,flipArc,e);selectMany(es.map(e=>e.dataset.byte));clearDraft();return true}
+function commitMirrorCopies(es,fn,flipArc=false){if(!es.length)return false;saveHistory();const ids=[];for(const entity of es){const copy=entity.cloneNode(true);copy.dataset.byte=next();copy.classList.remove('selected','draft');copy.classList.add('entity');transformEntity(entity,fn,flipArc,copy);scene.append(copy);indexEntity(copy);ids.push(copy.dataset.byte)}selectMany(ids);clearDraft();return true}
+function beginTransform(kind,pick=null){let es=selectedEntities();if(!es.length&&pick){setSingleSelection(pick.dataset.byte);es=[pick]}if(!es.length)return null;draft=kind==='mirror'?{kind,entities:es,stage:'axis1',a:null,b:null}:{kind,entities:es,stage:'center',c:null,a:null,b:null,angle:0,buffer:''};refresh();return draft}
+function center(e){const b=e.getBBox();return midpoint({x:b.x,y:b.y},{x:C('MOVE_X',{X1:b.x,TX:b.width}),y:C('MOVE_Y',{Y1:b.y,TY:b.height})})}
+svg.addEventListener('dblclick',e=>{
+  const p=pt(e),q=pickTarget(e,p);
+  if(!q||q.dataset.kind!=='text')return;
+  e.preventDefault();e.stopPropagation();
+  set('TOOL','text');setSingleSelection(q.dataset.byte);
+  q.style.visibility='hidden';
+  draft={kind:'text',a:{x:+q.getAttribute('x'),y:+q.getAttribute('y')},buffer:q.textContent||'',stage:'input',edit:q};
+  preview();refresh();svg.focus()
+});
+svg.addEventListener('pointerdown',e=>{
+  svg.focus();const p=snap(pt(e));
+  if(e.button===1||e.button===2||e.altKey||e.shiftKey){pan={cx:e.clientX,cy:e.clientY,x:num('VIEW_X'),y:num('VIEW_Y'),scale:num('VIEW_SCALE')||1};svg.setPointerCapture(e.pointerId);return}
   const tool=get('TOOL');
-  if(['copy','move','offset','mirror'].includes(tool)&&selected){
-    if(!modify)beginModify(tool);
-    if(e.key==='Escape'){e.preventDefault();finishModify();selected=null;render();return}
-    if(e.key==='Backspace'){e.preventDefault();cmdInput.buffer=cmdInput.buffer.slice(0,-1);updateCommand();render();return}
-    if(/^[0-9.,+-]$/.test(e.key)){e.preventDefault();if(appendCadNumericKey(e.key)){updateCommand();render()}return}
+  if(selectionPhaseActive()&&draft.kind===tool){
+    const raw=pt(e),q=pickTarget(e,raw),add=e.ctrlKey||e.metaKey;
+    if(q){
+      if(add){toggleSelection(q.dataset.byte);refresh();return}
+      if(selectedEntities().length){confirmEditorSelection(p);return}
+      setSingleSelection(q.dataset.byte);refresh();return
+    }
+    if(selectedEntities().length&&!add){confirmEditorSelection(p);return}
+    selectionDrag={start:raw,current:raw,add,pointerId:e.pointerId};
+    svg.setPointerCapture(e.pointerId);drawSelectionBox();if(!add)clearSelection();refresh();return
+  }
+  if(tool==='mirror'){
+    if(!draft){const q=pickTarget(e,p);if(!selectedEntities().length&&!q){command.textContent='SPECCHIA · seleziona oggetto/i';return}beginTransform('mirror',q);return}
+    if(draft.stage==='axis1'){draft.a=p;draft.b=p;draft.stage='axis2';preview();refresh();return}
+    if(draft.stage==='axis2'){draft.b=p;if(C('DIST',{X1:draft.a.x,Y1:draft.a.y,X2:p.x,Y2:p.y})<=1e-9){command.textContent='SPECCHIA · asse non valido';return}commitMirrorCopies(draft.entities,q=>mirrorPoint(q,draft.a,draft.b),true);return}
+  }
+  if(tool==='rotate'){
+    if(!draft){const q=pickTarget(e,p);if(!selectedEntities().length&&!q){command.textContent='RUOTA · seleziona oggetto/i';return}beginTransform('rotate',q);return}
+    if(draft.stage==='center'){draft.c=p;draft.stage='ref';preview();refresh();return}
+    if(draft.stage==='ref'){if(C('DIST',{X1:draft.c.x,Y1:draft.c.y,X2:p.x,Y2:p.y})<=1e-9){command.textContent='RUOTA · punto riferimento diverso dal centro';return}draft.a=p;draft.b=p;draft.stage='end';draft.angle=0;preview();refresh();return}
+    if(draft.stage==='end'){draft.b=p;const angle=draft.buffer?C('DEG_RAD',{DEG:Number(draft.buffer.replace(',','.'))}):rotationAngle(draft.c,draft.a,draft.b);if(!Number.isFinite(angle))return;commitTransformMany(draft.entities,q=>rotatePoint(q,draft.c,angle));return}
+  }
+  if(tool==='trim'||tool==='extend'){if(!draft){const boundary=pickTarget(e,p);if(!cadLine(boundary)){command.textContent=`${tool.toUpperCase()} · seleziona una linea limite`;return}draft={kind:tool,stage:'target',boundary,plan:null};setSingleSelection(boundary.dataset.byte);preview();refresh();return}const target=pickTarget(e,p);const plan=editLinePlan(tool,draft.boundary,target,p);if(!plan){command.textContent=`${tool.toUpperCase()} · intersezione non valida`;return}commitLineEdit(plan);return}
+  if(tool==='select'){const raw=pt(e),q=pickTarget(e,raw),add=e.ctrlKey||e.metaKey;if(q){if(add)toggleSelection(q.dataset.byte);else setSingleSelection(q.dataset.byte);refresh();return}selectionDrag={start:raw,current:raw,add,pointerId:e.pointerId};svg.setPointerCapture(e.pointerId);drawSelectionBox();if(!add)clearSelection();refresh();return}
+  if(tool==='delete'){if(selectedEntities().length){deleteSelection();return}const q=pickTarget(e,p);if(q){setSingleSelection(q.dataset.byte);deleteSelection()}return}
+  if(tool==='move'||tool==='copy'){
+    if(!draft){
+      const es=selectedEntities();
+      if(!es.length){draft={kind:tool,entities:[],stage:'select',base:null,to:null};refresh();return}
+      draft={kind:tool,entities:[...es],stage:'base',base:null,to:null};
+      command.textContent=`${tool.toUpperCase()} · punto base`;
+      refresh();
+      return
+    }
+    if(draft.kind===tool&&draft.stage==='base'){
+      draft.base=p;draft.to=p;draft.stage='to';preview();updateCommand();refresh();return
+    }
+    if(draft.kind===tool&&draft.stage==='to'){
+      draft.to=p;
+      const v=CV(['DX','DY'],{X1:draft.base.x,Y1:draft.base.y,X2:draft.to.x,Y2:draft.to.y});
+      if(tool==='move'){
+        translateMany(draft.entities,v.DX,v.DY);selectMany(draft.entities.map(q=>q.dataset.byte));clearDraft();
+      }else{
+        saveHistory();const clones=[];
+        for(const q of draft.entities){const n=q.cloneNode(true);n.dataset.byte=next();n.classList.remove('selected','draft');n.classList.add('entity');scene.append(n);indexEntity(n);translateEntity(n,v.DX,v.DY);clones.push(n)}
+        selectMany(clones.map(n=>n.dataset.byte));clearDraft();
+      }
+      return
+    }
+  }
+  if(tool==='fillet'){if(draft?.kind==='fillet')commitFillet();else startFillet(p);return}
+  if(tool==='text'){
+    if(!draft){
+      const one=selectedEntities();
+      if(one.length===1&&one[0].dataset.kind==='text'){
+        const q=one[0];q.style.visibility='hidden';
+        draft={kind:'text',a:{x:+q.getAttribute('x'),y:+q.getAttribute('y')},buffer:q.textContent||'',stage:'input',edit:q};
+      }else draft={kind:'text',a:p,buffer:'',stage:'input'};
+      preview();refresh()
+    }
+    return
+  }
+  if(tool==='line'||tool==='dashline'||tool==='dashdotline'||tool==='circle'){if(!draft){draft={kind:tool,a:p,b:p};preview()}else{draft.b=p;make(tool,draft.a,draft.b);clearDraft()}return}
+  if(tool==='arc-rif'){if(!draft)return;if(draft.stage==='radius'){draft.stage='start';draft.buffer='';refresh();return}if(draft.stage==='start'){draft.a=p;draft.b=p;draft.stage='end';preview();refresh()}else{draft.b=p;if(makeArcRadius(draft.a,draft.b,Number(draft.radius)))clearDraft();else{command.textContent='ARCO R-I-F · raggio minore di metà corda';preview()}}return}
+  if(tool==='arc-ifr'){if(!draft){draft={kind:'arc-ifr',a:p,b:p,stage:'end',radius:Number(get('ARC_RADIUS'))||50,buffer:''};preview();refresh()}else if(draft.stage==='end'){draft.b=p;draft.stage='radius';draft.buffer='';const rr=arcRadiusFromPoint(draft.a,draft.b,p);if(rr)draft.radius=rr;preview();refresh()}else if(draft.stage==='radius'){if(Number.isFinite(Number(draft.radius))&&makeArcRadius(draft.a,draft.b,Number(draft.radius)))clearDraft();else{command.textContent='ARCO I-F-R · sposta il mouse lontano dalla corda o digita il raggio';preview()}}return}
+  if(tool==='dim'){if(!draft){draft={kind:'dim',a:p,b:p,c:p,stage:1};preview();refresh()}else if(draft.stage===1){draft.b=p;draft.c=p;draft.stage=2;preview();refresh()}else{draft.c=p;make('dim',draft.a,draft.b,draft.c);clearDraft()}return}
+  if(tool==='angdim'){if(!draft){draft={kind:'angdim',a:p,b:p,c:p,d:p,stage:1};preview();refresh()}else if(draft.stage===1){draft.b=p;draft.c=p;draft.d=p;draft.stage=2;preview();refresh()}else if(draft.stage===2){draft.c=p;draft.d=p;draft.stage=3;preview();refresh()}else{draft.d=p;make('angdim',draft.a,draft.b,draft.c,draft.d);clearDraft()}return}
+  if(tool==='aligndim'){
+    if(!draft){draft={kind:'aligndim',a:p,b:p,offset:0,stage:'offset'};preview();refresh();return}
+    if(draft.stage==='offset'){
+      draft.offset=C('SIGNED_DIST_Y',{X1:draft.a.x,Y1:draft.a.y,X2:p.x,Y2:p.y});
+      draft.stage='points';draft.b=draft.a;preview();refresh();return
+    }
+    draft.b=p;
+    if(C('DIST',{X1:draft.a.x,Y1:draft.a.y,X2:p.x,Y2:p.y})>1e-9)make('aligndim',draft.a,p,null,{offset:draft.offset});
+    draft={kind:'aligndim',a:draft.a,b:p,offset:draft.offset,stage:'points'};preview();refresh();return
+  }
+});
+svg.addEventListener('pointermove',e=>{
+  const raw=pt(e);if(selectionDrag){selectionDrag.current=raw;drawSelectionBox();coords.textContent=`x ${raw.x.toFixed(2)} · y ${raw.y.toFixed(2)}`;return}const p=snap(raw);coords.textContent=`x ${p.x.toFixed(2)} · y ${p.y.toFixed(2)}`;
+  if(pan){set('VIEW_X',C('PAN_VIEW_X',{START_VIEW_X:pan.x,CLIENT_X:e.clientX,START_CLIENT_X:pan.cx,START_SCALE:pan.scale}));set('VIEW_Y',C('PAN_VIEW_Y',{START_VIEW_Y:pan.y,CLIENT_Y:e.clientY,START_CLIENT_Y:pan.cy,START_SCALE:pan.scale}));view();return}
+  if(draft){
+    if(draft.kind==='mirror'){if(draft.stage==='axis2'){draft.b=p;preview();updateCommand()}return}
+    if(draft.kind==='rotate'){if(draft.stage==='end'){draft.b=p;if(!draft.buffer)draft.angle=rotationAngle(draft.c,draft.a,p);preview();updateCommand()}return}
+    if(draft.kind==='trim'||draft.kind==='extend'){const target=pickTarget(e,p);draft.plan=editLinePlan(draft.kind,draft.boundary,target,p);preview();updateCommand();return}
+    if((draft.kind==='move'||draft.kind==='copy')&&draft.stage==='to'){draft.to=p;preview();updateCommand();return}
+    if(draft.kind==='fillet'){if(!draft.buffer){draft.radius=C('DIST',{X1:draft.g.v.x,Y1:draft.g.v.y,X2:p.x,Y2:p.y});}preview();refresh()}
+    else if(draft.kind==='arc-rif'){if(draft.stage==='end'){draft.b=p;preview();refresh();return}}
+    else if(draft.kind==='arc-ifr'){if(draft.stage==='end')draft.b=p;else if(draft.stage==='radius'&&!draft.buffer){draft.radius=arcRadiusFromPoint(draft.a,draft.b,p)}}
+    else if(draft.kind==='dim'){if(draft.stage===1){draft.b=p;draft.c=p}else draft.c=p}
+    else if(draft.kind==='angdim'){if(draft.stage===1){draft.b=p;draft.c=p;draft.d=p}else if(draft.stage===2){draft.c=p;draft.d=p}else draft.d=p}
+    else if(draft.kind==='aligndim'){
+      if(draft.stage==='offset'){
+        draft.offset=C('SIGNED_DIST_Y',{X1:draft.a.x,Y1:draft.a.y,X2:p.x,Y2:p.y});draft.b={x:C('MOVE_X',{X1:draft.a.x,TX:1}),y:draft.a.y}
+      }else draft.b=p
+    }
+    else if(draft.stage===1||draft.b)draft.b=p;
+    if(draft?.kind!=='fillet')preview()
+  }
+});
+svg.addEventListener('pointerup',e=>{if(selectionDrag){finishSelectionBox();try{svg.releasePointerCapture(e.pointerId)}catch{}return}pan=null});svg.addEventListener('pointerleave',()=>{guideState={x:null,y:null,point:null};drawGuides()});svg.addEventListener('contextmenu',e=>e.preventDefault());
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=svg.getBoundingClientRect(),old=num('VIEW_SCALE')||1;
+  let delta=e.deltaY;if(e.deltaMode===1)delta*=16;else if(e.deltaMode===2)delta*=r.height||1;
+  const q={OLD_SCALE:old,DELTA:delta,CLIENT_X:e.clientX,CLIENT_Y:e.clientY,LEFT:r.left,TOP:r.top,SCREEN_W:r.width,SCREEN_H:r.height,VIEW_X:num('VIEW_X'),VIEW_Y:num('VIEW_Y')},
+        ns=C('ZOOM_SCALE',q),v=CV(['ZOOM_CENTER_X','ZOOM_CENTER_Y'],{...q,NEW_SCALE:ns});
+  set('VIEW_SCALE',ns);set('VIEW_X',v.ZOOM_CENTER_X);set('VIEW_Y',v.ZOOM_CENTER_Y);view()
+},{passive:false});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest?.('input,textarea,select,[contenteditable=true]'))return;
+  if(get('TOOL')==='text'&&draft?.kind==='text'){
+    if(e.key==='Escape'){
+      e.preventDefault();
+      if(draft.edit)draft.edit.style.visibility='';
+      clearDraft();return
+    }
     if(e.key==='Enter'){
       e.preventDefault();
-      if(tool==='mirror'){
-        if(!modify.axisA)return;
-        const deg=cadNumber(cmdInput.buffer),r=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);
-        if(Number.isFinite(deg)){const b=endpointFromPolar(modify.axisA,100,deg);saveHistory();const out=mirrorEntity(r,modify.axisA,b);if(out)selected=out.getAttribute('name');finishModify()}
-      }else{
-        const d=cadNumber(cmdInput.buffer),w=modify.hover||relCenter(drawing.querySelector(`:scope > riki-relation[name="${selected}"]`));
-        if(Number.isFinite(d)&&d>0)applyLinearModify(tool,w,d)
-      }
+      const tx=String(draft.buffer||'');
+      if(tx.trim()){
+        if(draft.edit){
+          saveHistory();draft.edit.textContent=tx;draft.edit.style.visibility='';setSingleSelection(draft.edit.dataset.byte);clearDraft()
+        }else make('text',draft.a,null,null,tx)
+      }else if(draft.edit){draft.edit.style.visibility='';clearDraft()}
+      else clearDraft();
       return
     }
-  }
-  if(tool==='text'&&draft&&draft.kind==='text'){
-    if(e.key==='Escape'){e.preventDefault();draft=null;resetCommandInput();render();return}
-    if(e.key==='Backspace'){
-      e.preventDefault();
-      cmdInput.buffer=cmdInput.buffer.slice(0,-1);
-
-      if(tool==='line'){
-        const pair=parseLinePair(cmdInput.buffer);
-        if(pair&&pair.length>0&&Number.isFinite(pair.angle)){
-          draft.b=endpointFromPolar(draft.a,pair.length,pair.angle);
-        }else{
-          const len=cadNumber(cmdInput.buffer);
-          const target=lastPointerWorld||draft.b||draft.a;
-          const deg=lineAngle(draft.a,target);
-          if(Number.isFinite(len)&&len>0&&Number.isFinite(deg)){
-            draft.b=endpointFromPolar(draft.a,len,deg);
-          }else if(lastPointerWorld){
-            draft.b=lastPointerWorld;
-          }
-        }
-      }
-
-      updateCommand();
-      render();
-      return;
-    }
-    if(e.key==='Enter'){e.preventDefault();const t=cmdInput.buffer.trim();if(t){saveHistory();const a=createPoint(draft.a),rel=createTextRelation(a,t);selected=rel.getAttribute('name')}draft=null;resetCommandInput();render();return}
-    if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();cmdInput.buffer+=e.key;updateCommand();render();return}
-  }
-  if(tool==='dim'&&draft&&e.key==='Escape'){e.preventDefault();draft=null;resetCommandInput();render();return}
-  if(draft&&['line','rect','circle','arc'].includes(tool)){
-    if(e.key==='Escape'){e.preventDefault();draft=null;resetCommandInput();render();return}
-    if(e.key==='Backspace'){e.preventDefault();cmdInput.buffer=cmdInput.buffer.slice(0,-1);updateCommand();render();return}
-    if(/^[0-9.,+-]$/.test(e.key)){
-      e.preventDefault();
-
-      if(tool==='line' && (cmdInput.buffer.includes('<') || cmdInput.buffer.includes('@'))){
-        let k=e.key===','?'.':e.key;
-        if(/^[0-9]$/.test(k)){
-          cmdInput.buffer+=k;
-        }else if(k==='.' && !cmdInput.buffer.split(/[<@]/).pop().includes('.')){
-          cmdInput.buffer+=k;
-        }else if((k==='+'||k==='-') && /[<@]$/.test(cmdInput.buffer)){
-          cmdInput.buffer+=k;
-        }
-        updateCommand();
-        render();
-        return;
-      }
-
-      if(appendCadNumericKey(e.key)){
-        // Update LINE geometry immediately, even if the mouse does not move.
-        if(tool==='line'){
-          const len=cadNumber(cmdInput.buffer);
-          const target=lastPointerWorld||draft.b||draft.a;
-          const deg=lineAngle(draft.a,target);
-          if(Number.isFinite(len)&&len>0&&Number.isFinite(deg)){
-            draft.b=endpointFromPolar(draft.a,len,deg);
-          }
-        }
-        updateCommand();
-        render();
-      }
-      return;
-    }
-    if(tool==='line'){
-      // Direct polar entry, e.g. 100<45 or 100@45.
-      const pair=parseLinePair(cmdInput.buffer);
-
-      if(e.key==='Enter'){
-        e.preventDefault();
-
-        if(pair&&pair.length>0&&Number.isFinite(pair.angle)){
-          draft.b=endpointFromPolar(draft.a,pair.length,pair.angle);
-          commitDraft(draft);
-          return;
-        }
-
-        const len=cadNumber(cmdInput.buffer);
-        if(Number.isFinite(len)&&len>0){
-          const target=lastPointerWorld||draft.b||draft.a;
-          let deg=lineAngle(draft.a,target);
-          if(!Number.isFinite(deg))deg=0;
-          draft.b=endpointFromPolar(draft.a,len,deg);
-          commitDraft(draft);
-        }
-        return;
-      }
-
-      // Allow separator for direct polar entry inside the same buffer.
-      if((e.key==='<'||e.key==='@') && !cmdInput.buffer.includes('<') && !cmdInput.buffer.includes('@')){
-        e.preventDefault();
-        const len=cadNumber(cmdInput.buffer);
-        if(Number.isFinite(len)&&len>0){
-          cmdInput.buffer += e.key;
-          updateCommand();
-          render();
-        }
-        return;
-      }
-    }
-    if(tool==='rect'&&e.key==='Enter'){
-      e.preventDefault();
-      if(cmdInput.stage==='width'){
-        const v=cadNumber(cmdInput.buffer);
-        if(Number.isFinite(v)&&v!==0){cmdInput.v1=v;cmdInput.buffer='';cmdInput.stage='height';updateCommand();render()}
-      }else{
-        const h=cadNumber(cmdInput.buffer);
-        if(cmdInput.v1!==null&&Number.isFinite(h)&&h!==0){draft.b={x:draft.a.x+cmdInput.v1,y:draft.a.y+h};commitDraft(draft)}
-      }
-      return
-    }
-    if(tool==='circle'&&e.key==='Enter'){
-      e.preventDefault();const r=cadNumber(cmdInput.buffer);
-      if(Number.isFinite(r)&&r>0){draft.b={x:draft.a.x+r,y:draft.a.y};commitDraft(draft)}
-      return
-    }
-    if(tool==='arc'){
-      if(e.key==='Enter'){
-        e.preventDefault();
-        if(cmdInput.stage==='radius'){
-          const r=cadNumber(cmdInput.buffer);
-          if(Number.isFinite(r)&&r>0){cmdInput.v1=r;cmdInput.buffer='';cmdInput.stage='startAngle';updateCommand();render()}
-        }else if(cmdInput.stage==='startAngle'){
-          const a=cadNumber(cmdInput.buffer);
-          if(cmdInput.v1>0&&Number.isFinite(a)){cmdInput.v2=a;draft.b=endpointFromPolar(draft.a,cmdInput.v1,a);cmdInput.buffer='';cmdInput.stage='endAngle';updateCommand();render()}
-        }else if(cmdInput.stage==='endAngle'){
-          const a=cadNumber(cmdInput.buffer);
-          if(cmdInput.v1>0&&Number.isFinite(a)){draft.c=endpointFromPolar(draft.a,cmdInput.v1,a);commitDraft(draft)}
-        }
-        return
-      }
-    }
-
-  }
-  if(e.key==='Delete'||e.key==='Backspace'){
-    if(selected){
-      e.preventDefault();
-      del();
+    if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);preview();refresh();return}
+    if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+      e.preventDefault();draft.buffer+=e.key;preview();refresh();return
     }
   }
-  if(e.key==='Escape'){
+  if(selectionPhaseActive()&&e.key==='Enter'){
     e.preventDefault();
-    draft=null;modify=null;selected=null;resetCommandInput();render();
+    const kind=draft.kind;
+    if(!confirmEditorSelection())command.textContent=`${kind.toUpperCase()} · seleziona almeno un oggetto`;
+    return
   }
+  if(draft?.kind==='rotate'&&draft.stage==='end'){
+    if(e.key==='Escape'){e.preventDefault();clearDraft();return}
+    if(e.key==='Enter'){e.preventDefault();let angle=draft.angle||0;if(draft.buffer){const deg=Number(draft.buffer.replace(',','.'));if(!Number.isFinite(deg))return;angle=C('DEG_RAD',{DEG:deg})}commitTransformMany(draft.entities,q=>rotatePoint(q,draft.c,angle));return}
+    if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer&&draft.buffer!=='-'){const deg=Number(draft.buffer.replace(',','.'));if(Number.isFinite(deg))draft.angle=C('DEG_RAD',{DEG:deg})}preview();refresh();return}
+    if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))||(e.key==='-'&&!draft.buffer)){e.preventDefault();draft.buffer+=e.key;const deg=Number(draft.buffer.replace(',','.'));if(Number.isFinite(deg))draft.angle=C('DEG_RAD',{DEG:deg});preview();refresh();return}
+  }
+  if(draft&&(draft.kind==='arc-rif'||draft.kind==='arc-ifr')&&draft.stage==='radius'){
+    if(e.key==='Escape'){e.preventDefault();clearDraft();return}
+    if(e.key==='Enter'){e.preventDefault();const r=Number((draft.buffer||String(draft.radius)).replace(',','.'));if(!Number.isFinite(r)||r===0)return;if(draft.kind==='arc-rif'){draft.radius=r;draft.buffer='';draft.stage='start';refresh();return}draft.radius=r;if(makeArcRadius(draft.a,draft.b,r))clearDraft();else{command.textContent='ARCO I-F-R · raggio non valido';preview()}return}
+    if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer&&draft.buffer!=='-'){const r=Number(draft.buffer.replace(',','.'));if(Number.isFinite(r)&&r!==0)draft.radius=r}preview();refresh();return}
+    if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))||(e.key==='-'&&!draft.buffer)){e.preventDefault();draft.buffer+=e.key;const r=Number(draft.buffer.replace(',','.'));if(Number.isFinite(r)&&r!==0)draft.radius=r;preview();refresh();return}
+  }
+  if(draft?.kind==='fillet'){
+    if(e.key==='Escape'){e.preventDefault();clearDraft();return}
+    if(e.key==='Enter'){e.preventDefault();commitFillet();return}
+    if(e.key==='Backspace'){e.preventDefault();draft.buffer=draft.buffer.slice(0,-1);if(draft.buffer){const r=Number(draft.buffer.replace(',','.'));if(r>0)draft.radius=r}preview();refresh();return}
+    if(/^[0-9]$/.test(e.key)||((e.key==='.'||e.key===',')&&!/[.,]/.test(draft.buffer))){e.preventDefault();draft.buffer+=e.key;const r=Number(draft.buffer.replace(',','.'));if(r>0)draft.radius=r;preview();refresh();return}
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
+  if(e.key==='Escape'){selectionDrag=null;drawSelectionBox();clearDraft()}
+  if((e.key==='Delete'||e.key==='Backspace')&&selectedEntities().length){e.preventDefault();deleteSelection()}
 });
-function cadCanvasData(){render();return canvas.toDataURL('image/png')}
-
-function cadSelectionBoundsCss(){
-  if(!selected)return null;
-  const rel=drawing.querySelector(`:scope > riki-relation[name="${selected}"]`);if(!rel)return null;
-  const d=relData(rel),kind=rel.getAttribute('kind');let pts=[];
-  if(kind==='text'){const a=pxy(rel.getAttribute('a'));if(a)pts=[a]}
-  else if(d){
-    pts=[d.a,d.b];if(d.c)pts.push(d.c);
-    if(kind==='circle'||kind==='arc'){const rad=Math.hypot(d.b.x-d.a.x,d.b.y-d.a.y);pts.push({x:d.a.x-rad,y:d.a.y-rad},{x:d.a.x+rad,y:d.a.y+rad})}
-    if(kind==='rect')pts.push({x:d.a.x,y:d.b.y},{x:d.b.x,y:d.a.y});
+function fit(){const es=entities();if(!es.length){set('VIEW_X',0);set('VIEW_Y',0);set('VIEW_SCALE',1);view();return}const b=scene.getBBox(),r=svg.getBoundingClientRect(),v=CV(['FIT_CX','FIT_CY','FIT_SCALE'],{BOX_X:b.x,BOX_Y:b.y,BOX_W:b.width,BOX_H:b.height,SCREEN_W:r.width,SCREEN_H:r.height});set('VIEW_X',v.FIT_CX);set('VIEW_Y',v.FIT_CY);set('VIEW_SCALE',v.FIT_SCALE);view()}
+function commitPendingText(){
+  if(draft?.kind!=='text')return;
+  const tx=String(draft.buffer||'');
+  if(tx.trim()){
+    if(draft.edit){
+      saveHistory();
+      draft.edit.textContent=tx;
+      draft.edit.style.visibility='';
+      setSingleSelection(draft.edit.dataset.byte);
+    }else{
+      make('text',draft.a,null,null,tx);
+    }
+  }else if(draft.edit){
+    draft.edit.style.visibility='';
   }
-  if(!pts.length)return null;
-  const sp=pts.map(worldToScreen),xs=sp.map(p=>p.x),ys=sp.map(p=>p.y),pad=24;
-  const x1=Math.max(0,Math.min(...xs)-pad),y1=Math.max(0,Math.min(...ys)-pad);
-  const x2=Math.min(canvas.clientWidth,Math.max(...xs)+pad),y2=Math.min(canvas.clientHeight,Math.max(...ys)+pad);
-  return{x:x1,y:y1,w:Math.max(1,x2-x1),h:Math.max(1,y2-y1)};
+  draft=null;
+  overlay.querySelectorAll('.draft').forEach(e=>e.remove());
 }
-
-function cropCadCanvas(bounds){
-  if(!bounds)return cadCanvasData();
-  const q=dpr(),x=Math.max(0,Math.round(bounds.x*q)),y=Math.max(0,Math.round(bounds.y*q)),w=Math.max(1,Math.round(bounds.w*q)),h=Math.max(1,Math.round(bounds.h*q));
-  const out=document.createElement('canvas');out.width=w;out.height=h;const ox=out.getContext('2d');ox.fillStyle='#fff';ox.fillRect(0,0,w,h);ox.drawImage(canvas,x,y,w,h,0,0,w,h);return out.toDataURL('image/png');
+function run(name,kind){
+  if(kind==='tool'){
+    if(draft?.kind==='text'&&name!==get('TOOL'))commitPendingText();
+    else clearDraft();
+    set('TOOL',name);
+    if(name==='arc-rif')draft={kind:'arc-rif',a:null,b:null,stage:'radius',radius:Number(get('ARC_RADIUS'))||50,buffer:''};
+    else if(name==='move'||name==='copy'){
+      const es=selectedEntities();draft=es.length?{kind:name,entities:[...es],stage:'base',base:null,to:null}:{kind:name,entities:[],stage:'select',base:null,to:null};
+    }else if(name==='mirror'){
+      if(selectedEntities().length)beginTransform('mirror');else draft={kind:'mirror',entities:[],stage:'select',a:null,b:null};
+    }else if(name==='rotate'){
+      if(selectedEntities().length)beginTransform('rotate');else draft={kind:'rotate',entities:[],stage:'select',c:null,a:null,b:null,angle:0,buffer:''};
+    }
+    refresh();return
+  }
+  if(draft?.kind==='text')commitPendingText();
+  if(name==='undo')undo();
+  else if(name==='delete'){
+    if(selectedEntities().length)deleteSelection();
+    else{set('TOOL','delete');clearDraft();draft={kind:'delete',entities:[],stage:'select'};refresh()}
+  }
+  else if(name==='fit')fit();else if(name==='save')save();else if(name==='open')openProject?.click();else if(name==='text-down')set('TEXT_SIZE',C('TEXT_DOWN',{TEXT_SIZE:num('TEXT_SIZE')}));else if(name==='text-up')set('TEXT_SIZE',C('TEXT_UP',{TEXT_SIZE:num('TEXT_SIZE')}))
 }
-
-function printCadImage(dataUrl,mode){
-  const img=document.createElement('img');img.className='print-cad-image';img.alt='CAD print';img.src=dataUrl;
-  const layer=document.getElementById('print-layer');if(!layer)return;
-  layer.innerHTML='';layer.dataset.mode=mode||'cad';layer.setAttribute('aria-hidden','false');layer.append(img);
-  const cleanup=()=>{layer.setAttribute('aria-hidden','true');layer.innerHTML='';window.removeEventListener('afterprint',cleanup)};
-  window.addEventListener('afterprint',cleanup);img.onload=()=>requestAnimationFrame(()=>window.print());
-}
-
-document.getElementById('cad-print')?.addEventListener('click',()=>{
-  const mode=printArea?.value||'window';
-  if(mode==='selection'){if(!selected){command.textContent='PRINT · select an entity first';return}render();printCadImage(cropCadCanvas(cadSelectionBoundsCss()),'cad-selection');return}
-  if(mode==='window'){render();printCadImage(cadCanvasData(),'cad-window');return}
-  const vx=get('VIEW_X'),vy=get('VIEW_Y'),vs=get('VIEW_SCALE');fit();
-  requestAnimationFrame(()=>{render();const data=cadCanvasData();set('VIEW_X',vx);set('VIEW_Y',vy);set('VIEW_SCALE',vs);render();printCadImage(data,'cad-all')});
+document.querySelectorAll('[data-cad-name]').forEach(b=>b.addEventListener('click',()=>run(b.dataset.cadName,b.dataset.cadKind)));
+document.getElementById('cad-print')?.addEventListener('click',()=>window.print());
+lineColorInput?.addEventListener('input',e=>setLineProperty('color',e.currentTarget.value));
+lineWidthInput?.addEventListener('change',e=>setLineProperty('width',C('STYLE_WIDTH',{WIDTH:Number(e.currentTarget.value)||.55})));
+document.getElementById('cad-snap')?.addEventListener('change',e=>{set('SNAP',e.currentTarget.value);refresh()});
+document.getElementById('cad-text-size')?.addEventListener('change',e=>{
+  const v=C('STYLE_TEXT_SIZE',{SIZE:Number(e.currentTarget.value)||16}),ts=selectedEntities().filter(x=>x.dataset.kind==='text');
+  if(ts.length){
+    saveHistory();
+    for(const x of ts)x.dataset.textSize=String(v);
+  }else set('TEXT_SIZE',v);
+  syncScreenStyles();refresh()
 });
-
-function fit(){const ps=points();if(!ps.length){set('VIEW_X',0);set('VIEW_Y',0);set('VIEW_SCALE',1);render();return}const xs=ps.map(p=>+p.getAttribute('x')),ys=ps.map(p=>+p.getAttribute('y'));const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);set('VIEW_X',(minx+maxx)/2);set('VIEW_Y',(miny+maxy)/2);const w=Math.max(1,maxx-minx),h=Math.max(1,maxy-miny);set('VIEW_SCALE',Math.max(.02,Math.min(100,.8*Math.min(canvas.clientWidth/w,canvas.clientHeight/h))));render()}
-
-function syncSequenceFromSpace(){
-  let m=0;
-  for(const e of drawing.querySelectorAll('[name]')){
-    const q=(e.getAttribute('name')||'').match(/^[PR](\d+)$/);
-    if(q)m=Math.max(m,Number(q[1]));
-  }
-  seq=m;
-}
-syncSequenceFromSpace();buildToolbar();window.addEventListener('resize',resize);resize();window.RIKI_CAD={resize,render,fit,undo,tool:n=>{set('TOOL',n);syncToolbar();render();},count:()=>relations().length};
+window.addEventListener('resize',view);view();refresh();
+window.RIKI_CAD=Object.freeze({resize:view,fit,undo,tool:n=>{set('TOOL',n);refresh()},count:()=>entities().length,chains:RIKI.names,chain:(n,c)=>C(n,c),audit:()=>Object.freeze({...RIKI.audit(),entities:entityIndex.size,dimensionCreates:PERF.dimensionCreates,dimensionUpdates:PERF.dimensionUpdates,selectionTouches:PERF.selectionTouches})});
 })();
 </script>
-<script>
+
+
+<script id="unisefe-white-ui-guard">
 (()=>{
- const s=document.querySelector('#cad-riki-space');
- const val=n=>s.querySelector(`riki-byte[name="${n}"] riki-value`);
- const bind=(id,n)=>{const el=document.getElementById(id); if(!el)return; el.addEventListener('change',()=>{const v=val(n);if(v)v.textContent=el.value;window.RIKI_CAD?.render();});};
- bind('cad-snap','SNAP');bind('cad-text-size','TEXT_SIZE');
+  document.getElementById('cad-editor')?.classList.remove('hidden');
+  document.getElementById('panel-cad')?.classList.remove('hidden');
+  document.getElementById('document-editor')?.classList.add('hidden');
+  document.getElementById('sheet-editor')?.classList.add('hidden');
+  document.getElementById('panel-document')?.classList.add('hidden');
+  document.getElementById('panel-sheet')?.classList.add('hidden');
 })();
 </script>
 
