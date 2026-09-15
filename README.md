@@ -337,4 +337,62 @@ Demo:
 
 https://riccardobasti.github.io/UNISEFE-WEB-CAD-2D/
 
+## Technical Comparison
+
+The table below compares the current **UNISEFE CAD 2D Alpha**
+with established 2D CAD systems.
+
+This is not intended as a claim of overall superiority.
+It compares architectural characteristics and currently available capabilities.
+
+| Area | UNISEFE CAD 2D | AutoCAD Web | QCAD | LibreCAD | DraftSight |
+|---|---|---|---|---|---|
+| Runs directly in browser | **Yes** | **Yes** | No | No | No |
+| Single static HTML possible | **Yes** | No | No | No | No |
+| Backend required for core CAD | **No** | Yes | No | No | No |
+| Line / Arc / Circle | **Yes** | Yes | Yes | Yes | Yes |
+| Dashed / dash-dot lines | **Yes** | Yes | Yes | Yes | Yes |
+| Object snap | **Yes** | Yes | Yes | Yes | Yes |
+| Midpoint / intersection snap | **Yes** | Yes | Yes | Yes | Yes |
+| Perpendicular / tangent snap | **Yes** | Yes | Yes | Yes | Yes |
+| Move / Copy | **Yes** | Yes | Yes | Yes | Yes |
+| Rotate / Mirror | **Yes** | Yes | Yes | Yes | Yes |
+| Trim / Extend | **Yes** | Yes | Yes | Yes | Yes |
+| Fillet | **Yes** | Yes | Yes | Yes | Yes |
+| Linear dimensions | **Yes** | Yes | Yes | Yes | Yes |
+| Angular dimensions | **Yes** | Yes | Yes | Yes | Yes |
+| Progressive / aligned dimensions | **Yes** | Yes | Yes | Yes | Yes |
+| Text | **Yes** | Yes | Yes | Yes | Yes |
+| Undo | **Yes** | Yes | Yes | Yes | Yes |
+| Save / Open | **Yes** | Yes | Yes | Yes | Yes |
+| Native browser printing / PDF | **Yes** | Yes | Yes | Yes | Yes |
+| Automatic `Δ = 0` coincidence logic | **Yes** | Constraint workflow | No native equivalent | No native equivalent | Constraint workflow |
+| CAD state inspectable as web markup | **Yes** | No | No | No | No |
+| Geometry/state in same document | **Yes** | No | No | No | No |
+| No installation required | **Yes** | **Yes** | No | No | No |
+| Offline standalone file | **Yes** | No* | Yes | Yes | Yes |
+| External CAD engine required | **No** | Autodesk platform | QCAD engine | LibreCAD engine | DraftSight engine |
+| Current maturity | **Alpha** | Production | Production | Production | Production |
+
+\* AutoCAD Web itself is cloud-based; Autodesk documents offline work for the mobile application.
+
+### Architectural Difference
+
+UNISEFE CAD 2D is intentionally much smaller than mature CAD platforms.
+
+Its distinctive characteristic is that the CAD does not live behind a separate application or geometric service.
+
+Geometry, state, relationships and interface can coexist inside one standalone HTML document.
+
+The same file can therefore act as:
+
+- the application;
+- the drawing environment;
+- the geometric state;
+- the runtime;
+- and the portable document.
+
+The current Alpha should not be interpreted as feature-complete compared with mature CAD products.
+Its focus is on minimizing the number of architectural layers required to obtain a functional CAD environment.
+
 UNISEFE WEB CAD 2D — Technical drawing, directly in the browser.
